@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>6th &amp; 7th Grade Math &amp; Science</title>
+  <style>
+    :root {
+      --bg: #f4f1eb;
+      --ink: #1a2e3b;
+      --muted: #5a7080;
+      --radius: 20px;
+      --shadow: 0 12px 36px rgba(26, 46, 59, 0.10);
+
+      /* subject palette */
+      --stat-hue:   #1d6fa4;
+      --stat-soft:  #deeef9;
+      --alg-hue:    #c85b1b;
+      --alg-soft:   #fce8db;
+      --geo-hue:    #1a8a5e;
+      --geo-soft:   #d3f0e5;
+      --prop-hue:   #7b38c4;
+      --prop-soft:  #ede0f9;
+      --num-hue:    #b5811a;
+      --num-soft:   #fdf0d0;
+      --sci-hue:    #c42a5c;
+      --sci-soft:   #fcdde9;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    /* ── HERO ─────────────────────────────────── */
+    .hero {
+      background: linear-gradient(135deg, #1a2e3b 0%, #223d52 55%, #1a3d55 100%);
+      color: white;
+      padding: 56px 24px 64px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 20% 30%, rgba(200,91,27,0.22) 0%, transparent 45%),
+        radial-gradient(circle at 80% 70%, rgba(29,111,164,0.28) 0%, transparent 45%);
+      pointer-events: none;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.6rem);
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      position: relative;
+    }
+
+    .hero p {
+      margin-top: 14px;
+      font-size: 1.15rem;
+      color: rgba(255,255,255,0.72);
+      max-width: 50ch;
+      margin-inline: auto;
+      position: relative;
+    }
+
+    .grade-badges {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      margin-top: 22px;
+      position: relative;
+    }
+
+    .grade-badge {
+      padding: 8px 20px;
+      border-radius: 999px;
+      font-weight: 700;
+      font-size: 0.9rem;
+      border: 2px solid rgba(255,255,255,0.35);
+      color: rgba(255,255,255,0.9);
+    }
+
+    /* ── WRAPPER ──────────────────────────────── */
+    .wrap {
+      max-width: 1160px;
+      margin: 0 auto;
+      padding: 44px 24px 72px;
+    }
+
+    /* ── SUBJECT SECTION ──────────────────────── */
+    .subject {
+      margin-bottom: 52px;
+    }
+
+    .subject-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 22px;
+      padding-bottom: 14px;
+      border-bottom: 2px solid rgba(26,46,59,0.10);
+    }
+
+    .subject-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      flex-shrink: 0;
+    }
+
+    .subject-icon svg { width: 26px; height: 26px; }
+
+    .subject-title {
+      font-size: 1.55rem;
+      font-weight: 800;
+    }
+
+    .subject-desc {
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .lesson-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+    }
+
+    /* ── LESSON CARD ──────────────────────────── */
+    .card {
+      background: white;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      text-decoration: none;
+      color: var(--ink);
+      display: flex;
+      flex-direction: column;
+      transition: transform 200ms ease, box-shadow 200ms ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 48px rgba(26, 46, 59, 0.16);
+    }
+
+    .card-thumb {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .card-thumb svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .card-body {
+      padding: 16px 18px 20px;
+    }
+
+    .card-label {
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .card-title {
+      font-size: 1.08rem;
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .card-desc {
+      font-size: 0.88rem;
+      color: var(--muted);
+      margin-top: 6px;
+      line-height: 1.55;
+    }
+
+    .card-arrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 12px;
+      font-size: 0.85rem;
+      font-weight: 700;
+    }
+
+    /* ── ADD-MORE PLACEHOLDER ─────────────────── */
+    .card-add {
+      background: transparent;
+      border: 2px dashed rgba(26,46,59,0.18);
+      border-radius: var(--radius);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 32px 20px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-align: center;
+      min-height: 180px;
+    }
+
+    .card-add-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px dashed currentColor;
+      display: grid;
+      place-items: center;
+      font-size: 1.4rem;
+      line-height: 1;
+    }
+
+    /* ── SUBJECT COLOURS ──────────────────────── */
+    .stat  .subject-icon { background: var(--stat-soft); color: var(--stat-hue); }
+    .stat  .card-label   { color: var(--stat-hue); }
+    .stat  .card-arrow   { color: var(--stat-hue); }
+    .stat  .card-thumb   { background: var(--stat-soft); }
+
+    .alg   .subject-icon { background: var(--alg-soft);  color: var(--alg-hue); }
+    .alg   .card-label   { color: var(--alg-hue); }
+    .alg   .card-arrow   { color: var(--alg-hue); }
+    .alg   .card-thumb   { background: var(--alg-soft); }
+
+    .geo   .subject-icon { background: var(--geo-soft);  color: var(--geo-hue); }
+    .geo   .card-label   { color: var(--geo-hue); }
+    .geo   .card-arrow   { color: var(--geo-hue); }
+    .geo   .card-thumb   { background: var(--geo-soft); }
+
+    .prop  .subject-icon { background: var(--prop-soft); color: var(--prop-hue); }
+    .prop  .card-label   { color: var(--prop-hue); }
+    .prop  .card-arrow   { color: var(--prop-hue); }
+    .prop  .card-thumb   { background: var(--prop-soft); }
+
+    .num   .subject-icon { background: var(--num-soft);  color: var(--num-hue); }
+    .num   .card-label   { color: var(--num-hue); }
+    .num   .card-arrow   { color: var(--num-hue); }
+    .num   .card-thumb   { background: var(--num-soft); }
+
+    .sci   .subject-icon { background: var(--sci-soft);  color: var(--sci-hue); }
+    .sci   .card-label   { color: var(--sci-hue); }
+    .sci   .card-arrow   { color: var(--sci-hue); }
+    .sci   .card-thumb   { background: var(--sci-soft); }
+
+    @media (max-width: 600px) {
+      .hero { padding: 40px 18px 48px; }
+      .wrap { padding: 28px 16px 56px; }
+      .subject-title { font-size: 1.3rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>Math &amp; Science Lab</h1>
+  <p>Interactive lessons for curious minds — explore, click, and learn at your own pace.</p>
+  <div class="grade-badges">
+    <span class="grade-badge">6th Grade</span>
+    <span class="grade-badge">7th Grade</span>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <!-- ══════════════════════════════════════════
+       STATISTICS
+  ══════════════════════════════════════════ -->
+  <section class="subject stat" id="statistics">
+    <div class="subject-header">
+      <div class="subject-icon">
+        <svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <rect x="3" y="14" width="4" height="9" rx="1"/>
+          <rect x="11" y="8" width="4" height="15" rx="1"/>
+          <rect x="19" y="4" width="4" height="19" rx="1"/>
+          <line x1="1" y1="24" x2="25" y2="24"/>
+        </svg>
+      </div>
+      <div>
+        <div class="subject-title">Statistics &amp; Data</div>
+        <div class="subject-desc">Median, quartiles, IQR, outliers, and reading data displays</div>
+      </div>
+    </div>
+
+    <div class="lesson-grid">
+
+      <!-- IQR Jump Rope -->
+      <a class="card" href="statistics/iqr-jump-rope.html">
+        <div class="card-thumb">
+          <!-- Box plot / IQR illustration -->
+          <svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg">
+            <rect width="320" height="180" fill="#deeef9"/>
+            <!-- axis -->
+            <line x1="30" y1="140" x2="290" y2="140" stroke="#1d6fa4" stroke-width="2"/>
+            <!-- whiskers -->
+            <line x1="54" y1="140" x2="54" y2="115" stroke="#1d6fa4" stroke-width="2"/>
+            <line x1="54" y1="115" x2="74" y2="115" stroke="#1d6fa4" stroke-width="2" stroke-dasharray="4 2"/>
+            <line x1="258" y1="140" x2="258" y2="115" stroke="#1d6fa4" stroke-width="2"/>
+            <line x1="258" y1="115" x2="238" y2="115" stroke="#1d6fa4" stroke-width="2" stroke-dasharray="4 2"/>
+            <!-- IQR box -->
+            <rect x="74" y="95" width="164" height="45" rx="6" fill="rgba(29,111,164,0.18)" stroke="#1d6fa4" stroke-width="2.5"/>
+            <!-- median line -->
+            <line x1="156" y1="95" x2="156" y2="140" stroke="#22c55e" stroke-width="3"/>
+            <!-- Q1 label -->
+            <text x="82" y="82" font-family="Arial" font-size="11" fill="#1d6fa4" font-weight="700">Q1</text>
+            <!-- Q3 label -->
+            <text x="222" y="82" font-family="Arial" font-size="11" fill="#1d6fa4" font-weight="700">Q3</text>
+            <!-- IQR brace -->
+            <text x="116" y="164" font-family="Arial" font-size="12" fill="#c85b1b" font-weight="700">IQR = Q3 − Q1</text>
+            <!-- outlier dots -->
+            <circle cx="42" cy="140" r="5" fill="#0ea5e9" stroke="white" stroke-width="1.5"/>
+            <circle cx="278" cy="140" r="5" fill="#ec4899" stroke="white" stroke-width="1.5"/>
+            <text x="32" y="158" font-family="Arial" font-size="9" fill="#0ea5e9" font-weight="700">outlier</text>
+            <text x="262" y="158" font-family="Arial" font-size="9" fill="#ec4899" font-weight="700">outlier</text>
+            <!-- title -->
+            <text x="16" y="26" font-family="Arial" font-size="14" fill="#1a2e3b" font-weight="800">Jump Rope &amp; IQR</text>
+          </svg>
+        </div>
+        <div class="card-body">
+          <div class="card-label">Statistics</div>
+          <div class="card-title">Jump Rope &amp; the IQR</div>
+          <div class="card-desc">Find Q1, Q2, Q3, and the interquartile range using jump-rope scores. Spot outliers with the fence method.</div>
+          <div class="card-arrow">Open lesson →</div>
+        </div>
+      </a>
+
+      <!-- placeholder -->
+      <div class="card-add">
+        <div class="card-add-icon">+</div>
+        <span>Add a statistics lesson here</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       LINEAR EQUATIONS / ALGEBRA
+  ══════════════════════════════════════════ -->
+  <section class="subject alg" id="algebra">
+    <div class="subject-header">
+      <div class="subject-icon">
+        <svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <line x1="3" y1="23" x2="23" y2="3"/>
+          <line x1="3" y1="13" x2="23" y2="13"/>
+          <line x1="13" y1="3" x2="13" y2="23"/>
+          <circle cx="8" cy="18" r="1.8" fill="currentColor" stroke="none"/>
+          <circle cx="18" cy="8" r="1.8" fill="currentColor" stroke="none"/>
+        </svg>
+      </div>
+      <div>
+        <div class="subject-title">Linear Equations &amp; Algebra</div>
+        <div class="subject-desc">Slope, y-intercept, y = mx + b, and solving for unknowns</div>
+      </div>
+    </div>
+
+    <div class="lesson-grid">
+
+      <!-- Linear Equations Lab -->
+      <a class="card" href="linear-equation/index.html">
+        <div class="card-thumb">
+          <!-- y=mx+b graph -->
+          <svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg">
+            <rect width="320" height="180" fill="#fce8db"/>
+            <!-- grid lines -->
+            <g stroke="rgba(200,91,27,0.18)" stroke-width="1">
+              <line x1="60" y1="20" x2="60" y2="155"/>
+              <line x1="100" y1="20" x2="100" y2="155"/>
+              <line x1="140" y1="20" x2="140" y2="155"/>
+              <line x1="180" y1="20" x2="180" y2="155"/>
+              <line x1="220" y1="20" x2="220" y2="155"/>
+              <line x1="260" y1="20" x2="260" y2="155"/>
+              <line x1="30" y1="50" x2="290" y2="50"/>
+              <line x1="30" y1="90" x2="290" y2="90"/>
+              <line x1="30" y1="130" x2="290" y2="130"/>
+            </g>
+            <!-- axes -->
+            <line x1="30" y1="155" x2="290" y2="155" stroke="#1a2e3b" stroke-width="2"/>
+            <line x1="30" y1="20" x2="30" y2="155" stroke="#1a2e3b" stroke-width="2"/>
+            <!-- line y = mx + b -->
+            <line x1="40" y1="145" x2="275" y2="38" stroke="#c85b1b" stroke-width="3" stroke-linecap="round"/>
+            <!-- dots on line -->
+            <circle cx="80" cy="125" r="5" fill="#c85b1b"/>
+            <circle cx="160" cy="90" r="5" fill="#c85b1b"/>
+            <circle cx="240" cy="55" r="5" fill="#c85b1b"/>
+            <!-- b = y-intercept label -->
+            <circle cx="40" cy="145" r="5" fill="#f3b43f" stroke="white" stroke-width="1.5"/>
+            <text x="45" y="142" font-family="Arial" font-size="10" fill="#c85b1b" font-weight="700">b (start)</text>
+            <!-- formula label -->
+            <rect x="170" y="24" width="112" height="28" rx="8" fill="rgba(200,91,27,0.15)" stroke="#c85b1b" stroke-width="1.5"/>
+            <text x="182" y="42" font-family="Arial" font-size="15" fill="#c85b1b" font-weight="800">y = mx + b</text>
+            <!-- title -->
+            <text x="38" y="20" font-family="Arial" font-size="13" fill="#1a2e3b" font-weight="800">Linear Equations Lab</text>
+          </svg>
+        </div>
+        <div class="card-body">
+          <div class="card-label">Algebra</div>
+          <div class="card-title">Linear Equations Lab</div>
+          <div class="card-desc">Explore <strong>y = mx + b</strong> through chore-money stories. Solve for y when x is known, and solve for x when y is known.</div>
+          <div class="card-arrow">Open lesson →</div>
+        </div>
+      </a>
+
+      <!-- placeholder -->
+      <div class="card-add">
+        <div class="card-add-icon">+</div>
+        <span>Add an algebra lesson here</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       GEOMETRY
+  ══════════════════════════════════════════ -->
+  <section class="subject geo" id="geometry">
+    <div class="subject-header">
+      <div class="subject-icon">
+        <svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="4" y="10" width="14" height="12" rx="1"/>
+          <polygon points="4,10 11,3 18,10"/>
+          <line x1="18" y1="10" x2="22" y2="14"/>
+          <line x1="18" y1="22" x2="22" y2="22"/>
+          <line x1="22" y1="14" x2="22" y2="22"/>
+        </svg>
+      </div>
+      <div>
+        <div class="subject-title">Geometry &amp; Measurement</div>
+        <div class="subject-desc">Surface area, nets, volume, and 3D shapes</div>
+      </div>
+    </div>
+
+    <div class="lesson-grid">
+
+      <!-- Box Surface Area -->
+      <a class="card" href="surface-area/surface_area.html">
+        <div class="card-thumb">
+          <!-- Box unfolding net -->
+          <svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg">
+            <rect width="320" height="180" fill="#d3f0e5"/>
+            <!-- unfolded net cross shape -->
+            <!-- Top -->
+            <rect x="120" y="18" width="70" height="42" rx="4" fill="rgba(26,138,94,0.30)" stroke="#1a8a5e" stroke-width="2"/>
+            <text x="148" y="44" font-family="Arial" font-size="10" fill="#1a8a5e" font-weight="700">Top</text>
+            <!-- Left -->
+            <rect x="46" y="60" width="42" height="60" rx="4" fill="rgba(26,138,94,0.20)" stroke="#1a8a5e" stroke-width="2"/>
+            <text x="52" y="95" font-family="Arial" font-size="10" fill="#1a8a5e" font-weight="700">Left</text>
+            <!-- Front (center) -->
+            <rect x="88" y="60" width="70" height="60" rx="4" fill="rgba(26,138,94,0.45)" stroke="#1a8a5e" stroke-width="2.5"/>
+            <text x="106" y="95" font-family="Arial" font-size="11" fill="#1a8a5e" font-weight="800">Front</text>
+            <!-- Right -->
+            <rect x="158" y="60" width="42" height="60" rx="4" fill="rgba(26,138,94,0.20)" stroke="#1a8a5e" stroke-width="2"/>
+            <text x="164" y="95" font-family="Arial" font-size="10" fill="#1a8a5e" font-weight="700">Right</text>
+            <!-- Extra right -->
+            <rect x="200" y="60" width="42" height="60" rx="4" fill="rgba(26,138,94,0.15)" stroke="#1a8a5e" stroke-width="2" stroke-dasharray="4 3"/>
+            <text x="207" y="95" font-family="Arial" font-size="10" fill="#1a8a5e" font-weight="700">Back</text>
+            <!-- Bottom -->
+            <rect x="88" y="120" width="70" height="42" rx="4" fill="rgba(26,138,94,0.22)" stroke="#1a8a5e" stroke-width="2"/>
+            <text x="104" y="146" font-family="Arial" font-size="10" fill="#1a8a5e" font-weight="700">Bottom</text>
+            <!-- crease dashes -->
+            <line x1="88" y1="60" x2="88" y2="120" stroke="#1a8a5e" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <line x1="158" y1="60" x2="158" y2="120" stroke="#1a8a5e" stroke-width="1.5" stroke-dasharray="3 3"/>
+            <!-- title -->
+            <text x="16" y="174" font-family="Arial" font-size="12" fill="#1a2e3b" font-weight="800">Box Net &amp; Surface Area</text>
+          </svg>
+        </div>
+        <div class="card-body">
+          <div class="card-label">Geometry</div>
+          <div class="card-title">Box Net &amp; Surface Area</div>
+          <div class="card-desc">Watch a 3D box unfold into its flat net. Set length, width, and height, then calculate the total surface area step by step.</div>
+          <div class="card-arrow">Open lesson →</div>
+        </div>
+      </a>
+
+      <!-- Cube Surface Area -->
+      <a class="card" href="surface-area/open-net.html">
+        <div class="card-thumb">
+          <!-- Cube cross net -->
+          <svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg">
+            <rect width="320" height="180" fill="#d3f0e5"/>
+            <!-- cube isometric sketch -->
+            <!-- front face -->
+            <polygon points="110,60 195,60 195,140 110,140" fill="rgba(245,158,11,0.25)" stroke="#1a8a5e" stroke-width="2.5"/>
+            <!-- top face -->
+            <polygon points="110,60 195,60 228,30 143,30" fill="rgba(26,138,94,0.28)" stroke="#1a8a5e" stroke-width="2.5"/>
+            <!-- right face -->
+            <polygon points="195,60 228,30 228,110 195,140" fill="rgba(26,138,94,0.18)" stroke="#1a8a5e" stroke-width="2.5"/>
+            <!-- labels -->
+            <text x="138" y="105" font-family="Arial" font-size="12" fill="#1a8a5e" font-weight="700">Front</text>
+            <text x="158" y="52" font-family="Arial" font-size="10" fill="#1a8a5e" font-weight="700">Top</text>
+            <text x="202" y="85" font-family="Arial" font-size="10" fill="#1a8a5e" font-weight="700">Side</text>
+            <!-- "6s²" formula badge -->
+            <rect x="222" y="130" width="82" height="34" rx="10" fill="rgba(26,138,94,0.18)" stroke="#1a8a5e" stroke-width="1.5"/>
+            <text x="237" y="151" font-family="Arial" font-size="17" fill="#1a8a5e" font-weight="800">SA = 6s²</text>
+            <!-- title -->
+            <text x="16" y="174" font-family="Arial" font-size="12" fill="#1a2e3b" font-weight="800">Cube Net Explorer</text>
+          </svg>
+        </div>
+        <div class="card-body">
+          <div class="card-label">Geometry</div>
+          <div class="card-title">Cube Net Explorer</div>
+          <div class="card-desc">Slide the side-length and watch a cube open into 6 equal squares. See why the formula is <strong>6s²</strong> with a live diagram.</div>
+          <div class="card-arrow">Open lesson →</div>
+        </div>
+      </a>
+
+      <!-- placeholder -->
+      <div class="card-add">
+        <div class="card-add-icon">+</div>
+        <span>Add a geometry lesson here</span>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       PROPORTIONS & RATIOS
+  ══════════════════════════════════════════ -->
+  <section class="subject prop" id="proportions">
+    <div class="subject-header">
+      <div class="subject-icon">
+        <svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="7" cy="19" r="4"/>
+          <circle cx="19" cy="7" r="4"/>
+          <line x1="10" y1="16" x2="16" y2="10"/>
+          <line x1="3" y1="13" x2="3" y2="23" stroke-width="1.5"/>
+          <line x1="23" y1="3" x2="23" y2="13" stroke-width="1.5"/>
+        </svg>
+      </div>
+      <div>
+        <div class="subject-title">Proportions &amp; Ratios</div>
+        <div class="subject-desc">Equivalent ratios, unit rates, percent, and scaling</div>
+      </div>
+    </div>
+
+    <div class="lesson-grid">
+      <div class="card-add">
+        <div class="card-add-icon">+</div>
+        <span>Add a proportions lesson here</span>
+      </div>
+      <div class="card-add">
+        <div class="card-add-icon">+</div>
+        <span>Add a ratios lesson here</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       NUMBER SENSE
+  ══════════════════════════════════════════ -->
+  <section class="subject num" id="number-sense">
+    <div class="subject-header">
+      <div class="subject-icon">
+        <svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <rect x="3" y="3" width="9" height="9" rx="2"/>
+          <rect x="14" y="3" width="9" height="9" rx="2"/>
+          <rect x="3" y="14" width="9" height="9" rx="2"/>
+          <rect x="14" y="14" width="9" height="9" rx="2"/>
+        </svg>
+      </div>
+      <div>
+        <div class="subject-title">Number Sense &amp; Operations</div>
+        <div class="subject-desc">Integers, fractions, decimals, exponents, and prime factors</div>
+      </div>
+    </div>
+
+    <div class="lesson-grid">
+      <div class="card-add">
+        <div class="card-add-icon">+</div>
+        <span>Add a number sense lesson here</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       SCIENCE
+  ══════════════════════════════════════════ -->
+  <section class="subject sci" id="science">
+    <div class="subject-header">
+      <div class="subject-icon">
+        <svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M10 3v8L4 21h18L16 11V3"/>
+          <line x1="10" y1="3" x2="16" y2="3"/>
+          <circle cx="9" cy="17" r="1.5" fill="currentColor" stroke="none"/>
+          <circle cx="15" cy="19" r="1.5" fill="currentColor" stroke="none"/>
+        </svg>
+      </div>
+      <div>
+        <div class="subject-title">Science</div>
+        <div class="subject-desc">Life science, earth science, physical science, and experiments</div>
+      </div>
+    </div>
+
+    <div class="lesson-grid">
+      <div class="card-add">
+        <div class="card-add-icon">+</div>
+        <span>Add a science lesson here</span>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+</body>
+</html>
