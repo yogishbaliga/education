@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Jump Rope & the IQR — A Kid-Friendly Story</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --q1: #3b82f6;
+      --q1-bg: rgba(59, 130, 246, 0.15);
+      --q2: #22c55e;
+      --q2-bg: rgba(34, 197, 94, 0.2);
+      --q3: #a855f7;
+      --q3-bg: rgba(168, 85, 247, 0.15);
+      --iqr: #f97316;
+      --iqr-bg: rgba(249, 115, 22, 0.2);
+      --fence-low: #0ea5e9;
+      --fence-high: #ec4899;
+      --paper: #fffbeb;
+      --ink: #1e293b;
+      --muted: #64748b;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Nunito", system-ui, sans-serif;
+      background: linear-gradient(165deg, #fef3c7 0%, #fde68a 35%, #fcd34d 100%);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+
+    .wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 1.5rem 1rem 3rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    header h1 {
+      font-size: clamp(1.35rem, 4vw, 1.85rem);
+      font-weight: 800;
+      margin: 0 0 0.5rem;
+      color: #b45309;
+    }
+
+    header p.lead {
+      margin: 0;
+      font-size: 1.05rem;
+      color: var(--muted);
+      max-width: 38em;
+      margin-inline: auto;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      justify-content: center;
+      margin: 1.25rem 0;
+      font-size: 0.9rem;
+    }
+
+    .legend span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.3rem 0.65rem;
+      border-radius: 999px;
+      background: white;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+      font-size: 1.02rem;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .panel {
+      background: var(--paper);
+      border-radius: 20px;
+      padding: 1.25rem 1.5rem;
+      box-shadow: 0 8px 30px rgba(180, 83, 9, 0.15);
+      border: 3px solid #fbbf24;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .tabs button {
+      flex: 1;
+      min-width: 140px;
+      padding: 0.65rem 1rem;
+      border: 3px solid #f59e0b;
+      border-radius: 12px;
+      background: #fff;
+      font-family: inherit;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+
+    .tabs button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.35);
+    }
+
+    .tabs button[aria-selected="true"] {
+      background: linear-gradient(180deg, #fbbf24, #f59e0b);
+      color: white;
+      border-color: #d97706;
+    }
+
+    .story {
+      font-size: 1.05rem;
+      margin-bottom: 1rem;
+      color: var(--ink);
+    }
+
+    .row-cards {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      justify-content: center;
+      min-height: 88px;
+      align-items: flex-end;
+      padding: 0.5rem 0;
+      position: relative;
+    }
+
+    .card {
+      width: 92px;
+      padding: 0.5rem 0.4rem;
+      border-radius: 14px;
+      background: white;
+      border: 3px solid #e2e8f0;
+      text-align: center;
+      transition:
+        transform 0.6s cubic-bezier(0.34, 1.2, 0.64, 1),
+        border-color 0.4s,
+        box-shadow 0.4s,
+        background 0.4s;
+      position: relative;
+      z-index: 1;
+    }
+
+    .card .name {
+      font-weight: 800;
+      font-size: 0.95rem;
+      color: #334155;
+    }
+
+    .card .jumps {
+      font-size: 1.35rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    .card .unit {
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .card.sorting {
+      z-index: 2;
+      will-change: transform;
+    }
+
+    .card.is-median {
+      border-color: var(--q2);
+      background: var(--q2-bg);
+      box-shadow: 0 0 0 3px var(--q2);
+    }
+
+    .card.q1-zone {
+      border-color: var(--q1);
+      background: var(--q1-bg);
+      box-shadow: 0 0 0 3px var(--q1);
+    }
+
+    .card.q2-zone {
+      border-color: var(--q2);
+      background: var(--q2-bg);
+      box-shadow: 0 0 0 3px var(--q2);
+    }
+
+    .card.q3-zone {
+      border-color: var(--q3);
+      background: var(--q3-bg);
+      box-shadow: 0 0 0 3px var(--q3);
+    }
+
+    .card.outlier-low {
+      border-color: var(--fence-low);
+      border-style: dashed;
+    }
+
+    .card.outlier-high {
+      border-color: var(--fence-high);
+      border-style: dashed;
+    }
+
+    .q-marker {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      transform: translateX(-50%) scale(0.85);
+      opacity: 0;
+      text-align: center;
+      pointer-events: none;
+      z-index: 5;
+      transition:
+        opacity 0.45s ease,
+        transform 0.5s cubic-bezier(0.34, 1.5, 0.64, 1);
+    }
+
+    .q-marker.show {
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+    }
+
+    .q-marker .q-pointer {
+      width: 0;
+      height: 0;
+      margin: 0 auto 2px;
+      border-left: 11px solid transparent;
+      border-right: 11px solid transparent;
+      border-top: 14px solid #94a3b8;
+      filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.12));
+    }
+
+    .q-marker.q1m .q-pointer {
+      border-top-color: var(--q1);
+    }
+
+    .q-marker.q2m .q-pointer {
+      border-top-color: var(--q2);
+    }
+
+    .q-marker.q3m .q-pointer {
+      border-top-color: var(--q3);
+    }
+
+    .q-marker .q-label {
+      font-size: 1.02rem;
+      font-weight: 800;
+      line-height: 1.25;
+      max-width: 160px;
+      white-space: normal;
+    }
+
+    .q-marker.q1m .q-label {
+      color: var(--q1);
+    }
+
+    .q-marker.q2m .q-label {
+      color: var(--q2);
+    }
+
+    .q-marker.q3m .q-label {
+      color: var(--q3);
+    }
+
+    .card.is-q1 {
+      border-color: var(--q1);
+      background: var(--q1-bg);
+      box-shadow: 0 0 0 3px var(--q1);
+    }
+
+    .card.is-q3 {
+      border-color: var(--q3);
+      background: var(--q3-bg);
+      box-shadow: 0 0 0 3px var(--q3);
+    }
+
+    .outline-box {
+      position: absolute;
+      border: 4px dashed transparent;
+      border-radius: 18px;
+      pointer-events: none;
+      z-index: 0;
+      transition: border-color 0.5s, box-shadow 0.5s, opacity 0.4s;
+      opacity: 0;
+    }
+
+    .outline-box.show-q1 {
+      opacity: 1;
+      border-color: var(--q1);
+      box-shadow: inset 0 0 0 2px var(--q1-bg);
+    }
+
+    .outline-box.show-q3 {
+      opacity: 1;
+      border-color: var(--q3);
+      box-shadow: inset 0 0 0 2px var(--q3-bg);
+    }
+
+    .steps {
+      margin-top: 5rem;
+    }
+
+    .step-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .step-nav button {
+      padding: 0.5rem 0.9rem;
+      border-radius: 10px;
+      border: 2px solid #cbd5e1;
+      background: white;
+      font-family: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .step-nav button:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+
+    .step-nav button.primary {
+      background: linear-gradient(180deg, #34d399, #10b981);
+      color: white;
+      border-color: #059669;
+    }
+
+    .explain {
+      background: #f8fafc;
+      border-radius: 12px;
+      padding: 1rem 1.1rem;
+      border-left: 5px solid #f59e0b;
+      font-size: 1rem;
+      min-height: 4.5em;
+    }
+
+    .explain strong {
+      color: #b45309;
+    }
+
+    .math-line {
+      margin-top: 0.75rem;
+      padding: 0.75rem;
+      background: white;
+      border-radius: 10px;
+      font-family: ui-monospace, monospace;
+      font-size: 0.95rem;
+      overflow-x: auto;
+    }
+
+    .iqr-demo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 0.85rem;
+      margin-top: 1rem;
+      padding: 1.35rem 1.15rem 1.5rem;
+      background: linear-gradient(135deg, #fff7ed, #ffedd5);
+      border-radius: 14px;
+      border: 2px dashed var(--iqr);
+      min-height: 5.75rem;
+    }
+
+    .iqr-demo .op {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: var(--muted);
+      min-width: 0.75rem;
+      text-align: center;
+    }
+
+    .pill {
+      padding: 0.55rem 1.1rem;
+      border-radius: 999px;
+      font-weight: 800;
+      font-size: 1.28rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      vertical-align: middle;
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    .pill.pill-xl {
+      font-size: 1.42rem;
+      padding: 0.62rem 1.2rem;
+    }
+
+    .pill.q3c {
+      background: var(--q3-bg);
+      color: #6b21a8;
+    }
+
+    .pill.q1c {
+      background: var(--q1-bg);
+      color: #1e40af;
+    }
+
+    .pill.iqr-pill {
+      background: var(--iqr-bg);
+      color: #c2410c;
+    }
+
+    .pill.iqr-mul {
+      background: rgba(249, 115, 22, 0.28);
+      color: #9a3412;
+      font-size: 1.12rem;
+    }
+
+    .pill.iqr-mul.pill-xl {
+      font-size: 1.2rem;
+    }
+
+    .iqr-slot-pill {
+      opacity: 0;
+      transition: opacity 0.35s ease;
+    }
+
+    .iqr-slot-pill.in {
+      opacity: 1;
+    }
+
+    .iqr-slot-pill.fly-pending {
+      opacity: 0;
+    }
+
+    .fly-pill {
+      position: fixed;
+      z-index: 10050;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      border-radius: 999px;
+      font-family: inherit;
+      font-weight: 800;
+      line-height: 1.15;
+      box-shadow: 0 10px 36px rgba(0, 0, 0, 0.2);
+      border: 3px solid rgba(255, 255, 255, 0.95);
+      transition: none;
+      will-change: left, top, width, height, transform;
+    }
+
+    .fly-pill.q3c {
+      background: var(--q3-bg);
+      color: #6b21a8;
+    }
+
+    .fly-pill.q1c {
+      background: var(--q1-bg);
+      color: #1e40af;
+    }
+
+    .fly-pill.iqr-pill {
+      background: var(--iqr-bg);
+      color: #c2410c;
+    }
+
+    .fly-pill.iqr-mul {
+      background: rgba(249, 115, 22, 0.35);
+      color: #9a3412;
+      border-radius: 14px;
+    }
+
+    .fence-box {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #ecfeff;
+      border-radius: 12px;
+      border: 2px solid #06b6d4;
+    }
+
+    .fence-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.55rem;
+      margin: 0.65rem 0;
+      font-size: 1.05rem;
+    }
+
+    .fence-row .label {
+      font-weight: 800;
+      min-width: 7.5rem;
+    }
+
+    .fence-formula {
+      display: inline-flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .fence-slot {
+      opacity: 0;
+      transform: translateY(16px) scale(0.94);
+      transition:
+        opacity 0.4s ease,
+        transform 0.5s cubic-bezier(0.34, 1.35, 0.64, 1);
+    }
+
+    .fence-slot.in {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+
+    .fence-eq {
+      font-weight: 800;
+      color: var(--muted);
+      font-size: 1.5rem;
+    }
+
+    .fence-result {
+      font-weight: 800;
+      font-size: 1.28rem;
+      padding: 0.35rem 0.65rem;
+      border-radius: 10px;
+      background: white;
+    }
+
+    .fence-result.low {
+      color: var(--fence-low);
+      border: 3px solid var(--fence-low);
+    }
+
+    .fence-result.high {
+      color: var(--fence-high);
+      border: 3px solid var(--fence-high);
+    }
+
+    .progress-dots {
+      display: flex;
+      justify-content: center;
+      gap: 0.35rem;
+      margin-top: 0.75rem;
+    }
+
+    .progress-dots span {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #cbd5e1;
+    }
+
+    .progress-dots span.on {
+      background: #f59e0b;
+      transform: scale(1.2);
+    }
+
+    @media (max-width: 520px) {
+      .card {
+        width: 82px;
+      }
+      .steps {
+        margin-top: 4.5rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>How many jumps in 10 minutes?</h1>
+      <p class="lead">
+        Friends counted their jump-rope skips. Some numbers are super small or huge — we call those
+        <strong>outliers</strong>. Let’s learn how grown-ups find the “middle spread” using quartiles and the
+        <strong>IQR</strong> (Interquartile Range). Tap the buttons in order — the pictures move!
+      </p>
+    </header>
+
+    <div class="legend">
+      <span><i class="dot" style="background: var(--q1)"></i> 1st quartile (Q1)</span>
+      <span><i class="dot" style="background: var(--q2)"></i> 2nd quartile / median (Q2)</span>
+      <span><i class="dot" style="background: var(--q3)"></i> 3rd quartile (Q3)</span>
+      <span><i class="dot" style="background: var(--iqr)"></i> IQR</span>
+    </div>
+
+    <div class="panel">
+      <div class="tabs" role="tablist">
+        <button type="button" id="tab-odd" role="tab" aria-selected="true" aria-controls="panel-odd">
+          7 friends (odd count)
+        </button>
+        <button type="button" id="tab-even" role="tab" aria-selected="false" aria-controls="panel-even">
+          8 friends (even count)
+        </button>
+      </div>
+
+      <p class="story" id="story-text"></p>
+
+      <div id="cards-wrap" style="position: relative; padding-bottom: 5.25rem">
+        <div class="outline-box" id="outline-q1" aria-hidden="true"></div>
+        <div class="outline-box" id="outline-q3" aria-hidden="true"></div>
+        <div class="row-cards" id="cards-row"></div>
+        <div class="q-marker q1m" id="marker-q1" aria-hidden="true">
+          <div class="q-pointer"></div>
+          <div class="q-label" id="label-q1"></div>
+        </div>
+        <div class="q-marker q2m" id="marker-q2" aria-hidden="true">
+          <div class="q-pointer"></div>
+          <div class="q-label" id="label-q2"></div>
+        </div>
+        <div class="q-marker q3m" id="marker-q3" aria-hidden="true">
+          <div class="q-pointer"></div>
+          <div class="q-label" id="label-q3"></div>
+        </div>
+      </div>
+
+      <div class="steps">
+        <div class="step-nav">
+          <button type="button" class="primary" id="btn-next">Start: show friends</button>
+          <button type="button" id="btn-prev" disabled>Back</button>
+        </div>
+        <div class="progress-dots" id="progress-dots"></div>
+        <div class="explain" id="explain"></div>
+        <div id="extra-math"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const ODD = {
+        id: "odd",
+        label: "seven friends",
+        story:
+          "Each card is one friend. The big number is how many jumps they did in 10 minutes. We have an <strong>odd</strong> number of friends, so there is one clear middle jumper when we line everyone up!",
+        people: [
+          { name: "Kim", jumps: 1 },
+          { name: "Sam", jumps: 8 },
+          { name: "Mia", jumps: 9 },
+          { name: "Leo", jumps: 10 },
+          { name: "Zoe", jumps: 11 },
+          { name: "Ava", jumps: 12 },
+          { name: "Ben", jumps: 50 },
+        ],
+      };
+
+      const EVEN = {
+        id: "even",
+        label: "eight friends",
+        story:
+          "Here we have an <strong>even</strong> number of friends. After sorting, there are two people in the middle — so the median is the number <em>between</em> their two scores!",
+        people: [
+          { name: "Kim", jumps: 1 },
+          { name: "Max", jumps: 7 },
+          { name: "Sam", jumps: 8 },
+          { name: "Mia", jumps: 9 },
+          { name: "Leo", jumps: 10 },
+          { name: "Zoe", jumps: 11 },
+          { name: "Ava", jumps: 12 },
+          { name: "Ben", jumps: 50 },
+        ],
+      };
+
+      let dataset = ODD;
+      let step = 0;
+
+      function medianOf(arr) {
+        const n = arr.length;
+        if (n === 0) return NaN;
+        const mid = Math.floor((n - 1) / 2);
+        if (n % 2 === 1) return arr[mid];
+        return (arr[n / 2 - 1] + arr[n / 2]) / 2;
+      }
+
+      function quartiles(people) {
+        const sorted = [...people].sort((a, b) => a.jumps - b.jumps);
+        const values = sorted.map((p) => p.jumps);
+        const n = values.length;
+        const Q2 = medianOf(values);
+        let lower;
+        let upper;
+        if (n % 2 === 1) {
+          const midIdx = (n - 1) / 2;
+          lower = values.slice(0, midIdx);
+          upper = values.slice(midIdx + 1);
+        } else {
+          lower = values.slice(0, n / 2);
+          upper = values.slice(n / 2);
+        }
+        const Q1 = medianOf(lower);
+        const Q3 = medianOf(upper);
+        const IQR = Q3 - Q1;
+        const fenceLow = Q1 - 1.5 * IQR;
+        const fenceHigh = Q3 + 1.5 * IQR;
+        return {
+          sorted,
+          values,
+          Q1,
+          Q2,
+          Q3,
+          IQR,
+          fenceLow,
+          fenceHigh,
+          lower,
+          upper,
+        };
+      }
+
+      const cardsRow = document.getElementById("cards-row");
+      const cardsWrap = document.getElementById("cards-wrap");
+      const outlineQ1 = document.getElementById("outline-q1");
+      const outlineQ3 = document.getElementById("outline-q3");
+      const explainEl = document.getElementById("explain");
+      const extraMath = document.getElementById("extra-math");
+      const btnNext = document.getElementById("btn-next");
+      const btnPrev = document.getElementById("btn-prev");
+      const storyText = document.getElementById("story-text");
+      const tabOdd = document.getElementById("tab-odd");
+      const tabEven = document.getElementById("tab-even");
+      const progressDots = document.getElementById("progress-dots");
+
+      const STEPS = [
+        {
+          title: "Meet the friends",
+          text: function (q, d) {
+            return (
+              "Here are " +
+              d.label +
+              ". The jumps are <strong>not</strong> in order yet. Next we will slide them from smallest to biggest — like lining up from shortest to tallest!"
+            );
+          },
+          setup: function () {
+            renderCards(false, function () {
+              clearHighlights();
+            });
+          },
+        },
+        {
+          title: "Sort smallest → biggest",
+          text: function () {
+            return "Watch the cards slide into order. Now we can talk about the <strong>median</strong> — the middle of the pack once everyone is lined up.";
+          },
+          setup: function () {
+            renderCards(true, function () {
+              clearHighlights();
+            });
+          },
+        },
+        {
+          title: "Median (2nd quartile, Q2)",
+          text: function (q, d) {
+            const even = d.people.length % 2 === 0;
+            const msg = even
+              ? "Two friends sit in the middle! Their jumps are <strong>" +
+                q.sorted[q.sorted.length / 2 - 1].jumps +
+                "</strong> and <strong>" +
+                q.sorted[q.sorted.length / 2].jumps +
+                "</strong>. The median is the number <em>in between</em>: <strong>" +
+                q.Q2 +
+                "</strong>."
+              : "The friend exactly in the middle is the <strong>median</strong>. Here the median jump count is <strong>" +
+                q.Q2 +
+                "</strong>. We also call this the <strong>2nd quartile (Q2)</strong>.";
+            return msg;
+          },
+          setup: function () {
+            renderCards(true, function () {
+              updateQuartileMarkers();
+            });
+          },
+        },
+        {
+          title: "1st quartile (Q1)",
+          text: function (q) {
+            return (
+              "For Q1, we look at the <strong>lower half</strong> of the sorted list (the smaller jumps). The median <em>of that half</em> is Q1 = <strong>" +
+              q.Q1 +
+              "</strong>. The dashed box shows which friends we used."
+            );
+          },
+          setup: function () {
+            renderCards(true, function () {
+              updateQuartileMarkers();
+              outlineQuartile("q1");
+            });
+          },
+        },
+        {
+          title: "3rd quartile (Q3)",
+          text: function (q) {
+            return (
+              "For Q3, we use the <strong>upper half</strong> (the bigger jumps). The median of that half is Q3 = <strong>" +
+              q.Q3 +
+              "</strong>."
+            );
+          },
+          setup: function () {
+            renderCards(true, function () {
+              updateQuartileMarkers();
+              outlineQuartile("q3");
+            });
+          },
+        },
+        {
+          title: "IQR = Q3 − Q1",
+          text: function (q) {
+            return (
+              "The <strong>IQR</strong> tells us how wide the <em>middle bunch</em> of jumps is. First the <strong>Q3</strong> and <strong>Q1</strong> numbers slide into place, then we see the answer after the equals sign."
+            );
+          },
+          setup: function () {
+            renderCards(true, function () {
+              updateQuartileMarkers();
+              outlineQuartile("both");
+              showIqrMath(true, false, false);
+            });
+          },
+        },
+        {
+          title: "Outlier fences",
+          text: function (q) {
+            const lowNames = q.sorted
+              .filter((p) => p.jumps < q.fenceLow)
+              .map((p) => p.name)
+              .join(" & ");
+            const highNames = q.sorted
+              .filter((p) => p.jumps > q.fenceHigh)
+              .map((p) => p.name)
+              .join(" & ");
+            return (
+              "To spot outliers, we draw two <strong>fences</strong>. Numbers below the lower fence or above the upper fence are often called outliers for this trick. " +
+              "Lower fence = Q1 − 1.5×IQR = <strong>" +
+              roundNice(q.fenceLow) +
+              "</strong>. " +
+              "Upper fence = Q3 + 1.5×IQR = <strong>" +
+              roundNice(q.fenceHigh) +
+              "</strong>. " +
+              (lowNames ? "<strong>" + lowNames + "</strong> is below the lower fence. " : "") +
+              (highNames ? "<strong>" + highNames + "</strong> is above the upper fence. " : "") +
+              "Those are the unusual jumps!"
+            );
+          },
+          setup: function () {
+            renderCards(true, function () {
+              updateQuartileMarkers();
+              outlineQuartile("both");
+              showIqrMath(false, true, true);
+              markOutliers();
+            });
+          },
+        },
+      ];
+
+      function roundNice(x) {
+        return Math.round(x * 1000) / 1000;
+      }
+
+      function clearHighlights() {
+        outlineQ1.className = "outline-box";
+        outlineQ3.className = "outline-box";
+        ["marker-q1", "marker-q2", "marker-q3"].forEach(function (id) {
+          const el = document.getElementById(id);
+          if (el) el.classList.remove("show");
+        });
+        extraMath.innerHTML = "";
+      }
+
+      function halfMedianIndices(halfIdx) {
+        const len = halfIdx.length;
+        if (len === 0) return [];
+        if (len % 2 === 1) return [halfIdx[(len - 1) / 2]];
+        return [halfIdx[len / 2 - 1], halfIdx[len / 2]];
+      }
+
+      function updateQuartileMarkers() {
+        const cards = [...cardsRow.querySelectorAll(".card")];
+        const wrap = cardsWrap || cardsRow.parentElement;
+        const q = quartiles(dataset.people);
+        const n = q.sorted.length;
+        const { idxQ1, idxQ3 } = qGroups();
+
+        cards.forEach(function (c) {
+          c.classList.remove("is-median", "is-q1", "is-q3");
+        });
+
+        const m1 = document.getElementById("marker-q1");
+        const m2 = document.getElementById("marker-q2");
+        const m3 = document.getElementById("marker-q3");
+        const l1 = document.getElementById("label-q1");
+        const l2 = document.getElementById("label-q2");
+        const l3 = document.getElementById("label-q3");
+
+        [m1, m2, m3].forEach(function (m) {
+          if (m) m.classList.remove("show");
+        });
+
+        if (step < 2 || cards.length === 0 || !wrap) return;
+
+        function centerX(el) {
+          const wr = wrap.getBoundingClientRect();
+          const r = el.getBoundingClientRect();
+          return r.left - wr.left + r.width / 2;
+        }
+
+        if (step >= 2) {
+          if (n % 2 === 1) {
+            const midIdx = (n - 1) / 2;
+            const el = cards[midIdx];
+            if (el && m2 && l2) {
+              el.classList.add("is-median");
+              m2.style.left = centerX(el) + "px";
+              l2.innerHTML = "<strong>Q2</strong> (median) = " + q.Q2;
+              m2.classList.add("show");
+            }
+          } else {
+            const a = cards[n / 2 - 1];
+            const b = cards[n / 2];
+            if (a && b && m2 && l2) {
+              a.classList.add("is-median");
+              b.classList.add("is-median");
+              m2.style.left = (centerX(a) + centerX(b)) / 2 + "px";
+              l2.innerHTML =
+                "<strong>Q2</strong> (median) = " +
+                q.Q2 +
+                "<br><span style=\"font-weight:700;font-size:0.72rem\">" +
+                a.querySelector(".name").textContent +
+                " &amp; " +
+                b.querySelector(".name").textContent +
+                "</span>";
+              m2.classList.add("show");
+            }
+          }
+        }
+
+        if (step >= 3) {
+          const ix = halfMedianIndices(idxQ1);
+          const els = ix.map(function (i) {
+            return cards[i];
+          }).filter(Boolean);
+          if (els.length === 1 && m1 && l1) {
+            els[0].classList.add("is-q1");
+            m1.style.left = centerX(els[0]) + "px";
+            l1.innerHTML = "<strong>Q1</strong> = " + q.Q1;
+            m1.classList.add("show");
+          } else if (els.length === 2 && m1 && l1) {
+            els[0].classList.add("is-q1");
+            els[1].classList.add("is-q1");
+            m1.style.left = (centerX(els[0]) + centerX(els[1])) / 2 + "px";
+            l1.innerHTML =
+              "<strong>Q1</strong> = " +
+              q.Q1 +
+              "<br><span style=\"font-weight:700;font-size:0.72rem\">" +
+              els[0].querySelector(".name").textContent +
+              " &amp; " +
+              els[1].querySelector(".name").textContent +
+              "</span>";
+            m1.classList.add("show");
+          }
+        }
+
+        if (step >= 4) {
+          const ix = halfMedianIndices(idxQ3);
+          const els = ix.map(function (i) {
+            return cards[i];
+          }).filter(Boolean);
+          if (els.length === 1 && m3 && l3) {
+            els[0].classList.add("is-q3");
+            m3.style.left = centerX(els[0]) + "px";
+            l3.innerHTML = "<strong>Q3</strong> = " + q.Q3;
+            m3.classList.add("show");
+          } else if (els.length === 2 && m3 && l3) {
+            els[0].classList.add("is-q3");
+            els[1].classList.add("is-q3");
+            m3.style.left = (centerX(els[0]) + centerX(els[1])) / 2 + "px";
+            l3.innerHTML =
+              "<strong>Q3</strong> = " +
+              q.Q3 +
+              "<br><span style=\"font-weight:700;font-size:0.72rem\">" +
+              els[0].querySelector(".name").textContent +
+              " &amp; " +
+              els[1].querySelector(".name").textContent +
+              "</span>";
+            m3.classList.add("show");
+          }
+        }
+      }
+
+      /** Indices in sorted order for Q1 group and Q3 group */
+      function qGroups() {
+        const q = quartiles(dataset.people);
+        const n = q.sorted.length;
+        const idxQ1 = [];
+        const idxQ3 = [];
+        if (n % 2 === 1) {
+          const mid = (n - 1) / 2;
+          for (let i = 0; i < mid; i++) idxQ1.push(i);
+          for (let i = mid + 1; i < n; i++) idxQ3.push(i);
+        } else {
+          for (let i = 0; i < n / 2; i++) idxQ1.push(i);
+          for (let i = n / 2; i < n; i++) idxQ3.push(i);
+        }
+        return { idxQ1, idxQ3, q };
+      }
+
+      function outlineQuartile(which) {
+        const { idxQ1, idxQ3 } = qGroups();
+        const cards = [...cardsRow.querySelectorAll(".card")];
+        const pad = 8;
+
+        const wrap = cardsWrap || cardsRow.parentElement;
+
+        function place(box, indices, showClass) {
+          if (indices.length === 0 || !wrap) return;
+          const els = indices.map((i) => cards[i]);
+          const first = els[0];
+          const last = els[els.length - 1];
+          const wr = wrap.getBoundingClientRect();
+          const fr = first.getBoundingClientRect();
+          const lr = last.getBoundingClientRect();
+          const left = fr.left - wr.left - pad;
+          const top = fr.top - wr.top - pad;
+          const width = lr.right - fr.left + pad * 2;
+          const height =
+            Math.max(...els.map((c) => c.getBoundingClientRect().height)) + pad * 2;
+          box.style.left = left + "px";
+          box.style.top = top + "px";
+          box.style.width = width + "px";
+          box.style.height = height + "px";
+          box.className = "outline-box " + showClass;
+        }
+
+        outlineQ1.className = "outline-box";
+        outlineQ3.className = "outline-box";
+        if (which === "q1" || which === "both") {
+          place(outlineQ1, idxQ1, "show-q1");
+        }
+        if (which === "q3" || which === "both") {
+          place(outlineQ3, idxQ3, "show-q3");
+        }
+      }
+
+      var FLY_MS = 820;
+
+      function fadeInEl(el, delay, done) {
+        if (!el) {
+          if (done) done();
+          return;
+        }
+        el.style.opacity = "0";
+        window.setTimeout(function () {
+          el.style.transition = "opacity 0.42s ease, transform 0.45s cubic-bezier(0.33, 1.12, 0.52, 1)";
+          el.style.opacity = "1";
+          el.style.transform = "translateY(0) scale(1)";
+          el.classList.add("in");
+          window.setTimeout(function () {
+            if (done) done();
+          }, 440);
+        }, delay);
+      }
+
+      function flyPillFromRect(startRect, toEl, flyClass, done) {
+        if (!toEl) {
+          if (done) done();
+          return;
+        }
+        const toRect = toEl.getBoundingClientRect();
+        const cs = window.getComputedStyle(toEl);
+        const destFs = cs.fontSize;
+
+        toEl.style.opacity = "0";
+        toEl.classList.add("fly-pending");
+
+        const clone = document.createElement("div");
+        clone.className = "fly-pill " + flyClass;
+        clone.textContent = toEl.textContent.replace(/\s+/g, " ").trim();
+        clone.style.left = startRect.left + "px";
+        clone.style.top = startRect.top + "px";
+        clone.style.width = Math.max(startRect.width, 48) + "px";
+        clone.style.height = Math.max(startRect.height, 36) + "px";
+        clone.style.fontSize = Math.min(parseFloat(destFs) * 0.82, parseFloat(destFs)) + "px";
+        clone.style.boxSizing = "border-box";
+        document.body.appendChild(clone);
+
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            clone.style.transition =
+              "left " +
+              FLY_MS +
+              "ms cubic-bezier(0.33, 1.12, 0.52, 1), top " +
+              FLY_MS +
+              "ms cubic-bezier(0.33, 1.12, 0.52, 1), width " +
+              FLY_MS +
+              "ms cubic-bezier(0.33, 1.12, 0.52, 1), height " +
+              FLY_MS +
+              "ms cubic-bezier(0.33, 1.12, 0.52, 1), font-size " +
+              FLY_MS +
+              "ms cubic-bezier(0.33, 1.12, 0.52, 1)";
+            clone.style.left = toRect.left + "px";
+            clone.style.top = toRect.top + "px";
+            clone.style.width = toRect.width + "px";
+            clone.style.height = toRect.height + "px";
+            clone.style.fontSize = destFs;
+          });
+        });
+
+        window.setTimeout(function () {
+          clone.remove();
+          toEl.style.opacity = "1";
+          toEl.classList.remove("fly-pending");
+          toEl.classList.add("in");
+          if (done) done();
+        }, FLY_MS + 90);
+      }
+
+      function flyPillFromElement(fromEl, toEl, flyClass, done) {
+        if (!fromEl || !toEl) {
+          if (toEl) {
+            toEl.style.opacity = "1";
+            toEl.classList.add("in");
+          }
+          if (done) done();
+          return;
+        }
+        const sr = fromEl.getBoundingClientRect();
+        if (sr.width < 4 || sr.height < 4) {
+          toEl.style.opacity = "1";
+          toEl.classList.add("in");
+          if (done) done();
+          return;
+        }
+        flyPillFromRect(sr, toEl, flyClass, done);
+      }
+
+      function midpointRectBetween(el1, el2, w, h) {
+        const r1 = el1.getBoundingClientRect();
+        const r2 = el2.getBoundingClientRect();
+        const cx = (r1.left + r1.right + r2.left + r2.right) / 4;
+        const cy = (r1.top + r1.bottom + r2.top + r2.bottom) / 4;
+        return {
+          left: cx - w / 2,
+          top: cy - h / 2,
+          width: w,
+          height: h,
+        };
+      }
+
+      function showIqrMath(animateIqr, includeFence, animateFence) {
+        const q = quartiles(dataset.people);
+        extraMath.innerHTML = "";
+
+        const iqrContainer = document.createElement("div");
+        iqrContainer.className = "iqr-demo";
+        iqrContainer.innerHTML =
+          '<span class="pill q3c iqr-slot-pill pill-xl" id="iqr-pill-q3">Q3 = ' +
+          q.Q3 +
+          "</span>" +
+          '<span class="op" id="iqr-op-min">−</span>' +
+          '<span class="pill q1c iqr-slot-pill pill-xl" id="iqr-pill-q1">Q1 = ' +
+          q.Q1 +
+          "</span>" +
+          '<span class="op" id="iqr-op-eq">=</span>' +
+          '<span class="pill iqr-pill iqr-slot-pill pill-xl" id="iqr-pill-res">IQR = ' +
+          q.IQR +
+          "</span>";
+        extraMath.appendChild(iqrContainer);
+
+        const pq3 = document.getElementById("iqr-pill-q3");
+        const pq1 = document.getElementById("iqr-pill-q1");
+        const pres = document.getElementById("iqr-pill-res");
+        const opMin = document.getElementById("iqr-op-min");
+        const opEq = document.getElementById("iqr-op-eq");
+
+        if (opMin) opMin.style.opacity = "0";
+        if (opEq) opEq.style.opacity = "0";
+
+        if (includeFence) {
+          const fenceBox = document.createElement("div");
+          fenceBox.className = "fence-box";
+          fenceBox.id = "fence-block";
+          fenceBox.innerHTML =
+            '<div class="fence-row">' +
+            '<span class="label" style="color: var(--fence-low)">Lower fence</span>' +
+            '<div class="fence-formula" id="fence-form-low"></div>' +
+            "</div>" +
+            '<div class="fence-row">' +
+            '<span class="label" style="color: var(--fence-high)">Upper fence</span>' +
+            '<div class="fence-formula" id="fence-form-high"></div>' +
+            "</div>";
+          extraMath.appendChild(fenceBox);
+
+          const lowForm = document.getElementById("fence-form-low");
+          const highForm = document.getElementById("fence-form-high");
+          const i15 = roundNice(1.5 * q.IQR);
+          lowForm.innerHTML =
+            '<span class="pill q1c fence-slot pill-xl" id="f-low-q1">Q1 = ' +
+            q.Q1 +
+            "</span>" +
+            '<span class="fence-eq fence-slot" id="f-low-m1">−</span>' +
+            '<span class="pill iqr-mul fence-slot pill-xl" id="f-low-15">1.5×IQR = ' +
+            i15 +
+            "</span>" +
+            '<span class="fence-eq fence-slot" id="f-low-eq">=</span>' +
+            '<span class="fence-result low fence-slot" id="f-low-res">' +
+            roundNice(q.fenceLow) +
+            "</span>";
+          highForm.innerHTML =
+            '<span class="pill q3c fence-slot pill-xl" id="f-high-q3">Q3 = ' +
+            q.Q3 +
+            "</span>" +
+            '<span class="fence-eq fence-slot" id="f-high-p1">+</span>' +
+            '<span class="pill iqr-mul fence-slot pill-xl" id="f-high-15">1.5×IQR = ' +
+            i15 +
+            "</span>" +
+            '<span class="fence-eq fence-slot" id="f-high-eq">=</span>' +
+            '<span class="fence-result high fence-slot" id="f-high-res">' +
+            roundNice(q.fenceHigh) +
+            "</span>";
+
+          lowForm.querySelectorAll(".fence-slot").forEach(function (el) {
+            el.style.opacity = "0";
+            el.classList.remove("in");
+          });
+          highForm.querySelectorAll(".fence-slot").forEach(function (el) {
+            el.style.opacity = "0";
+            el.classList.remove("in");
+          });
+        }
+
+        function runStaticIqrAndMaybeFence() {
+          if (pq3) {
+            pq3.style.opacity = "1";
+            pq3.classList.add("in");
+          }
+          if (pq1) {
+            pq1.style.opacity = "1";
+            pq1.classList.add("in");
+          }
+          if (pres) {
+            pres.style.opacity = "1";
+            pres.classList.add("in");
+          }
+          if (opMin) opMin.style.opacity = "1";
+          if (opEq) opEq.style.opacity = "1";
+          if (includeFence && !animateFence) {
+            document.querySelectorAll("#fence-form-low .fence-slot, #fence-form-high .fence-slot").forEach(function (el) {
+              el.style.opacity = "1";
+              el.style.transform = "translateY(0) scale(1)";
+              el.classList.add("in");
+            });
+          }
+        }
+
+        if (!animateIqr) {
+          runStaticIqrAndMaybeFence();
+          if (includeFence && animateFence) {
+            window.setTimeout(function () {
+              runFenceFlySequence();
+            }, 160);
+          }
+          return;
+        }
+
+        const mkQ3 = document.getElementById("marker-q3");
+        const mkQ1 = document.getElementById("marker-q1");
+
+        window.requestAnimationFrame(function () {
+          window.requestAnimationFrame(function () {
+            flyPillFromElement(mkQ3, pq3, "q3c", function () {
+              fadeInEl(opMin, 0, function () {
+                flyPillFromElement(mkQ1, pq1, "q1c", function () {
+                  fadeInEl(opEq, 0, function () {
+                    var mid;
+                    if (mkQ1 && mkQ3) {
+                      mid = midpointRectBetween(mkQ1, mkQ3, 120, 56);
+                    } else {
+                      var pr = pres.getBoundingClientRect();
+                      mid = {
+                        left: pr.left + pr.width * 0.1,
+                        top: pr.top - 72,
+                        width: Math.max(pr.width * 0.85, 96),
+                        height: Math.max(pr.height, 46),
+                      };
+                    }
+                    flyPillFromRect(mid, pres, "iqr-pill", function () {
+                      if (includeFence && animateFence) {
+                        window.setTimeout(runFenceFlySequence, 350);
+                      }
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      }
+
+      function runFenceFlySequence() {
+        const mkQ1 = document.getElementById("marker-q1");
+        const mkQ3 = document.getElementById("marker-q3");
+        const iqrSrc = document.getElementById("iqr-pill-res");
+        const tLowQ1 = document.getElementById("f-low-q1");
+        const tLow15 = document.getElementById("f-low-15");
+        const tHighQ3 = document.getElementById("f-high-q3");
+        const tHigh15 = document.getElementById("f-high-15");
+
+        flyPillFromElement(mkQ1, tLowQ1, "q1c", function () {
+          fadeInEl(document.getElementById("f-low-m1"), 0, function () {
+            flyPillFromElement(iqrSrc, tLow15, "iqr-mul", function () {
+              fadeInEl(document.getElementById("f-low-eq"), 0, function () {
+                fadeInEl(document.getElementById("f-low-res"), 0, function () {
+                  flyPillFromElement(mkQ3, tHighQ3, "q3c", function () {
+                    fadeInEl(document.getElementById("f-high-p1"), 0, function () {
+                      flyPillFromElement(iqrSrc, tHigh15, "iqr-mul", function () {
+                        fadeInEl(document.getElementById("f-high-eq"), 0, function () {
+                          fadeInEl(document.getElementById("f-high-res"), 0);
+                        });
+                      });
+                    });
+                  });
+                });
+              });
+            });
+          });
+        });
+      }
+
+      function markOutliers() {
+        const q = quartiles(dataset.people);
+        const cards = cardsRow.querySelectorAll(".card");
+        cards.forEach((c) => {
+          c.classList.remove("outlier-low", "outlier-high");
+          const j = parseFloat(c.dataset.jumps);
+          if (j < q.fenceLow) c.classList.add("outlier-low");
+          if (j > q.fenceHigh) c.classList.add("outlier-high");
+        });
+      }
+
+      function renderCards(sorted, done) {
+        const oldRects = new Map();
+        cardsRow.querySelectorAll(".card").forEach(function (card) {
+          const name = card.dataset.name;
+          if (name) oldRects.set(name, card.getBoundingClientRect());
+        });
+
+        const people = sorted
+          ? [...dataset.people].sort((a, b) => a.jumps - b.jumps)
+          : shuffleCopy([...dataset.people]);
+
+        cardsRow.innerHTML = "";
+        people.forEach(function (p) {
+          const div = document.createElement("div");
+          div.className = "card sorting";
+          div.dataset.jumps = String(p.jumps);
+          div.dataset.name = p.name;
+          div.innerHTML =
+            '<div class="name"></div><div class="jumps"></div><div class="unit">jumps</div>';
+          div.querySelector(".name").textContent = p.name;
+          div.querySelector(".jumps").textContent = p.jumps;
+          cardsRow.appendChild(div);
+        });
+
+        const flipMs = 680;
+        const shouldFlip = sorted && oldRects.size > 0;
+
+        if (shouldFlip) {
+          cardsRow.querySelectorAll(".card").forEach(function (card) {
+            const name = card.dataset.name;
+            const old = oldRects.get(name);
+            if (!old) return;
+            const neu = card.getBoundingClientRect();
+            const dx = old.left - neu.left;
+            const dy = old.top - neu.top;
+            if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) return;
+            card.style.transform = "translate(" + dx + "px," + dy + "px)";
+            card.style.transition = "none";
+          });
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              cardsRow.querySelectorAll(".card").forEach(function (card) {
+                card.style.transition =
+                  "transform 0.68s cubic-bezier(0.34, 1.2, 0.64, 1)";
+                card.style.transform = "";
+              });
+            });
+          });
+        }
+
+        window.setTimeout(function () {
+          if (typeof done === "function") done();
+        }, shouldFlip ? flipMs : 0);
+      }
+
+      function shuffleCopy(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      }
+
+      function applyStep() {
+        const s = STEPS[step];
+        const q = quartiles(dataset.people);
+        explainEl.innerHTML = "<strong>" + s.title + ".</strong> " + s.text(q, dataset);
+        s.setup();
+        btnPrev.disabled = step === 0;
+        if (step === 0) {
+          btnNext.textContent = "Next: sort smallest → biggest";
+        } else if (step === STEPS.length - 1) {
+          btnNext.textContent = "Start again (same friends)";
+        } else {
+          btnNext.textContent = "Next";
+        }
+        updateDots();
+      }
+
+      function updateDots() {
+        progressDots.innerHTML = "";
+        STEPS.forEach((_, i) => {
+          const d = document.createElement("span");
+          if (i === step) d.classList.add("on");
+          progressDots.appendChild(d);
+        });
+      }
+
+      btnNext.addEventListener("click", function () {
+        if (step < STEPS.length - 1) {
+          step++;
+        } else {
+          step = 0;
+        }
+        applyStep();
+      });
+
+      btnPrev.addEventListener("click", function () {
+        if (step > 0) {
+          step--;
+          applyStep();
+        }
+      });
+
+      function setDataset(d) {
+        dataset = d;
+        step = 0;
+        tabOdd.setAttribute("aria-selected", d === ODD);
+        tabEven.setAttribute("aria-selected", d === EVEN);
+        storyText.innerHTML = d.story;
+        clearHighlights();
+        applyStep();
+      }
+
+      tabOdd.addEventListener("click", () => setDataset(ODD));
+      tabEven.addEventListener("click", () => setDataset(EVEN));
+
+      function refreshStepLayout() {
+        if (step >= 2) updateQuartileMarkers();
+        if (step === 3) outlineQuartile("q1");
+        else if (step === 4) outlineQuartile("q3");
+        else if (step === 5 || step === 6) outlineQuartile("both");
+      }
+
+      var resizeT = null;
+      window.addEventListener("resize", function () {
+        window.clearTimeout(resizeT);
+        resizeT = window.setTimeout(refreshStepLayout, 120);
+      });
+
+      setDataset(ODD);
+    })();
+  </script>
+</body>
+</html>

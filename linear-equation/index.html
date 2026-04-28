@@ -1,0 +1,1043 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Linear Equations Lab</title>
+  <style>
+    :root {
+      --bg: #f5efe2;
+      --paper: #fff9ef;
+      --ink: #173042;
+      --accent: #ef6c3f;
+      --accent-2: #0f8b8d;
+      --accent-3: #f3b43f;
+      --card: rgba(255, 249, 239, 0.84);
+      --shadow: 0 22px 60px rgba(23, 48, 66, 0.16);
+      --radius: 28px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Avenir Next", "Trebuchet MS", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(243, 180, 63, 0.32), transparent 28%),
+        radial-gradient(circle at right 20%, rgba(15, 139, 141, 0.18), transparent 22%),
+        linear-gradient(180deg, #f7f1e7 0%, #f5efe2 46%, #efe4d2 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: auto;
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      z-index: 0;
+      pointer-events: none;
+      filter: blur(14px);
+      opacity: 0.55;
+      animation: drift 16s ease-in-out infinite;
+    }
+
+    body::before {
+      background: rgba(239, 108, 63, 0.16);
+      top: 6%;
+      right: -80px;
+    }
+
+    body::after {
+      background: rgba(15, 139, 141, 0.16);
+      left: -90px;
+      bottom: 10%;
+      animation-delay: -7s;
+    }
+
+    @keyframes drift {
+      0%, 100% { transform: translateY(0) translateX(0) scale(1); }
+      50% { transform: translateY(18px) translateX(-10px) scale(1.08); }
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      width: min(1120px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 28px 0 64px;
+    }
+
+    .hero,
+    .section,
+    .practice-card {
+      background: var(--card);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(23, 48, 66, 0.08);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 28px;
+      padding: 34px;
+      align-items: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(243, 180, 63, 0.22);
+      font-size: 0.9rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    h1, h2, h3 {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      line-height: 1.05;
+    }
+
+    h1 {
+      font-size: clamp(2.7rem, 5vw, 4.9rem);
+      margin-top: 18px;
+      max-width: 10ch;
+    }
+
+    .hero p {
+      font-size: 1.1rem;
+      line-height: 1.7;
+      max-width: 60ch;
+      margin: 18px 0 0;
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 26px;
+    }
+
+    .button {
+      border: 0;
+      border-radius: 999px;
+      padding: 14px 20px;
+      font: inherit;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .button:hover,
+    .button:focus-visible {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(23, 48, 66, 0.18);
+    }
+
+    .button.primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .button.secondary {
+      background: rgba(23, 48, 66, 0.08);
+      color: var(--ink);
+    }
+
+    .hero-visual {
+      display: grid;
+      gap: 18px;
+      justify-items: center;
+    }
+
+    .balance {
+      width: min(100%, 380px);
+      height: 300px;
+      position: relative;
+      display: grid;
+      place-items: center;
+    }
+
+    .beam {
+      position: absolute;
+      top: 68px;
+      left: 50%;
+      width: 260px;
+      height: 12px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent-2), #157174);
+      transform: translateX(-50%);
+      animation: sway 5s ease-in-out infinite;
+      transform-origin: center center;
+    }
+
+    .beam::before,
+    .beam::after {
+      content: "";
+      position: absolute;
+      top: 8px;
+      width: 4px;
+      height: 92px;
+      background: rgba(23, 48, 66, 0.55);
+    }
+
+    .beam::before { left: 34px; }
+    .beam::after { right: 34px; }
+
+    .tray {
+      position: absolute;
+      top: 164px;
+      width: 104px;
+      height: 18px;
+      border-radius: 999px;
+      background: rgba(23, 48, 66, 0.85);
+    }
+
+    .tray.left { left: 42px; }
+    .tray.right { right: 42px; }
+
+    .stand {
+      position: absolute;
+      bottom: 40px;
+      width: 18px;
+      height: 120px;
+      border-radius: 20px;
+      background: #254859;
+    }
+
+    .stand::after {
+      content: "";
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      width: 130px;
+      height: 18px;
+      background: #173042;
+      border-radius: 999px;
+      transform: translateX(-50%);
+    }
+
+    .token-row {
+      position: absolute;
+      top: 110px;
+      display: flex;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .token-row.left { left: 28px; }
+    .token-row.right { right: 24px; }
+
+    .token,
+    .cube {
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      color: white;
+      animation: bob 2.8s ease-in-out infinite;
+    }
+
+    .cube {
+      width: 54px;
+      height: 54px;
+      border-radius: 18px;
+      background: linear-gradient(160deg, var(--accent), #ca4f26);
+      box-shadow: 0 12px 22px rgba(239, 108, 63, 0.3);
+      font-size: 0.92rem;
+    }
+
+    .token {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: linear-gradient(160deg, var(--accent-3), #dd9e21);
+      box-shadow: 0 10px 16px rgba(243, 180, 63, 0.26);
+      animation-delay: -0.8s;
+    }
+
+    @keyframes sway {
+      0%, 100% { transform: translateX(-50%) rotate(1deg); }
+      50% { transform: translateX(-50%) rotate(-1deg); }
+    }
+
+    @keyframes bob {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-7px); }
+    }
+
+    .caption {
+      width: min(100%, 320px);
+      padding: 16px 18px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.72);
+      font-weight: 700;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(12, 1fr);
+      gap: 22px;
+      margin-top: 22px;
+    }
+
+    .section {
+      padding: 28px;
+    }
+
+    .span-7 { grid-column: span 7; }
+    .span-5 { grid-column: span 5; }
+    .span-6 { grid-column: span 6; }
+    .span-12 { grid-column: span 12; }
+
+    .section h2 {
+      font-size: clamp(2rem, 3vw, 3rem);
+      margin-bottom: 14px;
+    }
+
+    .lede {
+      font-size: 1.05rem;
+      line-height: 1.7;
+      margin: 0 0 20px;
+    }
+
+    .concept-list,
+    .steps-list {
+      display: grid;
+      gap: 14px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .concept-list li,
+    .steps-list li,
+    .mini-card,
+    .practice-card,
+    .tip {
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(23, 48, 66, 0.08);
+    }
+
+    .concept-list li,
+    .steps-list li {
+      padding: 18px 18px 18px 66px;
+      position: relative;
+      line-height: 1.6;
+      min-height: 74px;
+    }
+
+    .concept-list li::before,
+    .steps-list li::before {
+      content: attr(data-step);
+      position: absolute;
+      left: 16px;
+      top: 16px;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--accent-2);
+      color: white;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+    }
+
+    .mini-stack {
+      display: grid;
+      gap: 16px;
+    }
+
+    .mini-card {
+      padding: 18px;
+    }
+
+    .mini-card h3 {
+      font-size: 1.3rem;
+      margin-bottom: 8px;
+    }
+
+    .equation-board {
+      padding: 24px;
+      background: linear-gradient(180deg, rgba(23, 48, 66, 0.96), rgba(34, 69, 83, 0.94));
+      color: white;
+      border-radius: 24px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .equation-board::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(transparent 95%, rgba(255, 255, 255, 0.05) 95%),
+        linear-gradient(90deg, transparent 95%, rgba(255, 255, 255, 0.05) 95%);
+      background-size: 100% 36px, 36px 100%;
+      pointer-events: none;
+      opacity: 0.4;
+    }
+
+    .equation {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      font-size: clamp(1.5rem, 3vw, 2.4rem);
+      font-weight: 800;
+      position: relative;
+      z-index: 1;
+    }
+
+    .pill {
+      padding: 10px 16px;
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      min-width: 72px;
+      text-align: center;
+      transition: transform 280ms ease, background 280ms ease;
+    }
+
+    .pill.highlight {
+      background: rgba(243, 180, 63, 0.24);
+      transform: translateY(-4px) scale(1.04);
+    }
+
+    .board-note {
+      position: relative;
+      z-index: 1;
+      margin-top: 18px;
+      max-width: 48ch;
+      line-height: 1.65;
+      color: rgba(255, 255, 255, 0.9);
+    }
+
+    .step-controls {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .step-controls .button.primary {
+      background: var(--accent-3);
+      color: #173042;
+    }
+
+    .example-grid {
+      display: grid;
+      grid-template-columns: 0.95fr 1.05fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .steps-panel {
+      display: grid;
+      gap: 12px;
+    }
+
+    .step-card {
+      padding: 16px 18px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(23, 48, 66, 0.08);
+      transform: translateY(16px);
+      opacity: 0.45;
+      transition: opacity 260ms ease, transform 260ms ease, border-color 260ms ease;
+    }
+
+    .step-card.active {
+      opacity: 1;
+      transform: translateY(0);
+      border-color: rgba(239, 108, 63, 0.42);
+    }
+
+    .step-card strong {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .practice-card {
+      padding: 28px;
+      margin-top: 22px;
+    }
+
+    .practice-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .problem-box {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 1fr auto;
+      align-items: end;
+    }
+
+    label {
+      font-weight: 700;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    input {
+      width: 100%;
+      border: 2px solid rgba(23, 48, 66, 0.12);
+      border-radius: 18px;
+      padding: 14px 16px;
+      font: inherit;
+      background: rgba(255, 255, 255, 0.85);
+      color: var(--ink);
+    }
+
+    input:focus-visible {
+      outline: 3px solid rgba(15, 139, 141, 0.22);
+      border-color: var(--accent-2);
+    }
+
+    .feedback {
+      margin-top: 16px;
+      min-height: 28px;
+      font-weight: 700;
+    }
+
+    .feedback.good { color: #117a43; }
+    .feedback.try { color: #9e5209; }
+
+    .tip-wrap {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin-top: 22px;
+    }
+
+    .tip {
+      padding: 18px;
+      line-height: 1.6;
+    }
+
+    .tip strong {
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    .fade-up {
+      opacity: 0;
+      transform: translateY(26px);
+      transition: opacity 560ms ease, transform 560ms ease;
+    }
+
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .footer-note {
+      text-align: center;
+      margin-top: 26px;
+      color: rgba(23, 48, 66, 0.74);
+      font-weight: 700;
+    }
+
+    @media (max-width: 920px) {
+      .hero,
+      .example-grid,
+      .problem-box,
+      .tip-wrap {
+        grid-template-columns: 1fr;
+      }
+
+      .span-7,
+      .span-5,
+      .span-6 {
+        grid-column: span 12;
+      }
+
+      .hero {
+        padding: 26px;
+      }
+
+      h1 {
+        max-width: none;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition: none !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero fade-up visible">
+      <div>
+        <div class="eyebrow">Math Mission</div>
+        <h1>Linear equations can tell a money story.</h1>
+        <p>
+          A linear equation can show how one amount changes when another amount changes.
+          In <strong>y = mx + b</strong>, the <strong>b</strong> is the starting amount, and <strong>m</strong> tells how much gets added each time.
+        </p>
+        <div class="hero-actions">
+          <a class="button primary" href="#example">See an Example</a>
+          <button class="button secondary" id="animate-steps" type="button">Play the Steps</button>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="balance" aria-hidden="true">
+          <div class="beam"></div>
+          <div class="token-row left">
+            <div class="cube">0.75</div>
+            <div class="token">+5</div>
+          </div>
+          <div class="token-row right">
+            <div class="cube">y</div>
+          </div>
+          <div class="tray left"></div>
+          <div class="tray right"></div>
+          <div class="stand"></div>
+        </div>
+        <div class="caption">Start money + money earned each time = total money.</div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="section span-7 fade-up">
+        <h2>What does linear mean?</h2>
+        <p class="lede">
+          In 6th grade, a linear equation often looks like <strong>y = mx + b</strong>.
+          The variable is only to the first power, so the pattern grows in a steady, predictable way.
+        </p>
+        <ol class="concept-list">
+          <li data-step="1"><strong>x:</strong> The input. It tells how many times something happens, like chores completed.</li>
+          <li data-step="2"><strong>m:</strong> The rate. It tells how much is added for each 1 more x. This is called the slope.</li>
+          <li data-step="3"><strong>b:</strong> The starting amount. It is what you already have before x even begins.</li>
+        </ol>
+      </article>
+
+      <aside class="section span-5 fade-up">
+        <div class="mini-stack">
+          <div class="mini-card">
+            <h3>Think of allowance</h3>
+            <p>If you already get $5 each week and then earn more for each chore, the total grows by the same amount every time.</p>
+          </div>
+          <div class="mini-card">
+            <h3>Reading the formula</h3>
+            <p>In <strong>y = 0.75x + 5</strong>, the <strong>0.75</strong> means 75 cents per chore and the <strong>5</strong> means a starting $5.</p>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section class="section fade-up" id="example" style="margin-top: 22px;">
+      <h2>Example problem</h2>
+      <p class="lede">
+        Milo is saving for a glow-in-the-dark skateboard. He gets <strong>$5 every week</strong> for helping at home,
+        and he earns <strong>75 cents for each pet chore</strong> he finishes. If he does <strong>4 chores</strong>,
+        how much money does he make that week?
+      </p>
+
+      <div class="example-grid">
+        <div class="equation-board">
+          <div class="equation" id="equation-line">
+            <span class="pill highlight" data-part="left">y = 0.75(4) + 5</span>
+            <span>=</span>
+            <span class="pill" data-part="right">?</span>
+          </div>
+          <p class="board-note" id="board-note">
+            First write the story as an equation: <strong>y = 0.75x + 5</strong>. The 5 is the starting money, and 0.75 is the money earned per chore.
+          </p>
+          <div class="step-controls">
+            <button class="button primary" id="next-step" type="button">Next Step</button>
+            <button class="button secondary" id="reset-step" type="button">Start Over</button>
+          </div>
+        </div>
+
+        <div class="steps-panel" id="steps-panel">
+          <div class="step-card active">
+            <strong>Step 1</strong>
+            Write the rule: <strong>y = 0.75x + 5</strong>. This means total money equals chore money plus the starting $5.
+          </div>
+          <div class="step-card">
+            <strong>Step 2</strong>
+            Plug in <strong>x = 4</strong> because Milo did 4 chores.
+          </div>
+          <div class="step-card">
+            <strong>Step 3</strong>
+            Multiply: <strong>0.75 x 4 = 3</strong>. Milo earned $3 from chores.
+          </div>
+          <div class="step-card">
+            <strong>Step 4</strong>
+            Add the starting $5: <strong>3 + 5 = 8</strong>. Milo makes <strong>$8</strong> that week.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="section span-6 fade-up">
+        <h2>Solving recipe</h2>
+        <ol class="steps-list">
+          <li data-step="A"><strong>Name the parts.</strong> In <strong>y = mx + b</strong>, <strong>m</strong> is the rate and <strong>b</strong> is the starting amount.</li>
+          <li data-step="B"><strong>Plug in x.</strong> Replace x with the number from the story problem.</li>
+          <li data-step="C"><strong>Multiply first.</strong> Find how much the variable part adds to the total.</li>
+          <li data-step="D"><strong>Add the start amount.</strong> Finish with b to get the total y.</li>
+        </ol>
+      </article>
+
+      <article class="section span-6 fade-up">
+        <h2>Another quick one</h2>
+        <p class="lede"><strong>y = 1.50x + 2</strong></p>
+        <p class="lede">
+          Imagine a game arcade card with <strong>$2 already loaded</strong>, and then you add
+          <strong>$1.50 for each token pack</strong>. If you buy 3 packs, then
+          <strong>y = 1.50(3) + 2 = 6.50</strong>.
+        </p>
+        <div class="mini-card">
+          <h3>Mini check</h3>
+          <p>The total keeps growing by the same amount each time, so it is still linear.</p>
+        </div>
+      </article>
+    </section>
+
+    <section class="section fade-up" style="margin-top: 22px;">
+      <h2>Solving for x when y is known</h2>
+      <p class="lede">
+        Sometimes you already know the total money, and you need to figure out how many chores were done.
+        This means you solve for <strong>x</strong> by working backward.
+      </p>
+
+      <div class="example-grid">
+        <div class="equation-board">
+          <div class="equation">
+            <span class="pill highlight">14 = 0.75x + 5</span>
+            <span>&rarr;</span>
+            <span class="pill">x = ?</span>
+          </div>
+          <p class="board-note">
+            Milo has <strong>$14</strong> total. His rule is still <strong>y = 0.75x + 5</strong>.
+            To find <strong>x</strong>, first remove the starting $5, then divide by 0.75.
+          </p>
+        </div>
+
+        <div class="steps-panel">
+          <div class="step-card active">
+            <strong>Step 1</strong>
+            Start with the equation <strong>14 = 0.75x + 5</strong>.
+          </div>
+          <div class="step-card active">
+            <strong>Step 2</strong>
+            Subtract 5 from both sides: <strong>14 - 5 = 0.75x</strong>, so <strong>9 = 0.75x</strong>.
+          </div>
+          <div class="step-card active">
+            <strong>Step 3</strong>
+            Divide both sides by 0.75: <strong>9 &divide; 0.75 = x</strong>.
+          </div>
+          <div class="step-card active">
+            <strong>Step 4</strong>
+            <strong>x = 12</strong>. Milo did 12 chores to make $14 total.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="section span-6 fade-up">
+        <h2>Backward recipe</h2>
+        <ol class="steps-list">
+          <li data-step="1"><strong>Write the total as y.</strong> Put the known total in place of y.</li>
+          <li data-step="2"><strong>Subtract b first.</strong> Remove the starting amount because it was there before any x happened.</li>
+          <li data-step="3"><strong>Divide by m.</strong> This undoes the amount added for each x.</li>
+          <li data-step="4"><strong>Check the answer.</strong> Plug your x back into the original equation to see if it makes the correct total y.</li>
+        </ol>
+      </article>
+
+      <article class="section span-6 fade-up">
+        <h2>Why subtract first?</h2>
+        <p class="lede">
+          In <strong>y = mx + b</strong>, the <strong>b</strong> is extra money already sitting there at the start.
+          If you want only the part made by chores, you have to peel off the starting money first.
+        </p>
+        <div class="mini-card">
+          <h3>Think of it like this</h3>
+          <p>If someone hands you a jar with $14 in it, and you know $5 was there before the chores, then only $9 came from chores.</p>
+        </div>
+      </article>
+    </section>
+
+    <section class="practice-card fade-up">
+      <div class="practice-head">
+        <div>
+          <h2>Try one yourself</h2>
+          <p class="lede" style="margin: 8px 0 0;">
+            Zoe runs a weekend lemonade stand. She starts with <strong>$4</strong> in her jar,
+            and she earns <strong>$1.25</strong> for each lemonade she sells.
+            If she sells <strong>3 lemonades</strong>, what is <strong>y</strong>?
+          </p>
+        </div>
+        <button class="button secondary" id="show-hint" type="button">Show Hint</button>
+      </div>
+
+      <div class="problem-box">
+        <div>
+          <label for="answer">What is y in dollars?</label>
+          <input id="answer" inputmode="decimal" autocomplete="off" placeholder="Type your answer here">
+        </div>
+        <button class="button primary" id="check-answer" type="button">Check Answer</button>
+      </div>
+
+      <div class="feedback" id="feedback" aria-live="polite"></div>
+
+      <div class="tip-wrap">
+        <div class="tip">
+          <strong>Hint</strong>
+          <span id="hint-text">Press the hint button if you want a nudge.</span>
+        </div>
+        <div class="tip">
+          <strong>Remember</strong>
+          Multiply the amount per lemonade by 3 first, then add the starting $4.
+        </div>
+        <div class="tip">
+          <strong>Check</strong>
+          Your answer should be more than $4, because Zoe started with money before selling anything.
+        </div>
+      </div>
+    </section>
+
+    <section class="practice-card fade-up">
+      <div class="practice-head">
+        <div>
+          <h2>Now solve for x</h2>
+          <p class="lede" style="margin: 8px 0 0;">
+            Theo’s pet-walking rule is <strong>y = 2x + 6</strong>.
+            He has <strong>$16</strong> total. How many dog walks did he do?
+          </p>
+        </div>
+        <button class="button secondary" id="show-hint-x" type="button">Show Hint</button>
+      </div>
+
+      <div class="problem-box">
+        <div>
+          <label for="answer-x">What is x?</label>
+          <input id="answer-x" inputmode="numeric" autocomplete="off" placeholder="Type your answer here">
+        </div>
+        <button class="button primary" id="check-answer-x" type="button">Check Answer</button>
+      </div>
+
+      <div class="feedback" id="feedback-x" aria-live="polite"></div>
+
+      <div class="tip-wrap">
+        <div class="tip">
+          <strong>Hint</strong>
+          <span id="hint-text-x">Press the hint button if you want a nudge.</span>
+        </div>
+        <div class="tip">
+          <strong>Remember</strong>
+          Start by subtracting the <strong>+6</strong>, because that is the starting amount.
+        </div>
+        <div class="tip">
+          <strong>Check</strong>
+          Your answer should make <strong>2x + 6</strong> equal 16.
+        </div>
+      </div>
+    </section>
+
+    <p class="footer-note">Start amount, steady rate, total money. That is the heart of y = mx + b.</p>
+  </main>
+
+  <script>
+    const stepStates = [
+      {
+        equationLeft: "y = 0.75x + 5",
+        equationRight: "x = 4",
+        note: "Start with the rule <strong>y = 0.75x + 5</strong>. The 0.75 means 75 cents per chore, and the 5 means Milo already gets $5.",
+        highlight: "left"
+      },
+      {
+        equationLeft: "y = 0.75(4) + 5",
+        equationRight: "y = 3 + 5",
+        note: "Plug in <strong>x = 4</strong> because Milo finished 4 chores. Then multiply 0.75 by 4 to get 3.",
+        highlight: "both"
+      },
+      {
+        equationLeft: "y = 3 + 5",
+        equationRight: "y = 8",
+        note: "Now add the starting $5. Milo earns <strong>$8</strong> total for the week.",
+        highlight: "both"
+      },
+      {
+        equationLeft: "y = 0.75(4) + 5",
+        equationRight: "$8 total",
+        note: "Story check: <strong>$3 from chores + $5 starting money = $8</strong>. The equation matches the story.",
+        highlight: "both"
+      }
+    ];
+
+    let currentStep = 0;
+
+    const equationLeft = document.querySelector('[data-part="left"]');
+    const equationRight = document.querySelector('[data-part="right"]');
+    const boardNote = document.getElementById("board-note");
+    const stepCards = [...document.querySelectorAll(".step-card")];
+    const nextStepButton = document.getElementById("next-step");
+    const resetStepButton = document.getElementById("reset-step");
+    const animateStepsButton = document.getElementById("animate-steps");
+    const answerInput = document.getElementById("answer");
+    const checkAnswerButton = document.getElementById("check-answer");
+    const feedback = document.getElementById("feedback");
+    const showHintButton = document.getElementById("show-hint");
+    const hintText = document.getElementById("hint-text");
+    const answerXInput = document.getElementById("answer-x");
+    const checkAnswerXButton = document.getElementById("check-answer-x");
+    const feedbackX = document.getElementById("feedback-x");
+    const showHintXButton = document.getElementById("show-hint-x");
+    const hintTextX = document.getElementById("hint-text-x");
+
+    function renderStep(index) {
+      const state = stepStates[index];
+      equationLeft.textContent = state.equationLeft;
+      equationRight.textContent = state.equationRight;
+      boardNote.innerHTML = state.note;
+
+      equationLeft.classList.toggle("highlight", state.highlight === "left" || state.highlight === "both");
+      equationRight.classList.toggle("highlight", state.highlight === "right" || state.highlight === "both");
+
+      stepCards.forEach((card, cardIndex) => {
+        card.classList.toggle("active", cardIndex === index);
+      });
+    }
+
+    nextStepButton.addEventListener("click", () => {
+      currentStep = (currentStep + 1) % stepStates.length;
+      renderStep(currentStep);
+    });
+
+    resetStepButton.addEventListener("click", () => {
+      currentStep = 0;
+      renderStep(currentStep);
+    });
+
+    animateStepsButton.addEventListener("click", () => {
+      currentStep = 0;
+      renderStep(currentStep);
+
+      let playIndex = 1;
+      const interval = setInterval(() => {
+        renderStep(playIndex);
+        playIndex += 1;
+
+        if (playIndex >= stepStates.length) {
+          clearInterval(interval);
+          currentStep = stepStates.length - 1;
+        }
+      }, 1400);
+    });
+
+    checkAnswerButton.addEventListener("click", () => {
+      const value = answerInput.value.trim();
+
+      if (value === "") {
+        feedback.textContent = "Try typing a number first.";
+        feedback.className = "feedback try";
+        return;
+      }
+
+      if (Math.abs(Number(value) - 7.75) < 0.001) {
+        feedback.textContent = "Correct. y = 7.75, because 1.25 x 3 = 3.75 and 3.75 + 4 = 7.75.";
+        feedback.className = "feedback good";
+      } else {
+        feedback.textContent = "Not quite. Multiply 1.25 by 3 first, then add the starting $4.";
+        feedback.className = "feedback try";
+      }
+    });
+
+    answerInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        checkAnswerButton.click();
+      }
+    });
+
+    showHintButton.addEventListener("click", () => {
+      hintText.textContent = "Use y = 1.25(3) + 4. First find 1.25 x 3, then add 4.";
+    });
+
+    checkAnswerXButton.addEventListener("click", () => {
+      const value = answerXInput.value.trim();
+
+      if (value === "") {
+        feedbackX.textContent = "Try typing a number first.";
+        feedbackX.className = "feedback try";
+        return;
+      }
+
+      if (Number(value) === 5) {
+        feedbackX.textContent = "Correct. First 16 - 6 = 10, then 10 divided by 2 is 5, so x = 5.";
+        feedbackX.className = "feedback good";
+      } else {
+        feedbackX.textContent = "Not quite. Subtract 6 from 16 first, then divide by 2.";
+        feedbackX.className = "feedback try";
+      }
+    });
+
+    answerXInput.addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        checkAnswerXButton.click();
+      }
+    });
+
+    showHintXButton.addEventListener("click", () => {
+      hintTextX.textContent = "Write 16 = 2x + 6. Subtract 6 to get 10 = 2x, then divide by 2.";
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("visible");
+          observer.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.18 });
+
+    document.querySelectorAll(".fade-up").forEach((element) => {
+      if (!element.classList.contains("visible")) {
+        observer.observe(element);
+      }
+    });
+  </script>
+</body>
+</html>

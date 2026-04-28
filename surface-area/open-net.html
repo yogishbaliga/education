@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cube Wire Frame Explorer</title>
+  <style>
+    :root {
+      --bg: #f7fbff;
+      --card: #ffffff;
+      --text: #17324d;
+      --muted: #5d7288;
+      --line: #cfe0ef;
+      --accent: #2563eb;
+      --accent-soft: #dbeafe;
+      --good: #0f766e;
+      --good-soft: #ccfbf1;
+      --face: rgba(37, 99, 235, 0.10);
+      --edge: #0f172a;
+      --highlight: #f59e0b;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: linear-gradient(180deg, var(--bg), #eef6ff);
+      color: var(--text);
+    }
+
+    .page {
+      max-width: 1150px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+    }
+
+    .subtitle {
+      margin: 0 0 24px;
+      color: var(--muted);
+      font-size: 1.05rem;
+      line-height: 1.5;
+      max-width: 800px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 340px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 10px 30px rgba(20, 60, 120, 0.08);
+    }
+
+    .controls h2,
+    .visual h2,
+    .steps h2 {
+      margin-top: 0;
+      margin-bottom: 14px;
+      font-size: 1.2rem;
+    }
+
+    .control-group { margin-bottom: 18px; }
+
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      cursor: pointer;
+    }
+
+    .value-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 8px;
+      font-size: 0.95rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .button-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    button {
+      border: none;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 8px 18px rgba(37, 99, 235, 0.18);
+    }
+
+    .primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .secondary {
+      background: var(--accent-soft);
+      color: var(--accent);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 16px 0;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      background: #fcfeff;
+    }
+
+    .stat .k {
+      font-size: 0.9rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+
+    .stat .v {
+      font-size: 1.5rem;
+      font-weight: 800;
+    }
+
+    .formula {
+      background: var(--good-soft);
+      color: var(--good);
+      border-radius: 14px;
+      padding: 14px;
+      font-weight: 700;
+      line-height: 1.5;
+      border: 1px solid #99f6e4;
+    }
+
+    .visual-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 16px;
+    }
+
+    .canvas-wrap {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 10px;
+      background: linear-gradient(180deg, #ffffff, #f8fbff);
+    }
+
+    canvas {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 12px;
+      background: white;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 16px;
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    .dot {
+      width: 14px;
+      height: 14px;
+      display: inline-block;
+      border-radius: 4px;
+      margin-right: 6px;
+      vertical-align: middle;
+      border: 1px solid rgba(0,0,0,0.1);
+    }
+
+    .steps ol {
+      margin: 0;
+      padding-left: 22px;
+      line-height: 1.65;
+    }
+
+    .note {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      color: #9a3412;
+    }
+
+    .footer {
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 0.95rem;
+    }
+
+    @media (max-width: 940px) {
+      .layout,
+      .visual-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stats {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <h1>Cube Net Explorer</h1>
+    <p class="subtitle">
+      Move the slider to change the side length of the cube. Then use the button to <strong>open</strong> the cube into a flat <strong>net</strong>. This helps explain why a cube has <strong>6 equal square faces</strong> and why its surface area is <strong>6 × side × side</strong>.
+    </p>
+
+    <div class="layout">
+      <section class="card controls">
+        <h2>Controls</h2>
+
+        <div class="control-group">
+          <label for="sizeRange">Cube side length</label>
+          <input id="sizeRange" type="range" min="1" max="12" step="1" value="4" />
+          <div class="value-row">
+            <span>Small</span>
+            <strong><span id="sideValue">4</span> units</strong>
+            <span>Large</span>
+          </div>
+        </div>
+
+        <div class="button-row">
+          <button id="toggleOpen" class="primary">Open the cube</button>
+          <button id="toggleWire" class="secondary">Show net edges</button>
+        </div>
+
+        <div class="stats">
+          <div class="stat">
+            <div class="k">One face</div>
+            <div class="v"><span id="faceArea">16</span></div>
+          </div>
+          <div class="stat">
+            <div class="k">Faces</div>
+            <div class="v">6</div>
+          </div>
+          <div class="stat">
+            <div class="k">Surface area</div>
+            <div class="v"><span id="surfaceArea">96</span></div>
+          </div>
+        </div>
+
+        <div class="formula" id="formulaText">
+          Surface area = 6 × 4² = 6 × 16 = 96 square units
+        </div>
+
+        <div class="note">
+          <strong>What is surface area?</strong><br />
+          It is the total area covering the outside of a 3D shape.
+        </div>
+      </section>
+
+      <section class="card visual">
+        <h2>See it happen</h2>
+        <div class="visual-grid">
+          <div>
+            <div class="canvas-wrap">
+              <canvas id="cubeCanvas" width="520" height="420"></canvas>
+            </div>
+            <div class="legend">
+              <span><span class="dot" style="background: rgba(37,99,235,0.12);"></span>Faces</span>
+              <span><span class="dot" style="background: #0f172a;"></span>Edges of the net</span>
+              <span><span class="dot" style="background: #f59e0b;"></span>Highlighted face</span>
+            </div>
+          </div>
+
+          <div class="steps card">
+            <h2>How to explain it</h2>
+            <ol>
+              <li>A cube has <strong>6 faces</strong>.</li>
+              <li>Each face is a <strong>square</strong>.</li>
+              <li>If the side length is <strong>s</strong>, then one face has area <strong>s × s</strong>.</li>
+              <li>Since all 6 faces are the same, multiply by 6.</li>
+              <li>So the formula is <strong>6s²</strong>.</li>
+            </ol>
+            <div class="footer" id="modeText">
+              Right now you are looking at the <strong>closed cube</strong>.
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    const canvas = document.getElementById('cubeCanvas');
+    const ctx = canvas.getContext('2d');
+
+    const sizeRange = document.getElementById('sizeRange');
+    const sideValue = document.getElementById('sideValue');
+    const faceArea = document.getElementById('faceArea');
+    const surfaceArea = document.getElementById('surfaceArea');
+    const formulaText = document.getElementById('formulaText');
+    const toggleOpenBtn = document.getElementById('toggleOpen');
+    const toggleWireBtn = document.getElementById('toggleWire');
+    const modeText = document.getElementById('modeText');
+
+    let isOpen = false;
+    let showWire = false;
+
+    function updateNumbers() {
+      const s = Number(sizeRange.value);
+      const oneFace = s * s;
+      const total = 6 * oneFace;
+
+      sideValue.textContent = s;
+      faceArea.textContent = oneFace;
+      surfaceArea.textContent = total;
+      formulaText.textContent = `Surface area = 6 × ${s}² = 6 × ${oneFace} = ${total} square units`;
+    }
+
+    function clearCanvas() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function drawLabel(text, x, y) {
+      ctx.font = 'bold 18px Arial';
+      ctx.fillStyle = '#17324d';
+      ctx.fillText(text, x, y);
+    }
+
+    function square(x, y, side, fillStyle, strokeStyle = '#0f172a', lineWidth = 2) {
+      ctx.beginPath();
+      ctx.rect(x, y, side, side);
+      ctx.fillStyle = fillStyle;
+      ctx.fill();
+      ctx.lineWidth = lineWidth;
+      ctx.strokeStyle = strokeStyle;
+      ctx.stroke();
+    }
+
+    function drawNet(sidePx) {
+      clearCanvas();
+      const cx = canvas.width / 2;
+      const cy = canvas.height / 2 + 10;
+      const s = sidePx;
+
+      const faces = [
+        { x: cx - s / 2, y: cy - s / 2, label: 'Front', color: 'rgba(245,158,11,0.18)' },
+        { x: cx - s / 2, y: cy - s * 1.5, label: 'Top', color: 'rgba(37,99,235,0.10)' },
+        { x: cx - s / 2, y: cy + s / 2, label: 'Bottom', color: 'rgba(37,99,235,0.10)' },
+        { x: cx - s * 1.5, y: cy - s / 2, label: 'Left', color: 'rgba(37,99,235,0.10)' },
+        { x: cx + s / 2, y: cy - s / 2, label: 'Right', color: 'rgba(37,99,235,0.10)' },
+        { x: cx + s * 1.5, y: cy - s / 2, label: 'Back', color: 'rgba(37,99,235,0.10)' }
+      ];
+
+      faces.forEach((f) => {
+        if (!showWire) square(f.x, f.y, s, f.color);
+        else {
+          ctx.lineWidth = 2.2;
+          ctx.strokeStyle = f.label === 'Front' ? '#f59e0b' : '#0f172a';
+          ctx.strokeRect(f.x, f.y, s, s);
+        }
+
+        ctx.font = 'bold 15px Arial';
+        ctx.fillStyle = '#17324d';
+        ctx.textAlign = 'center';
+        ctx.fillText(f.label, f.x + s / 2, f.y + s / 2 + 5);
+      });
+
+      ctx.textAlign = 'left';
+      drawLabel('Opened cube (net)', 18, 28);
+
+      ctx.font = '16px Arial';
+      ctx.fillStyle = '#5d7288';
+      ctx.fillText('Count the 6 equal squares in the net to find the surface area.', 18, 52);
+    }
+
+    function project(x, y, z, scale, originX, originY) {
+      return {
+        x: originX + x * scale,
+        y: originY + y * scale
+      };
+    }
+
+    function drawCube(sideUnits) {
+      clearCanvas();
+
+      const s = 52 + sideUnits * 10;
+      const frontX = canvas.width / 2 - s / 2 - 30;
+      const frontY = canvas.height / 2 - s / 2 + 20;
+      const dx = s * 0.38;
+      const dy = s * 0.28;
+
+      const front = {
+        A: { x: frontX, y: frontY },
+        B: { x: frontX + s, y: frontY },
+        C: { x: frontX + s, y: frontY + s },
+        D: { x: frontX, y: frontY + s }
+      };
+
+      const back = {
+        A: { x: front.A.x + dx, y: front.A.y - dy },
+        B: { x: front.B.x + dx, y: front.B.y - dy },
+        C: { x: front.C.x + dx, y: front.C.y - dy },
+        D: { x: front.D.x + dx, y: front.D.y - dy }
+      };
+
+      if (!showWire) {
+        ctx.beginPath();
+        ctx.moveTo(front.A.x, front.A.y);
+        ctx.lineTo(front.B.x, front.B.y);
+        ctx.lineTo(front.C.x, front.C.y);
+        ctx.lineTo(front.D.x, front.D.y);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(245,158,11,0.18)';
+        ctx.fill();
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(back.A.x, back.A.y);
+        ctx.lineTo(back.B.x, back.B.y);
+        ctx.lineTo(front.B.x, front.B.y);
+        ctx.lineTo(front.A.x, front.A.y);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(37,99,235,0.10)';
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.moveTo(front.B.x, front.B.y);
+        ctx.lineTo(back.B.x, back.B.y);
+        ctx.lineTo(back.C.x, back.C.y);
+        ctx.lineTo(front.C.x, front.C.y);
+        ctx.closePath();
+        ctx.fillStyle = 'rgba(37,99,235,0.14)';
+        ctx.fill();
+        ctx.stroke();
+      }
+
+      const edges = [
+        [front.A, front.B], [front.B, front.C], [front.C, front.D], [front.D, front.A],
+        [back.A, back.B], [back.B, back.C], [back.C, back.D], [back.D, back.A],
+        [front.A, back.A], [front.B, back.B], [front.C, back.C], [front.D, back.D]
+      ];
+
+      edges.forEach(([p1, p2]) => {
+        ctx.beginPath();
+        ctx.moveTo(p1.x, p1.y);
+        ctx.lineTo(p2.x, p2.y);
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 2.2;
+        ctx.stroke();
+      });
+
+      drawLabel('Closed cube', 18, 28);
+      ctx.font = '16px Arial';
+      ctx.fillStyle = '#5d7288';
+      ctx.fillText('This 3D cube can open into a flat net with 6 square faces.', 18, 52);
+    }
+
+    function render() {
+      updateNumbers();
+      const sidePx = 58 + Number(sizeRange.value) * 8;
+
+      if (isOpen) {
+        drawNet(sidePx);
+        modeText.innerHTML = 'Right now you are looking at the <strong>opened cube</strong>, also called a <strong>net</strong>.';
+        toggleOpenBtn.textContent = 'Close the cube';
+      } else {
+        drawCube(Number(sizeRange.value));
+        modeText.innerHTML = 'Right now you are looking at the <strong>closed cube</strong>.';
+        toggleOpenBtn.textContent = 'Open the cube';
+      }
+
+      toggleWireBtn.textContent = isOpen
+          ? (showWire ? 'Show faces only' : 'Show net edges')
+          : 'Show net edges';
+    }
+
+    sizeRange.addEventListener('input', render);
+    toggleOpenBtn.addEventListener('click', () => {
+      isOpen = !isOpen;
+      render();
+    });
+    toggleWireBtn.addEventListener('click', () => {
+      showWire = !showWire;
+      if (!isOpen) isOpen = true;
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>
+

@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Box Net – Surface Area</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+      min-height: 100vh; color: #eee;
+      display: flex; flex-direction: column; align-items: center;
+      padding: 20px 16px 50px;
+    }
+    h1  { font-size: 1.85em; color: #f5c842; margin-bottom: 4px; text-align: center; }
+    .sub{ color: #aaa; margin-bottom: 18px; font-size: .9em; text-align: center; }
+
+    /* ── Controls ─────────────────────────────────── */
+    .controls {
+      display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end;
+      justify-content: center;
+      background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+      border-radius: 16px; padding: 14px 22px; margin-bottom: 20px;
+    }
+    .inp-g { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+    .inp-g label { font-size: .72em; text-transform: uppercase; letter-spacing: 2px; color: #aaa; }
+    .inp-g input {
+      width: 78px; padding: 9px; text-align: center;
+      border: 2px solid #444; border-radius: 10px;
+      background: rgba(255,255,255,.08); color: #fff; font-size: 1.25em;
+      outline: none; transition: border-color .2s;
+    }
+    .inp-g input:focus { border-color: #f5c842; }
+    .btn-grp { display: flex; gap: 10px; align-items: center; }
+    button {
+      padding: 10px 22px; border: none; border-radius: 25px;
+      cursor: pointer; font-size: .92em; font-weight: 700; transition: transform .15s;
+    }
+    button:hover { transform: scale(1.06); }
+    #btn-unfold {
+      background: linear-gradient(135deg, #f5c842, #e67e22); color: #1a1a1a;
+      box-shadow: 0 4px 15px rgba(245,200,66,.3);
+    }
+    #btn-reset { background: rgba(255,255,255,.1); color: #eee; border: 1px solid rgba(255,255,255,.2); }
+
+    /* ── 3-D CSS Box ──────────────────────────────── */
+    .view { width: 100%; max-width: 900px; }
+    #view-3d {
+      border-radius: 16px;
+      background: radial-gradient(ellipse at center, #1a2744 0%, #0d0d1a 100%);
+      border: 1px solid rgba(255,255,255,.08);
+      height: 420px; position: relative;
+      display: flex; align-items: center; justify-content: center;
+      cursor: grab; overflow: hidden; user-select: none;
+    }
+    #view-3d:active { cursor: grabbing; }
+    #scene-wrap {
+      width: 100%; height: 100%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #box { position: relative; transform-style: preserve-3d; }
+    .face3 {
+      position: absolute;
+      border: 2px solid rgba(255,255,255,.8);
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 3px;
+      color: white; text-shadow: 0 1px 3px rgba(0,0,0,.7);
+      backface-visibility: visible;
+    }
+    .axis-badge {
+      position: absolute; bottom: 12px; right: 14px;
+      display: flex; gap: 8px; font-size: .75em;
+    }
+    .axis-badge span {
+      background: rgba(0,0,0,.45); border-radius: 6px;
+      padding: 2px 8px; border: 1px solid rgba(255,255,255,.15); color: #f5c842;
+    }
+    .hint3d {
+      position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+      font-size: .7em; color: rgba(255,255,255,.3); white-space: nowrap;
+    }
+
+    /* ── Net unfolding view ───────────────────────── */
+    #view-net {
+      display: none;
+      background: rgba(0,0,0,.25); border: 1px solid rgba(255,255,255,.08);
+      border-radius: 16px; padding: 20px;
+      justify-content: center; align-items: flex-start;
+      flex-wrap: wrap; gap: 24px;
+    }
+    #view-net.active { display: flex; }
+
+    /*
+      The net stage uses CSS 3D perspective so faces "fall open" in 3-D.
+      perspective-origin is above centre so you can see the depth of each rotating face.
+    */
+    #net-stage {
+      position: relative;
+      perspective: 900px;
+      perspective-origin: 50% 25%;
+      /* width/height set by JS */
+    }
+
+    /* Each face in the net is a plain div, absolutely positioned */
+    .nface {
+      position: absolute;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 3px;
+      border-radius: 3px;
+      border: 2px solid rgba(255,255,255,.75);
+      color: white; text-shadow: 0 1px 3px rgba(0,0,0,.6);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      /* transition applied by JS once folded state is rendered */
+    }
+
+    /* fold-crease lines drawn with pseudo-elements on bottom (the anchor) */
+    #nf-bottom::before, #nf-bottom::after { display: none; }
+
+    /* Legend */
+    .legend { min-width: 195px; }
+    .legend h3 { font-size: .85em; text-transform: uppercase; letter-spacing: 1px; color: #f5c842; margin-bottom: 10px; }
+    .leg-row {
+      display: flex; align-items: center; gap: 10px;
+      padding: 7px 10px; border-radius: 9px; margin-bottom: 5px;
+      background: rgba(255,255,255,.05);
+    }
+    .leg-sw { width: 16px; height: 16px; border-radius: 3px; flex-shrink: 0; }
+    .leg-row .ln { font-size: .88em; font-weight: 600; }
+    .leg-row .ld { font-size: .76em; color: #aaa; }
+
+    /* ── Formula ──────────────────────────────────── */
+    #formula-area { width: 100%; max-width: 900px; margin-top: 18px; }
+    .step {
+      background: rgba(255,255,255,.05); border-left: 4px solid #555;
+      border-radius: 10px; padding: 12px 18px; margin-bottom: 8px;
+      font-size: 1.05em; opacity: 0; transform: translateY(10px);
+      transition: opacity .4s ease, transform .4s ease;
+    }
+    .step.show { opacity: 1; transform: translateY(0); }
+    .step-final {
+      text-align: center; font-size: 1.35em; font-weight: 700; color: #f5c842;
+      background: rgba(245,200,66,.1); border: 2px solid rgba(245,200,66,.45);
+      border-radius: 14px; padding: 18px; margin-top: 8px;
+      opacity: 0; transform: translateY(10px);
+      transition: opacity .4s ease, transform .4s ease;
+    }
+    .step-final.show { opacity: 1; transform: translateY(0); }
+  </style>
+</head>
+<body>
+
+<h1>📦 Box Net &amp; Surface Area</h1>
+<p class="sub">Watch the box unfold into its flat net!</p>
+
+<div class="controls">
+  <div class="inp-g"><label>Length (l)</label><input type="number" id="inp-l" value="4" min="1" max="20"></div>
+  <div class="inp-g"><label>Width  (w)</label><input type="number" id="inp-w" value="3" min="1" max="20"></div>
+  <div class="inp-g"><label>Height (h)</label><input type="number" id="inp-h" value="2" min="1" max="20"></div>
+  <div class="btn-grp">
+    <button id="btn-unfold">Unfold to Net →</button>
+    <button id="btn-reset">↺ Reset</button>
+  </div>
+</div>
+
+<!-- 3-D rotating box -->
+<div id="view-3d" class="view">
+  <div id="scene-wrap">
+    <div id="box">
+      <div class="face3" id="f-front"></div>
+      <div class="face3" id="f-back"></div>
+      <div class="face3" id="f-right"></div>
+      <div class="face3" id="f-left"></div>
+      <div class="face3" id="f-top"></div>
+      <div class="face3" id="f-bottom"></div>
+    </div>
+  </div>
+  <div class="axis-badge">
+    <span id="b-l"></span><span id="b-w"></span><span id="b-h"></span>
+  </div>
+  <div class="hint3d">Drag to rotate</div>
+</div>
+
+<!-- Net unfolding view -->
+<div id="view-net" class="view">
+  <div id="net-stage"></div>
+  <div class="legend" id="legend"></div>
+</div>
+
+<div id="formula-area"></div>
+
+<script>
+(function () {
+
+  /* ════════════════════════════════════════════════
+     HELPERS
+  ════════════════════════════════════════════════ */
+  function getDims() {
+    return {
+      l: Math.max(1, +document.getElementById('inp-l').value || 4),
+      w: Math.max(1, +document.getElementById('inp-w').value || 3),
+      h: Math.max(1, +document.getElementById('inp-h').value || 2),
+    };
+  }
+
+  /* ════════════════════════════════════════════════
+     CSS 3-D ROTATING BOX
+  ════════════════════════════════════════════════ */
+  const C3D = {
+    front:  'rgba(77,159,255,0.55)', back:   'rgba(77,159,255,0.35)',
+    right:  'rgba(255,77,77,0.55)',  left:   'rgba(255,77,77,0.35)',
+    top:    'rgba(77,204,77,0.55)',  bottom: 'rgba(77,204,77,0.35)',
+  };
+
+  let rotX = -22, rotY = 35, autoRot = true, dragging = false, lx = 0, ly = 0, raf3d;
+  const boxEl   = document.getElementById('box');
+  const sceneWp = document.getElementById('scene-wrap');
+  const view3d  = document.getElementById('view-3d');
+
+  function applyRot() { boxEl.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`; }
+
+  function buildBox() {
+    const { l, w, h } = getDims();
+    const S = 180 / Math.max(l, w, h);
+    const Lp = l*S, Wp = w*S, Hp = h*S;
+    sceneWp.style.perspective      = (Math.max(Lp,Wp,Hp) * 5) + 'px';
+    sceneWp.style.perspectiveOrigin = '50% 45%';
+    boxEl.style.width  = Lp + 'px';
+    boxEl.style.height = Hp + 'px';
+
+    const fc = [
+      { id:'f-front',  fw:Lp, fh:Hp, t:`translateZ(${Wp/2}px)`,                c:C3D.front,  lb:'Front',  dm:`${l}×${h}` },
+      { id:'f-back',   fw:Lp, fh:Hp, t:`rotateY(180deg) translateZ(${Wp/2}px)`,c:C3D.back,   lb:'Back',   dm:`${l}×${h}` },
+      { id:'f-right',  fw:Wp, fh:Hp, t:`rotateY(90deg) translateZ(${Lp/2}px)`, c:C3D.right,  lb:'Right',  dm:`${w}×${h}` },
+      { id:'f-left',   fw:Wp, fh:Hp, t:`rotateY(-90deg) translateZ(${Lp/2}px)`,c:C3D.left,   lb:'Left',   dm:`${w}×${h}` },
+      { id:'f-top',    fw:Lp, fh:Wp, t:`rotateX(-90deg) translateZ(${Hp/2}px)`,c:C3D.top,    lb:'Top',    dm:`${l}×${w}` },
+      { id:'f-bottom', fw:Lp, fh:Wp, t:`rotateX(90deg) translateZ(${Hp/2}px)`, c:C3D.bottom, lb:'Bottom', dm:`${l}×${w}` },
+    ];
+    fc.forEach(f => {
+      const el = document.getElementById(f.id);
+      const fs = Math.max(10, Math.min(15, Math.min(f.fw, f.fh) * 0.2));
+      Object.assign(el.style, {
+        width: f.fw+'px', height: f.fh+'px',
+        left: '50%', top: '50%',
+        marginLeft: (-f.fw/2)+'px', marginTop: (-f.fh/2)+'px',
+        background: f.c, transform: f.t, fontSize: fs+'px',
+      });
+      el.innerHTML = `<span style="font-weight:700">${f.lb}</span><span style="opacity:.75;font-size:.85em">${f.dm}</span>`;
+    });
+
+    document.getElementById('b-l').textContent = `l=${l}`;
+    document.getElementById('b-w').textContent = `w=${w}`;
+    document.getElementById('b-h').textContent = `h=${h}`;
+  }
+
+  function animLoop() {
+    raf3d = requestAnimationFrame(animLoop);
+    if (autoRot) { rotY += 0.35; applyRot(); }
+  }
+
+  function dragStart(x,y){ dragging=true; autoRot=false; lx=x; ly=y; }
+  function dragMove(x,y) {
+    if (!dragging) return;
+    rotY += (x-lx)*0.55; rotX = Math.max(-85,Math.min(85, rotX-(y-ly)*0.35));
+    lx=x; ly=y; applyRot();
+  }
+  function dragEnd(){ dragging=false; }
+  view3d.addEventListener('mousedown', e=>dragStart(e.clientX,e.clientY));
+  window.addEventListener('mousemove', e=>dragMove(e.clientX,e.clientY));
+  window.addEventListener('mouseup',   dragEnd);
+  view3d.addEventListener('touchstart',e=>{e.preventDefault();dragStart(e.touches[0].clientX,e.touches[0].clientY);},{passive:false});
+  window.addEventListener('touchmove', e=>dragMove(e.touches[0].clientX,e.touches[0].clientY),{passive:true});
+  window.addEventListener('touchend',  dragEnd);
+
+  /* ════════════════════════════════════════════════
+     NET UNFOLDING  (CSS 3-D hinge animation)
+
+     Net layout with BOTTOM as anchor:
+
+              ┌─────────┐
+              │   Top   │  l × w
+              ├─────────┤
+              │  Back   │  l × h
+         ┌────┼─────────┼────┐
+         │Left│ Bottom  │Right│
+         │h×w │  l × w  │ h×w│
+         └────┼─────────┼────┘
+              │  Front  │  l × h
+              └─────────┘
+
+     Unfolding order (each face hinges around its shared edge with neighbour):
+       1. Bottom   – anchor, already flat
+       2. Front    – hinge at BOTTOM edge of Bottom  → falls forward (rotateX -90→0)
+       3. Left     – hinge at LEFT  edge of Bottom  → falls left    (rotateY  90→0)
+       4. Right    – hinge at RIGHT edge of Bottom  → falls right   (rotateY -90→0)
+       5. Back     – hinge at TOP   edge of Bottom  → falls back    (rotateX  90→0)
+       6. Top      – hinge at TOP   edge of Back    → falls further back (rotateX 90→0, delayed)
+  ════════════════════════════════════════════════ */
+  function buildNetStage(l, w, h) {
+    const stage  = document.getElementById('net-stage');
+    const stageW = Math.min((document.getElementById('view-net').clientWidth || 620) - 50, 620);
+
+    // Scale so the full net fits
+    // Net bounding box: (l + 2h) wide  ×  (2w + 2h) tall  (in box units)
+    const S = Math.min(
+      stageW / (l + 2*h + 1),   // horizontal: Left(h) + Bottom(l) + Right(h)
+      480    / (2*w + 2*h + 1),  // vertical:   Top(w) + Back(h) + Bottom(w) + Front(h)
+      68                          // cap px/unit
+    );
+
+    const Lp = l*S, Wp = w*S, Hp = h*S;
+
+    // Stage dimensions (add padding around the net)
+    const PAD = 20;
+    const stgW = Math.ceil(Lp + 2*Hp + 2*PAD);
+    const stgH = Math.ceil(2*Wp + 2*Hp + 2*PAD);
+    stage.style.width  = stgW + 'px';
+    stage.style.height = stgH + 'px';
+
+    // Bottom face centre in stage coords
+    const cx = PAD + Hp + Lp/2;   // offset by left-face width
+    const cy = PAD + Wp + Hp + Wp/2; // offset from top: Top(Wp)+Back(Hp)+half of Bottom(Wp/2)
+
+    /*
+      Face positions (top-left corner in stage coords)
+      and CSS 3D fold animation params.
+
+      foldInit  : transform in FOLDED (closed box) state
+      origin    : transform-origin for the hinge rotation
+      delay (s) : staggered animation delay
+    */
+    const FACE_COLOR = {
+      bottom: { bg:'rgba(77,204,77,.55)',  bd:'#4dcc4d' },
+      front:  { bg:'rgba(77,159,255,.55)', bd:'#4d9fff' },
+      back:   { bg:'rgba(77,159,255,.40)', bd:'#4d9fff' },
+      left:   { bg:'rgba(255,77,77,.55)',  bd:'#ff4d4d' },
+      right:  { bg:'rgba(255,77,77,.40)',  bd:'#ff4d4d' },
+      top:    { bg:'rgba(77,204,77,.40)',  bd:'#4dcc4d' },
+    };
+
+    /*
+      Net face sizes (px):
+        Bottom : Lp  × Wp   (l wide, w tall)
+        Front  : Lp  × Hp   (l wide, h tall)  — below Bottom
+        Back   : Lp  × Hp   (l wide, h tall)  — above Bottom
+        Left   : Hp  × Wp   (h wide, w tall)  — left of Bottom
+        Right  : Hp  × Wp   (h wide, w tall)  — right of Bottom
+        Top    : Lp  × Wp   (l wide, w tall)  — above Back
+    */
+    const faces = [
+      {
+        id:'nf-bottom',
+        left: cx - Lp/2,  top: cy - Wp/2,
+        w: Lp, h: Wp,
+        label:'Bottom', dim:`${l} × ${w}`, area: l*w,
+        col: FACE_COLOR.bottom,
+        foldInit: null,          // anchor — no fold
+        origin:   'center center',
+        delay:    0,
+      },
+      {
+        id:'nf-front',
+        left: cx - Lp/2,  top: cy + Wp/2,   // touches bottom of Bottom
+        w: Lp, h: Hp,
+        label:'Front', dim:`${l} × ${h}`, area: l*h,
+        col: FACE_COLOR.front,
+        foldInit: 'rotateX(-90deg)',  // hinge at TOP of Front (= bottom edge of Bottom)
+        origin:   '50% 0%',           // top edge
+        delay:    0.05,
+      },
+      {
+        id:'nf-left',
+        left: cx - Lp/2 - Hp,  top: cy - Wp/2,  // touches left of Bottom
+        w: Hp, h: Wp,
+        label:'Left', dim:`${h} × ${w}`, area: h*w,
+        col: FACE_COLOR.left,
+        foldInit: 'rotateY(90deg)',   // hinge at RIGHT of Left (= left edge of Bottom)
+        origin:   '100% 50%',         // right edge
+        delay:    0.15,
+      },
+      {
+        id:'nf-right',
+        left: cx + Lp/2,               top: cy - Wp/2,  // touches right of Bottom
+        w: Hp, h: Wp,
+        label:'Right', dim:`${h} × ${w}`, area: h*w,
+        col: FACE_COLOR.right,
+        foldInit: 'rotateY(-90deg)',  // hinge at LEFT of Right (= right edge of Bottom)
+        origin:   '0% 50%',           // left edge
+        delay:    0.15,
+      },
+      {
+        id:'nf-back',
+        left: cx - Lp/2,  top: cy - Wp/2 - Hp,  // touches top of Bottom
+        w: Lp, h: Hp,
+        label:'Back', dim:`${l} × ${h}`, area: l*h,
+        col: FACE_COLOR.back,
+        foldInit: 'rotateX(90deg)',   // hinge at BOTTOM of Back (= top edge of Bottom)
+        origin:   '50% 100%',         // bottom edge
+        delay:    0.30,
+      },
+      {
+        id:'nf-top',
+        left: cx - Lp/2,  top: cy - Wp/2 - Hp - Wp,  // touches top of Back
+        w: Lp, h: Wp,
+        label:'Top', dim:`${l} × ${w}`, area: l*w,
+        col: FACE_COLOR.top,
+        foldInit: 'rotateX(90deg)',   // hinge at BOTTOM of Top (= top edge of Back)
+        origin:   '50% 100%',         // bottom edge
+        delay:    0.55,               // unfolds after Back
+      },
+    ];
+
+    // Build face divs
+    stage.innerHTML = '';
+    faces.forEach(f => {
+      const el = document.createElement('div');
+      el.id        = f.id;
+      el.className = 'nface';
+
+      // Font sizes relative to smallest face dimension
+      const md  = Math.min(f.w, f.h);
+      const fsL = Math.max(9,  Math.min(15, md * .24)).toFixed(1);
+      const fsD = Math.max(7,  Math.min(12, md * .17)).toFixed(1);
+      const fsA = Math.max(9,  Math.min(14, md * .21)).toFixed(1);
+
+      Object.assign(el.style, {
+        left:            f.left + 'px',
+        top:             f.top  + 'px',
+        width:           f.w    + 'px',
+        height:          f.h    + 'px',
+        background:      f.col.bg,
+        borderColor:     f.col.bd,
+        transformOrigin: f.origin,
+        // Start in folded state (or no transform for bottom anchor)
+        transform:       f.foldInit || 'none',
+      });
+
+      el.innerHTML = `
+        <span style="font-weight:700;font-size:${fsL}px">${f.label}</span>
+        <span style="opacity:.8;font-size:${fsD}px">${f.dim}</span>
+        <span style="font-weight:700;font-size:${fsA}px">= ${f.area}</span>`;
+
+      stage.appendChild(el);
+    });
+
+    // Draw fold-crease lines as an SVG overlay
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.setAttribute('width',  stgW);
+    svg.setAttribute('height', stgH);
+    svg.style.cssText = 'position:absolute;top:0;left:0;pointer-events:none;opacity:0;transition:opacity .4s 1.4s';
+    const creases = [
+      // x1, y1, x2, y2  (all in stage coords)
+      [cx-Lp/2, cy+Wp/2,  cx+Lp/2, cy+Wp/2],   // Bottom ↔ Front
+      [cx-Lp/2, cy-Wp/2,  cx+Lp/2, cy-Wp/2],   // Bottom ↔ Back
+      [cx-Lp/2, cy-Wp/2,  cx-Lp/2, cy+Wp/2],   // Bottom ↔ Left
+      [cx+Lp/2, cy-Wp/2,  cx+Lp/2, cy+Wp/2],   // Bottom ↔ Right
+      [cx-Lp/2, cy-Wp/2-Hp, cx+Lp/2, cy-Wp/2-Hp], // Back ↔ Top
+    ];
+    creases.forEach(([x1,y1,x2,y2]) => {
+      const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+      line.setAttribute('x1', x1.toFixed(1)); line.setAttribute('y1', y1.toFixed(1));
+      line.setAttribute('x2', x2.toFixed(1)); line.setAttribute('y2', y2.toFixed(1));
+      line.setAttribute('stroke', 'rgba(255,240,80,.65)');
+      line.setAttribute('stroke-width', '2');
+      line.setAttribute('stroke-dasharray', '6,4');
+      svg.appendChild(line);
+    });
+    stage.appendChild(svg);
+
+    // ── Trigger the unfolding animation ──────────────
+    // Two rAF: let browser paint the folded state, THEN apply transitions + unfold.
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      faces.forEach(f => {
+        if (!f.foldInit) return;           // bottom is already flat
+        const el = document.getElementById(f.id);
+        el.style.transition = `transform .65s cubic-bezier(.4,0,.2,1) ${f.delay}s`;
+        el.style.transform  = 'rotateX(0deg) rotateY(0deg)';
+      });
+      // Reveal crease lines after all faces have landed
+      setTimeout(() => { svg.style.opacity = '1'; }, 1400);
+    }));
+  }
+
+  /* ════════════════════════════════════════════════
+     LEGEND + FORMULA
+  ════════════════════════════════════════════════ */
+  function buildLegend(l, w, h) {
+    document.getElementById('legend').innerHTML = '<h3>Face Pairs</h3>' + [
+      { c:'#4dcc4d', n:'Bottom &amp; Top',  d:`${l}×${w} = ${l*w} each → ${2*l*w} total` },
+      { c:'#4d9fff', n:'Front &amp; Back',  d:`${l}×${h} = ${l*h} each → ${2*l*h} total` },
+      { c:'#ff4d4d', n:'Left &amp; Right',  d:`${h}×${w} = ${h*w} each → ${2*h*w} total` },
+    ].map(r =>
+      `<div class="leg-row">
+         <div class="leg-sw" style="background:${r.c}"></div>
+         <div><div class="ln">${r.n}</div><div class="ld">${r.d}</div></div>
+       </div>`
+    ).join('');
+  }
+
+  function showFormula(l, w, h) {
+    const tb = l*w, fb = l*h, lr = h*w, sa = 2*(tb+fb+lr);
+    const area = document.getElementById('formula-area');
+    area.innerHTML = '';
+    [
+      { html:`<b>Bottom &amp; Top:</b>   2 × (${l} × ${w}) = 2 × ${tb} = <b>${2*tb}</b>`, c:'#4dcc4d' },
+      { html:`<b>Front &amp; Back:</b>   2 × (${l} × ${h}) = 2 × ${fb} = <b>${2*fb}</b>`, c:'#4d9fff' },
+      { html:`<b>Left &amp; Right:</b>   2 × (${h} × ${w}) = 2 × ${lr} = <b>${2*lr}</b>`, c:'#ff4d4d' },
+      { html:`<b>Add them all:</b>   ${2*tb} + ${2*fb} + ${2*lr}`,                           c:'#f5c842' },
+    ].forEach((s, i) => {
+      const d = document.createElement('div');
+      d.className = 'step'; d.innerHTML = s.html; d.style.borderLeftColor = s.c;
+      area.appendChild(d);
+      setTimeout(() => d.classList.add('show'), i*400 + 100);
+    });
+    const fin = document.createElement('div');
+    fin.className = 'step-final';
+    fin.innerHTML = `🎉  Surface Area = <b>${sa}</b> square units`;
+    area.appendChild(fin);
+    setTimeout(() => fin.classList.add('show'), 4*400 + 100);
+  }
+
+  /* ════════════════════════════════════════════════
+     ACTIONS
+  ════════════════════════════════════════════════ */
+  function unfold() {
+    const { l, w, h } = getDims();
+    cancelAnimationFrame(raf3d);
+    document.getElementById('view-3d').style.display   = 'none';
+    document.getElementById('view-net').classList.add('active');
+    buildNetStage(l, w, h);
+    buildLegend(l, w, h);
+    // Formula appears after the slowest face (Top, ~0.55+0.65 = 1.2 s)
+    setTimeout(() => showFormula(l, w, h), 1500);
+  }
+
+  function resetAll() {
+    document.getElementById('view-net').classList.remove('active');
+    document.getElementById('view-3d').style.display   = '';
+    document.getElementById('formula-area').innerHTML  = '';
+    document.getElementById('legend').innerHTML        = '';
+    autoRot = true;
+    buildBox(); applyRot(); animLoop();
+  }
+
+  document.getElementById('btn-unfold').onclick = unfold;
+  document.getElementById('btn-reset').onclick  = resetAll;
+  ['inp-l','inp-w','inp-h'].forEach(id =>
+    document.getElementById(id).addEventListener('change', resetAll)
+  );
+
+  /* ── Boot ── */
+  buildBox(); applyRot(); animLoop();
+})();
+</script>
+</body>
+</html>
