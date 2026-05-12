@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>The Pythagorean Theorem</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+
+    /* ═══════════════════════════════════════════════════════
+       THEME TOKENS  —  each body class sets the whole palette
+    ═══════════════════════════════════════════════════════ */
+    body.theme-a {
+      --bg:          #f9f8f5;
+      --surface:     #ffffff;
+      --border:      #e4e4e7;
+      --ink:         #18181b;
+      --muted:       #71717a;
+      --accent:      #2563eb;
+      --accent-soft: #eff6ff;
+      --hyp:         #18181b;
+      --ok:          #16a34a;
+      --ok-soft:     #dcfce7;
+      --radius:      16px;
+      --shadow:      0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.07);
+      --font:        'Plus Jakarta Sans', system-ui, sans-serif;
+    }
+    body.theme-b {
+      --bg:          #0f172a;
+      --surface:     #1e293b;
+      --border:      rgba(255,255,255,.08);
+      --ink:         #f1f5f9;
+      --muted:       #94a3b8;
+      --accent:      #f59e0b;
+      --accent-soft: rgba(245,158,11,.12);
+      --hyp:         #f59e0b;
+      --ok:          #34d399;
+      --ok-soft:     rgba(52,211,153,.15);
+      --radius:      10px;
+      --shadow:      0 4px 24px rgba(0,0,0,.45);
+      --font:        'Inter', system-ui, sans-serif;
+    }
+    body.theme-c {
+      --bg:          #fef3c7;
+      --surface:     rgba(255,255,255,.86);
+      --border:      rgba(255,255,255,.55);
+      --ink:         #1e293b;
+      --muted:       #64748b;
+      --accent:      #0d9488;
+      --accent-soft: #ccfbf1;
+      --hyp:         #ef4444;
+      --ok:          #0d9488;
+      --ok-soft:     rgba(13,148,136,.15);
+      --radius:      24px;
+      --shadow:      0 4px 6px rgba(0,0,0,.04), 0 16px 48px rgba(0,0,0,.1);
+      --font:        'Nunito', system-ui, sans-serif;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       RESET + BASE
+    ═══════════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      color: var(--ink);
+      min-height: 100vh;
+      line-height: 1.6;
+      /* gradient bg for theme-c; solid for a+b */
+      background: var(--bg);
+      transition: color .3s, background-color .4s;
+    }
+    body.theme-c {
+      background: linear-gradient(165deg, #fef3c7 0%, #fde68a 40%, #fbbf24 100%);
+      background-attachment: fixed;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       THEME PICKER  (sticky bar)
+    ═══════════════════════════════════════════════════════ */
+    .picker {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: background .4s, border-color .3s;
+    }
+    .pick-label {
+      font-size: .76rem;
+      font-weight: 700;
+      color: var(--muted);
+      white-space: nowrap;
+      margin-right: 2px;
+    }
+    .pick-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 14px 6px 8px;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: var(--font);
+      font-size: .8rem;
+      font-weight: 700;
+      color: var(--muted);
+      transition: border-color .2s, color .2s, background .2s;
+    }
+    .pick-btn:hover { border-color: var(--accent); color: var(--ink); }
+    .pick-btn.active {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+    }
+    /* swatches always show the fixed theme colours, regardless of active theme */
+    .swatch {
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: 2px solid rgba(128,128,128,.2);
+    }
+    .swatch-a { background: conic-gradient(#f9f8f5 0 50%, #2563eb 50%); }
+    .swatch-b { background: conic-gradient(#0f172a 0 50%, #f59e0b 50%); }
+    .swatch-c { background: conic-gradient(#fde68a 0 50%, #0d9488 50%); }
+
+    /* ═══════════════════════════════════════════════════════
+       HERO
+    ═══════════════════════════════════════════════════════ */
+    .hero {
+      padding: 52px 24px 48px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: background .4s, border-color .3s;
+    }
+    .badge {
+      display: inline-block;
+      padding: 5px 16px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 999px;
+      font-size: .75rem;
+      font-weight: 800;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+      transition: background .3s, color .3s;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800;
+      letter-spacing: -.03em;
+      line-height: 1.1;
+    }
+    .hero h1 em { font-style: normal; color: var(--accent); transition: color .3s; }
+    .hero-sub {
+      margin-top: 12px;
+      font-size: 1.05rem;
+      color: var(--muted);
+      max-width: 52ch;
+      margin-inline: auto;
+    }
+    .formula-pill {
+      display: inline-block;
+      margin-top: 26px;
+      padding: 13px 36px;
+      border-radius: var(--radius);
+      font-size: 1.65rem;
+      font-weight: 800;
+      transition: background .4s, color .3s, border-radius .4s, box-shadow .3s;
+    }
+    .formula-pill sup { font-size: .6em; vertical-align: super; }
+
+    /* ═══════════════════════════════════════════════════════
+       LAYOUT
+    ═══════════════════════════════════════════════════════ */
+    .wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       CARD
+    ═══════════════════════════════════════════════════════ */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px 32px;
+      transition: background .4s, border-color .3s, border-radius .4s, box-shadow .4s;
+    }
+    .card-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      margin-bottom: 18px;
+    }
+    .c-icon {
+      width: 32px; height: 32px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 8px;
+      display: grid; place-items: center;
+      font-size: .88rem;
+      flex-shrink: 0;
+      transition: background .3s, color .3s, border-radius .4s;
+    }
+    .c-chip {
+      padding: 3px 12px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 999px;
+      font-size: .73rem;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      transition: background .3s, color .3s;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       STORY
+    ═══════════════════════════════════════════════════════ */
+    .story p {
+      color: var(--muted);
+      font-size: .95rem;
+      line-height: 1.75;
+      margin-bottom: 10px;
+    }
+    .story strong { color: var(--ink); }
+    .callout {
+      margin-top: 16px;
+      padding: 13px 18px;
+      background: var(--accent-soft);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 10px 10px 0;
+      font-size: .9rem;
+      font-weight: 600;
+      transition: background .3s, border-color .3s, border-radius .4s;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       INTERACTIVE
+    ═══════════════════════════════════════════════════════ */
+    .interact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: center;
+    }
+    @media (max-width: 600px) { .interact-grid { grid-template-columns: 1fr; } }
+
+    .sliders { display: flex; flex-direction: column; gap: 22px; }
+    .sl-row label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: .86rem;
+      font-weight: 700;
+      margin-bottom: 9px;
+    }
+    .sl-row label .v {
+      font-size: 1.15rem;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+      transition: color .3s;
+    }
+    input[type=range] {
+      width: 100%; appearance: none; -webkit-appearance: none;
+      height: 6px; border-radius: 999px;
+      background: var(--border); outline: none; cursor: pointer;
+      transition: background .3s;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px; height: 20px;
+      background: var(--accent);
+      border: 3px solid var(--surface);
+      border-radius: 50%;
+      transition: background .3s;
+    }
+    input[type=range]::-moz-range-thumb {
+      width: 20px; height: 20px;
+      background: var(--accent);
+      border: 3px solid var(--surface);
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    .perfect {
+      display: none;
+      margin-top: 14px;
+      padding: 9px 14px;
+      background: var(--ok-soft);
+      color: var(--ok);
+      border-radius: 10px;
+      font-size: .82rem;
+      font-weight: 800;
+      text-align: center;
+      transition: background .3s, color .3s;
+    }
+
+    /* ── SVG triangle ── */
+    .tri-wrap {
+      background: var(--accent-soft);
+      border-radius: calc(var(--radius) - 4px);
+      padding: 6px;
+      transition: background .4s, border-radius .4s;
+    }
+    /* Color the SVG elements through CSS so they respond to theme changes */
+    #tri-svg { display: block; }
+    #tri-svg text { font-family: var(--font); font-weight: 700; font-size: 13px; }
+    #la, #lb   { stroke: var(--accent); transition: stroke .3s; }
+    #lc        { stroke: var(--hyp);    transition: stroke .3s; }
+    #tf        { fill: var(--accent-soft); transition: fill .4s; }
+    #ta, #tb   { fill: var(--accent);  transition: fill .3s; }
+    #tc        { fill: var(--hyp);     transition: fill .3s; }
+    #ra        { stroke: var(--accent); transition: stroke .3s; }
+    /* hyp glow — only shown in theme-b */
+    #lc-glow   { display: none; }
+
+    /* ═══════════════════════════════════════════════════════
+       STEPS
+    ═══════════════════════════════════════════════════════ */
+    .steps { display: flex; flex-direction: column; gap: 10px; }
+    .step  { display: flex; align-items: flex-start; gap: 12px; }
+    .step-n {
+      width: 28px; height: 28px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      display: grid; place-items: center;
+      font-size: .75rem; font-weight: 800;
+      flex-shrink: 0; margin-top: 3px;
+      transition: background .3s, border-radius .4s;
+    }
+    .step-box {
+      flex: 1;
+      padding: 11px 16px;
+      background: var(--accent-soft);
+      border-radius: calc(var(--radius) - 4px);
+      transition: background .4s, border-radius .4s;
+    }
+    .step-lbl { color: var(--muted); font-size: .78rem; margin-bottom: 3px; }
+    .step-eq  { font-weight: 700; font-size: .98rem; }
+    .step-eq em { font-style: normal; color: var(--accent); transition: color .3s; }
+
+    /* ═══════════════════════════════════════════════════════
+       INSIGHT
+    ═══════════════════════════════════════════════════════ */
+    .insight {
+      background: var(--accent);
+      color: #fff;
+      border-radius: var(--radius);
+      padding: 24px 28px;
+      transition: background .4s, border-radius .4s, box-shadow .3s, border .3s;
+    }
+    .insight .eyebrow {
+      font-size: .72rem; font-weight: 800;
+      letter-spacing: .07em; text-transform: uppercase;
+      opacity: .75; margin-bottom: 8px;
+    }
+    .insight p { font-size: .95rem; line-height: 1.65; opacity: .92; }
+    .insight strong { font-weight: 800; }
+
+    /* ═══════════════════════════════════════════════════════
+       THEME A  —  clean, white hero, dark formula pill
+    ═══════════════════════════════════════════════════════ */
+    body.theme-a .hero {
+      background: #fff;
+      border-bottom: 1px solid #e4e4e7;
+    }
+    body.theme-a .formula-pill {
+      background: #18181b;
+      color: #fff;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       THEME B  —  dark hero + amber glow, card top stripe,
+                   monospace accents
+    ═══════════════════════════════════════════════════════ */
+    body.theme-b .hero {
+      background: linear-gradient(180deg, #131f38 0%, #0f172a 100%);
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+    body.theme-b .hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(245,158,11,.15) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    body.theme-b .badge {
+      font-family: 'SF Mono','Fira Code', monospace;
+      letter-spacing: .1em;
+      border: 1px solid rgba(245,158,11,.3);
+    }
+    body.theme-b .formula-pill {
+      background: rgba(245,158,11,.12);
+      color: #f59e0b;
+      border: 1px solid rgba(245,158,11,.3);
+      font-family: 'SF Mono','Fira Code', monospace;
+    }
+    body.theme-b .card         { border-top: 2px solid var(--accent); }
+    body.theme-b .card-head    { font-size: .82rem; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-family: 'SF Mono','Fira Code', monospace; }
+    body.theme-b .c-icon       { display: none; }
+    body.theme-b .c-chip       { display: none; }
+    body.theme-b .callout      { background: rgba(245,158,11,.08); }
+    body.theme-b .callout strong { color: var(--accent); }
+    body.theme-b .step-box     { background: rgba(255,255,255,.05); }
+    body.theme-b .step-lbl     { text-transform: uppercase; letter-spacing: .04em; font-size: .72rem; }
+    body.theme-b .step-eq      { font-family: 'SF Mono','Fira Code', monospace; }
+    body.theme-b .sl-row label { font-family: 'SF Mono','Fira Code', monospace; font-size: .8rem; color: var(--muted); font-weight: 500; }
+    body.theme-b .tri-wrap     { background: rgba(15,23,42,.5); border: 1px solid rgba(255,255,255,.08); }
+    body.theme-b #lc-glow      { display: block; }
+    body.theme-b .insight      { background: transparent; border: 1px solid rgba(245,158,11,.25); color: var(--muted); }
+    body.theme-b .insight .eyebrow { color: var(--accent); opacity: 1; }
+    body.theme-b .insight strong { color: var(--ink); }
+
+    /* ═══════════════════════════════════════════════════════
+       THEME C  —  gradient bg, frosted-glass cards,
+                   teal accents, coral hypotenuse
+    ═══════════════════════════════════════════════════════ */
+    body.theme-c .hero          { background: transparent; }
+    body.theme-c .formula-pill  { background: var(--accent); color: #fff; box-shadow: 0 8px 24px rgba(13,148,136,.3); }
+    body.theme-c .card          { backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+    body.theme-c .c-icon        { display: none; }
+    body.theme-c .callout       { border-left: none; border-radius: 16px; font-weight: 700; }
+    body.theme-c .step-n        { box-shadow: 0 4px 10px rgba(13,148,136,.35); }
+    body.theme-c .step-box      { background: rgba(255,255,255,.5); border: 1.5px solid rgba(255,255,255,.5); }
+    body.theme-c .insight       { box-shadow: 0 8px 32px rgba(13,148,136,.3); }
+
+    /* ═══════════════════════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════════════════════ */
+    @media (max-width: 600px) {
+      .card { padding: 20px 18px; }
+      .wrap { padding: 24px 16px 60px; gap: 18px; }
+      .hero { padding: 40px 18px 40px; }
+    }
+  </style>
+</head>
+<body class="theme-a">
+
+<!-- ── THEME PICKER ─────────────────────────────────────── -->
+<div class="picker" role="navigation" aria-label="Visual style selector">
+  <span class="pick-label">Style:</span>
+  <button class="pick-btn active" data-theme="a" aria-pressed="true">
+    <span class="swatch swatch-a"></span>Focused Explorer
+  </button>
+  <button class="pick-btn" data-theme="b" aria-pressed="false">
+    <span class="swatch swatch-b"></span>Dark Academy
+  </button>
+  <button class="pick-btn" data-theme="c" aria-pressed="false">
+    <span class="swatch swatch-c"></span>Notebook Energy
+  </button>
+</div>
+
+<!-- ── HERO ─────────────────────────────────────────────── -->
+<header class="hero">
+  <div class="badge">Grades 6–12 · Geometry</div>
+  <h1>The <em>Pythagorean</em> Theorem</h1>
+  <p class="hero-sub">Discover why a² + b² = c² has been reshaping the world for 2,500 years — and solve a real problem right now.</p>
+  <div class="formula-pill">a<sup>2</sup> + b<sup>2</sup> = c<sup>2</sup></div>
+</header>
+
+<!-- ── CONTENT ───────────────────────────────────────────── -->
+<main class="wrap">
+
+  <!-- Story -->
+  <div class="card">
+    <div class="card-head">
+      <div class="c-icon">🚒</div>
+      The Ladder Problem
+      <span class="c-chip">Story</span>
+    </div>
+    <div class="story">
+      <p>Maya is a firefighter. She parks her truck <strong>5 meters</strong> from the base of a burning building. The window she needs to reach is <strong>12 meters</strong> above the ground.</p>
+      <p>Her ladder runs from the truck to the window in a straight line — forming the longest side of a right triangle. How long must it be?</p>
+      <p>The Pythagorean Theorem gives us the answer instantly. No measuring tape needed.</p>
+    </div>
+    <div class="callout"><strong>Key idea:</strong> In any right triangle, the square of the hypotenuse equals the sum of the squares of the two legs.</div>
+  </div>
+
+  <!-- Interactive -->
+  <div class="card">
+    <div class="card-head">
+      <div class="c-icon">△</div>
+      Explore the Triangle
+      <span class="c-chip">Interactive</span>
+    </div>
+    <div class="interact-grid">
+      <div class="sliders">
+        <div class="sl-row">
+          <label>Side <i>a</i> — horizontal leg <span class="v" id="va">5</span></label>
+          <input type="range" id="sa" min="1" max="15" value="5"/>
+        </div>
+        <div class="sl-row">
+          <label>Side <i>b</i> — vertical leg <span class="v" id="vb">12</span></label>
+          <input type="range" id="sb" min="1" max="15" value="12"/>
+        </div>
+        <div class="perfect" id="perfect">✓ Pythagorean Triple — c is a whole number!</div>
+      </div>
+      <div class="tri-wrap">
+        <svg id="tri-svg" viewBox="0 0 320 240" width="100%" aria-label="Right triangle diagram">
+          <polygon id="tf"      points="60,215 125,215 60,59"/>
+          <!-- hyp glow: only visible in theme-b via CSS -->
+          <line id="lc-glow"   x1="125" y1="215" x2="60" y2="59" stroke="#f59e0b" stroke-width="10" stroke-linecap="round" opacity=".15"/>
+          <line id="la"        x1="60"  y1="215" x2="125" y2="215" stroke-width="2.5" stroke-linecap="round"/>
+          <line id="lb"        x1="60"  y1="215" x2="60"  y2="59"  stroke-width="2.5" stroke-linecap="round"/>
+          <line id="lc"        x1="125" y1="215" x2="60"  y2="59"  stroke-width="3"   stroke-linecap="round"/>
+          <path id="ra"        d="M 70,215 L 70,205 L 60,205" fill="none" stroke-width="1.5"/>
+          <text id="ta"        x="92"  y="232" text-anchor="middle">a = 5</text>
+          <text id="tb"        x="43"  y="140" text-anchor="end">b = 12</text>
+          <text id="tc"        x="104" y="109" text-anchor="middle">c = 13</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- Steps -->
+  <div class="card">
+    <div class="card-head">
+      <div class="c-icon">📐</div>
+      Step-by-Step Solution
+      <span class="c-chip">Math</span>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-n">1</div>
+        <div class="step-box">
+          <div class="step-lbl">Square each leg</div>
+          <div class="step-eq">a² = <em id="a2">25</em> &nbsp;·&nbsp; b² = <em id="b2">144</em></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">2</div>
+        <div class="step-box">
+          <div class="step-lbl">Add them together</div>
+          <div class="step-eq">a² + b² = <em id="sm">169</em></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">3</div>
+        <div class="step-box">
+          <div class="step-lbl">Take the square root — that's your hypotenuse</div>
+          <div class="step-eq">c = √<em id="sm2">169</em> = <em id="cv">13</em></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Insight -->
+  <div class="insight">
+    <div class="eyebrow">Did you know?</div>
+    <p>The <strong>(3, 4, 5)</strong> triple is the oldest known Pythagorean triple — three whole numbers that perfectly satisfy the theorem. Ancient Egyptian builders used knotted ropes in this ratio to create perfect right angles when constructing the pyramids. Set a = 3 and b = 4 to see c become exactly 5.</p>
+  </div>
+
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── Theme switcher ────────────────────────────────── */
+  const body  = document.body;
+  const btns  = document.querySelectorAll('.pick-btn');
+
+  function applyTheme(t, save) {
+    body.classList.remove('theme-a', 'theme-b', 'theme-c');
+    body.classList.add('theme-' + t);
+    btns.forEach(b => {
+      const on = b.dataset.theme === t;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-pressed', on);
+    });
+    if (save) localStorage.setItem('edu-theme', t);
+  }
+
+  btns.forEach(b => b.addEventListener('click', () => applyTheme(b.dataset.theme, true)));
+
+  const saved = localStorage.getItem('edu-theme');
+  if (saved && ['a','b','c'].includes(saved)) applyTheme(saved, false);
+
+  /* ── Triangle interactive ──────────────────────────── */
+  const OX = 60, OY = 215, S = 13;
+  const TRIPLES = [[3,4],[4,3],[5,12],[12,5],[8,15],[15,8],
+                   [6,8],[8,6],[9,12],[12,9],[7,24],[24,7]];
+
+  function fmt(n) { return Number.isInteger(n) ? String(n) : n.toFixed(2); }
+
+  function renderTri() {
+    const a = +document.getElementById('sa').value;
+    const b = +document.getElementById('sb').value;
+    const c2 = a * a + b * b;
+    const c  = Math.sqrt(c2);
+    const ax = OX + a * S, by_ = OY - b * S;
+
+    /* geometry */
+    document.getElementById('tf').setAttribute('points', `${OX},${OY} ${ax},${OY} ${OX},${by_}`);
+    document.getElementById('la').setAttribute('x2', ax);
+    document.getElementById('lb').setAttribute('y2', by_);
+    ['lc','lc-glow'].forEach(id => {
+      const el = document.getElementById(id);
+      el.setAttribute('x1', ax); el.setAttribute('y1', OY);
+      el.setAttribute('x2', OX); el.setAttribute('y2', by_);
+    });
+
+    /* labels */
+    const midX = (ax + OX) / 2, midY = (OY + by_) / 2;
+    const ox_  = (a / c) * 28,  oy_  = (b / c) * 28;
+    const ta = document.getElementById('ta');
+    ta.setAttribute('x', (OX + ax) / 2); ta.textContent = `a = ${a}`;
+    const tb = document.getElementById('tb');
+    tb.setAttribute('y', midY + 5); tb.textContent = `b = ${b}`;
+    const tc = document.getElementById('tc');
+    tc.setAttribute('x', midX + ox_); tc.setAttribute('y', midY - oy_);
+    tc.textContent = `c = ${fmt(c)}`;
+
+    /* step values */
+    document.getElementById('va').textContent  = a;
+    document.getElementById('vb').textContent  = b;
+    document.getElementById('a2').textContent  = a * a;
+    document.getElementById('b2').textContent  = b * b;
+    document.getElementById('sm').textContent  = c2;
+    document.getElementById('sm2').textContent = c2;
+    document.getElementById('cv').textContent  = fmt(c);
+
+    document.getElementById('perfect').style.display =
+      TRIPLES.some(([ta, tb]) => ta === a && tb === b) ? 'block' : 'none';
+  }
+
+  document.getElementById('sa').addEventListener('input', renderTri);
+  document.getElementById('sb').addEventListener('input', renderTri);
+  renderTri();
+})();
+</script>
+</body>
+</html>

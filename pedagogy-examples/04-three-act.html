@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Three-Act — Graphing Coordinates</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    body.theme-a{--accent:#b45309;--accent-soft:#fef3c7;--bg:#f9f8f5;--surface:#fff;--border:#e4e4e7;--ink:#18181b;--muted:#71717a;--radius:16px;--shadow:0 1px 3px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.07);--font:'Plus Jakarta Sans',system-ui,sans-serif;background:#f9f8f5}
+    body.theme-b{--accent:#f59e0b;--accent-soft:rgba(245,158,11,.12);--bg:#0f172a;--surface:#1e293b;--border:rgba(255,255,255,.08);--ink:#f1f5f9;--muted:#94a3b8;--radius:10px;--shadow:0 4px 24px rgba(0,0,0,.45);--font:'Inter',system-ui,sans-serif;background:#0f172a}
+    body.theme-c{--accent:#0d9488;--accent-soft:#ccfbf1;--bg:#fef3c7;--surface:rgba(255,255,255,.88);--border:rgba(255,255,255,.55);--ink:#1e293b;--muted:#64748b;--radius:24px;--shadow:0 4px 6px rgba(0,0,0,.04),0 16px 48px rgba(0,0,0,.1);--font:'Nunito',system-ui,sans-serif;background:linear-gradient(165deg,#fef3c7 0%,#fde68a 40%,#fbbf24 100%);background-attachment:fixed}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--font);color:var(--ink);min-height:100vh;line-height:1.6;transition:color .3s,background-color .4s}
+    .top-bar{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 20px;background:var(--surface);border-bottom:1px solid var(--border);backdrop-filter:blur(14px);transition:background .4s,border-color .3s}
+    .back-link{font-size:.82rem;font-weight:700;color:var(--accent);text-decoration:none}
+    .back-link:hover{text-decoration:underline}
+    .picker{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+    .pick-label{font-size:.74rem;font-weight:700;color:var(--muted);margin-right:2px}
+    .pick-btn{display:inline-flex;align-items:center;gap:6px;padding:5px 12px 5px 7px;background:transparent;border:1.5px solid var(--border);border-radius:999px;cursor:pointer;font-family:var(--font);font-size:.76rem;font-weight:700;color:var(--muted);transition:border-color .2s,color .2s,background .2s}
+    .pick-btn:hover{border-color:var(--accent);color:var(--ink)}
+    .pick-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+    .swatch{width:14px;height:14px;border-radius:50%;flex-shrink:0;border:2px solid rgba(128,128,128,.2)}
+    .swatch-a{background:conic-gradient(#f9f8f5 0 50%,#b45309 50%)}
+    .swatch-b{background:conic-gradient(#0f172a 0 50%,#f59e0b 50%)}
+    .swatch-c{background:conic-gradient(#fde68a 0 50%,#0d9488 50%)}
+    .approach-badge{position:sticky;top:53px;z-index:99;padding:6px 20px;background:var(--accent);color:#fff;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;text-align:center}
+    .act-bar{display:flex;background:var(--surface);border-bottom:1px solid var(--border)}
+    .act-tab{flex:1;padding:10px;text-align:center;font-size:.82rem;font-weight:700;color:var(--muted);border-right:1px solid var(--border);transition:all .3s}
+    .act-tab:last-child{border-right:none}
+    .act-tab.active{background:var(--accent-soft);color:var(--accent);font-weight:800}
+    .act-tab.done{background:var(--accent);color:#fff}
+    .wrap{max-width:860px;margin:0 auto;padding:28px 24px 80px;display:flex;flex-direction:column;gap:22px}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px 28px;transition:background .4s,border-radius .4s}
+    .card-head{font-size:1rem;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+    .chip{padding:3px 11px;background:var(--accent-soft);color:var(--accent);border-radius:999px;font-size:.72rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+    p{color:var(--muted);font-size:.93rem;line-height:1.7;margin-bottom:8px}
+    strong{color:var(--ink)}
+    .act-section{display:none}
+    .act-section.active{display:flex;flex-direction:column;gap:22px}
+    .mystery-box{background:var(--ink);color:white;border-radius:var(--radius);padding:28px;text-align:center}
+    .mystery-box h2{font-size:clamp(1.3rem,3vw,1.8rem);font-weight:800;line-height:1.2;margin-bottom:12px}
+    .mystery-box p{color:rgba(255,255,255,.75);font-size:1rem;margin:0}
+    .svg-bg{background:var(--accent-soft);border-radius:calc(var(--radius) - 4px);padding:6px;transition:background .4s}
+    .mystery-grid-wrap{display:flex;flex-direction:column;align-items:center;gap:14px}
+    .mystery-label{font-size:.82rem;color:var(--muted);font-weight:600;font-style:italic;text-align:center}
+    .info-btns{display:flex;flex-wrap:wrap;gap:10px;justify-content:center;margin-top:4px}
+    .info-btn{padding:10px 18px;border:2px solid var(--accent);border-radius:12px;background:transparent;color:var(--accent);font-family:var(--font);font-size:.86rem;font-weight:700;cursor:pointer;transition:background .2s,color .2s}
+    .info-btn:hover{background:var(--accent-soft)}
+    .info-btn.revealed{background:var(--accent);color:#fff;cursor:default}
+    .reveal-result{padding:12px 16px;background:var(--accent-soft);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;font-size:.88rem;font-weight:600;margin-top:6px;opacity:0;max-height:0;overflow:hidden;transition:opacity .4s,max-height .4s}
+    .reveal-result.show{opacity:1;max-height:120px}
+    .btn{padding:10px 24px;border:none;border-radius:999px;background:var(--accent);color:#fff;font-family:var(--font);font-size:.9rem;font-weight:700;cursor:pointer;transition:filter .15s;margin-top:6px}
+    .btn:hover{filter:brightness(1.1)}
+    .resolution-card{background:var(--accent);color:#fff;border-radius:var(--radius);padding:24px 28px}
+    .resolution-card h3{font-size:1.2rem;font-weight:800;margin-bottom:10px}
+    .resolution-card p{color:rgba(255,255,255,.88);margin:0 0 8px}
+    .definition-box{background:var(--accent-soft);border-radius:12px;padding:16px 20px;margin:14px 0;font-size:.9rem;line-height:1.7;border-left:3px solid var(--accent);transition:background .3s}
+    .practice-row{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    @media(max-width:540px){.practice-row{grid-template-columns:1fr}}
+    .prac-item h3{font-size:.88rem;font-weight:800;margin-bottom:8px;color:var(--accent)}
+    .feedback{font-size:.82rem;font-weight:700;min-height:20px;margin-top:6px}
+    .feedback.ok{color:#16a34a}
+    .feedback.no{color:#dc2626}
+    @media(max-width:600px){.card{padding:18px}.wrap{padding:20px 16px 60px;gap:16px}}
+  </style>
+</head>
+<body class="theme-a">
+
+<div class="top-bar">
+  <a class="back-link" href="index.html">← All approaches</a>
+  <div class="picker">
+    <span class="pick-label">Style:</span>
+    <button class="pick-btn active" data-theme="a"><span class="swatch swatch-a"></span>Explorer</button>
+    <button class="pick-btn" data-theme="b"><span class="swatch swatch-b"></span>Academy</button>
+    <button class="pick-btn" data-theme="c"><span class="swatch swatch-c"></span>Notebook</button>
+  </div>
+</div>
+<div class="approach-badge">Approach 4 — Three-Act Structure (Mystery → Request → Resolution)</div>
+<div class="act-bar">
+  <div class="act-tab active" id="tab-act1">Act 1<br><small>The mystery</small></div>
+  <div class="act-tab" id="tab-act2">Act 2<br><small>Get information</small></div>
+  <div class="act-tab" id="tab-act3">Act 3<br><small>Resolution</small></div>
+</div>
+
+<main class="wrap">
+
+  <!-- ACT 1 -->
+  <div class="act-section active" id="act1">
+    <div class="mystery-box">
+      <h2>🎮 Grid Game</h2>
+      <p>You're playing a two-player grid game with Kai. On their turn they announced: <strong>"My piece is at position (−3, 2)."</strong></p>
+      <p style="margin-top:8px">Below is your game grid. Can you find their piece?</p>
+    </div>
+    <div class="card">
+      <div class="card-head">The game grid <span class="chip">Act 1 · Mystery</span></div>
+      <div class="mystery-grid-wrap">
+        <div class="svg-bg"><svg id="mystery-grid" viewBox="0 0 260 260" width="min(260px,100%)" aria-label="Unlabeled grid"></svg></div>
+        <div class="mystery-label">A point is hidden on this grid. The announcement said "(−3, 2)". What information would help you find it?</div>
+        <div class="info-btns">
+          <button class="info-btn" id="need-btn">🤔 What do I need to find this?</button>
+        </div>
+        <div id="need-list" style="display:none;font-size:.88rem;color:var(--muted);text-align:center;line-height:1.8">
+          Think about it: you need to know <strong>which direction the numbers count</strong>, and <strong>where zero is</strong>.<br>Move to Act 2 to get that information.
+        </div>
+        <button class="btn" id="to-act2" style="display:none">Get the information →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACT 2 -->
+  <div class="act-section" id="act2">
+    <div class="card">
+      <div class="card-head">Request information <span class="chip">Act 2 · Gather clues</span></div>
+      <p>Each button reveals one piece of information. Collect what you need to find the piece at <strong>(−3, 2)</strong>.</p>
+      <div class="mystery-grid-wrap">
+        <div class="svg-bg"><svg id="info-grid" viewBox="0 0 260 260" width="min(260px,100%)" aria-label="Grid with progressive reveals"></svg></div>
+        <div style="width:100%;max-width:420px">
+          <button class="info-btn" id="reveal-origin" style="display:block;margin-bottom:8px;width:100%;text-align:left">① Show me where zero is (the origin)</button>
+          <div class="reveal-result" id="res-origin">The <strong>origin (0, 0)</strong> is the center of the grid — the intersection of the two main lines. All distances are measured from here.</div>
+          <button class="info-btn" id="reveal-x" style="display:block;margin-bottom:8px;width:100%;text-align:left">② Show me how the first number works</button>
+          <div class="reveal-result" id="res-x">The <strong>first number</strong> tells you to move <em>left or right</em>. Positive = right. Negative = left. <strong>−3</strong> means 3 steps left.</div>
+          <button class="info-btn" id="reveal-y" style="display:block;margin-bottom:8px;width:100%;text-align:left">③ Show me how the second number works</button>
+          <div class="reveal-result" id="res-y">The <strong>second number</strong> tells you to move <em>up or down</em>. Positive = up. Negative = down. <strong>+2</strong> means 2 steps up.</div>
+          <button class="btn" id="to-act3" style="display:none;margin-top:14px">I can find it now →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACT 3 -->
+  <div class="act-section" id="act3">
+    <div class="resolution-card">
+      <h3>🎯 Found it!</h3>
+      <p>Starting at origin (0, 0) → move 3 left (−3) → move 2 up (+2) → that's the piece. <strong>And now you know how coordinates work.</strong></p>
+    </div>
+    <div class="card">
+      <div class="card-head">The formal definition <span class="chip">Act 3 · Concept</span></div>
+      <div class="definition-box">
+        <strong>Ordered pair (x, y)</strong> — two numbers that name one exact point on a coordinate plane.<br>
+        • The <strong>x-value</strong> (first) tells left (+) or right (−) distance from origin.<br>
+        • The <strong>y-value</strong> (second) tells up (+) or down (−) distance from origin.<br>
+        • <strong>Order matters:</strong> (−3, 2) ≠ (2, −3).
+      </div>
+      <div class="svg-bg" style="margin-top:8px"><svg id="reveal-grid" viewBox="0 0 260 260" width="min(260px,100%)" aria-label="Solution grid"></svg></div>
+    </div>
+    <div class="card">
+      <div class="card-head">Two more <span class="chip">Practice</span></div>
+      <div class="practice-row">
+        <div class="prac-item">
+          <h3>Plot (4, −1)</h3>
+          <div class="svg-bg"><svg id="p3-1" viewBox="0 0 260 260" width="100%" style="cursor:crosshair"></svg></div>
+          <div class="feedback" id="fb3-1"></div>
+        </div>
+        <div class="prac-item">
+          <h3>Plot (−2, −3)</h3>
+          <div class="svg-bg"><svg id="p3-2" viewBox="0 0 260 260" width="100%" style="cursor:crosshair"></svg></div>
+          <div class="feedback" id="fb3-2"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+const NS='http://www.w3.org/2000/svg',S=24,CX=130,CY=130;
+let infoState={origin:false,x:false,y:false};
+
+(function(){var b=document.body,bs=document.querySelectorAll('.pick-btn');function at(t,s){b.classList.remove('theme-a','theme-b','theme-c');b.classList.add('theme-'+t);bs.forEach(function(btn){var on=btn.dataset.theme===t;btn.classList.toggle('active',on);btn.setAttribute('aria-pressed',on);});if(s)localStorage.setItem('edu-theme',t);initGrids();}bs.forEach(function(btn){btn.addEventListener('click',function(){at(btn.dataset.theme,true);});});var sv=localStorage.getItem('edu-theme');if(sv&&['a','b','c'].includes(sv))at(sv,false);})();
+function mkE(tag,a){const el=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(a))el.setAttribute(k,v);return el;}
+function isDark(){return document.body.classList.contains('theme-b');}
+function accent(){return getComputedStyle(document.body).getPropertyValue('--accent').trim();}
+
+function buildMysteryGrid(svg,showAxes=false,showLabels=false){
+  svg.innerHTML='';
+  const dark=isDark();
+  const gc=dark?'rgba(255,255,255,.1)':'rgba(0,0,0,.1)';
+  const ac=dark?'rgba(255,255,255,.4)':'rgba(0,0,0,.35)';
+  const lc=dark?'#94a3b8':'#64748b';
+  for(let i=-5;i<=5;i++){
+    svg.appendChild(mkE('line',{x1:CX+i*S,y1:10,x2:CX+i*S,y2:250,stroke:showAxes&&i===0?ac:gc,'stroke-width':showAxes&&i===0?2:1}));
+    svg.appendChild(mkE('line',{x1:10,y1:CY-i*S,x2:250,y2:CY-i*S,stroke:showAxes&&i===0?ac:gc,'stroke-width':showAxes&&i===0?2:1}));
+    if(showLabels&&i!==0){
+      const xt=mkE('text',{x:CX+i*S,y:CY+15,'text-anchor':'middle',fill:lc,'font-size':'10','font-family':'Arial'});xt.textContent=i;svg.appendChild(xt);
+      const yt=mkE('text',{x:CX-7,y:CY-i*S+4,'text-anchor':'end',fill:lc,'font-size':'10','font-family':'Arial'});yt.textContent=i;svg.appendChild(yt);
+    }
+  }
+  if(showAxes){
+    const xl=mkE('text',{x:255,y:CY+4,fill:ac,'font-size':'12','font-weight':'bold','font-family':'Arial'});xl.textContent='x';svg.appendChild(xl);
+    const yl=mkE('text',{x:CX+4,y:7,fill:ac,'font-size':'12','font-weight':'bold','font-family':'Arial'});yl.textContent='y';svg.appendChild(yl);
+    const o=mkE('text',{x:CX-7,y:CY+15,'text-anchor':'end',fill:lc,'font-size':'10','font-family':'Arial'});o.textContent='0';svg.appendChild(o);
+    // Origin dot
+    svg.appendChild(mkE('circle',{cx:CX,cy:CY,r:4,fill:ac}));
+  }
+}
+function plotPt(svg,gx,gy,color,label){
+  const px=CX+gx*S,py=CY-gy*S,g=mkE('g',{});
+  g.appendChild(mkE('circle',{cx:px,cy:py,r:7,fill:color,stroke:'white','stroke-width':2.5}));
+  if(label){const t=mkE('text',{x:px+10,y:py-10,fill:color,'font-size':'12','font-weight':'bold','font-family':'Arial'});t.textContent=label;g.appendChild(t);}
+  svg.appendChild(g);return g;
+}
+function clickToGrid(evt,svgEl){
+  const r=svgEl.getBoundingClientRect();
+  const sx=(evt.clientX-r.left)*260/r.width,sy=(evt.clientY-r.top)*260/r.height;
+  return{x:Math.max(-5,Math.min(5,Math.round((sx-CX)/S))),y:Math.max(-5,Math.min(5,Math.round((CY-sy)/S)))};
+}
+
+function initGrids(){
+  // Act 1 mystery grid — no axes, no labels, just grid lines + hidden point
+  const mg=document.getElementById('mystery-grid');
+  buildMysteryGrid(mg,false,false);
+  // Draw mystery point as a vague mark (no coordinates visible)
+  const px=CX+(-3)*S,py=CY-2*S;
+  const qEl=mkE('circle',{cx:px,cy:py,r:8,fill:'rgba(180,83,9,.35)',stroke:'rgba(180,83,9,.6)','stroke-width':2,'stroke-dasharray':'4,2'});
+  mg.appendChild(qEl);
+  const ql=mkE('text',{x:px+11,y:py-11,fill:'rgba(180,83,9,.7)','font-size':'13','font-weight':'bold','font-family':'Arial'});ql.textContent='?';mg.appendChild(ql);
+
+  // Act 2 info grid
+  rebuildInfoGrid();
+}
+
+function rebuildInfoGrid(){
+  const svg=document.getElementById('info-grid');
+  if(!svg)return;
+  buildMysteryGrid(svg,infoState.origin,infoState.x&&infoState.y);
+  if(infoState.x&&!infoState.y){
+    // Show x-axis arrow only
+    const ac=isDark()?'rgba(255,255,255,.5)':'rgba(0,0,0,.45)';
+    const xl=mkE('text',{x:255,y:CY+4,fill:ac,'font-size':'12','font-weight':'bold','font-family':'Arial'});xl.textContent='x';svg.appendChild(xl);
+    const xl2=mkE('text',{x:15,y:CY+4,fill:ac,'font-size':'11','font-family':'Arial'});xl2.textContent='← left (−)';svg.appendChild(xl2);
+    const xr=mkE('text',{x:200,y:CY+4,fill:ac,'font-size':'11','font-family':'Arial'});xr.textContent='right (+) →';svg.appendChild(xr);
+  }
+  if(infoState.y&&!infoState.x){
+    const ac=isDark()?'rgba(255,255,255,.5)':'rgba(0,0,0,.45)';
+    const yl=mkE('text',{x:CX+4,y:7,fill:ac,'font-size':'12','font-weight':'bold','font-family':'Arial'});yl.textContent='y';svg.appendChild(yl);
+  }
+  // Hidden point
+  const px=CX+(-3)*S,py=CY-2*S;
+  const qEl=mkE('circle',{cx:px,cy:py,r:8,fill:'rgba(180,83,9,.35)',stroke:'rgba(180,83,9,.6)','stroke-width':2,'stroke-dasharray':'4,2'});
+  svg.appendChild(qEl);
+  const ql=mkE('text',{x:px+11,y:py-11,fill:'rgba(180,83,9,.7)','font-size':'13','font-weight':'bold','font-family':'Arial'});ql.textContent='?';svg.appendChild(ql);
+}
+
+// Act 1 buttons
+document.getElementById('need-btn').addEventListener('click',function(){
+  this.style.display='none';
+  document.getElementById('need-list').style.display='block';
+  setTimeout(()=>document.getElementById('to-act2').style.display='block',600);
+});
+
+// Act 1 → 2
+document.getElementById('to-act2').addEventListener('click',()=>{
+  setAct('act2');
+  initGrids();
+});
+
+// Act 2 reveals
+document.getElementById('reveal-origin').addEventListener('click',function(){
+  if(this.classList.contains('revealed'))return;
+  this.classList.add('revealed');
+  infoState.origin=true;
+  document.getElementById('res-origin').classList.add('show');
+  rebuildInfoGrid();
+  checkAllRevealed();
+});
+document.getElementById('reveal-x').addEventListener('click',function(){
+  if(this.classList.contains('revealed'))return;
+  this.classList.add('revealed');
+  infoState.x=true;
+  document.getElementById('res-x').classList.add('show');
+  rebuildInfoGrid();
+  checkAllRevealed();
+});
+document.getElementById('reveal-y').addEventListener('click',function(){
+  if(this.classList.contains('revealed'))return;
+  this.classList.add('revealed');
+  infoState.y=true;
+  document.getElementById('res-y').classList.add('show');
+  rebuildInfoGrid();
+  checkAllRevealed();
+});
+function checkAllRevealed(){
+  if(infoState.origin&&infoState.x&&infoState.y){
+    document.getElementById('to-act3').style.display='block';
+  }
+}
+
+// Act 2 → 3
+document.getElementById('to-act3').addEventListener('click',()=>{
+  setAct('act3');
+  // Build resolution grid
+  const rsvg=document.getElementById('reveal-grid');
+  buildMysteryGrid(rsvg,true,true);
+  const ac=accent();
+  // Animate path to (-3,2)
+  setTimeout(()=>{rsvg.appendChild(mkE('circle',{cx:CX,cy:CY,r:5,fill:'#94a3b8'}));},200);
+  setTimeout(()=>{rsvg.appendChild(mkE('line',{x1:CX,y1:CY,x2:CX+(-3)*S,y2:CY,stroke:ac,'stroke-width':2.5,'stroke-dasharray':'5,3'}));},600);
+  setTimeout(()=>{rsvg.appendChild(mkE('line',{x1:CX+(-3)*S,y1:CY,x2:CX+(-3)*S,y2:CY-2*S,stroke:ac,'stroke-width':2.5,'stroke-dasharray':'5,3'}));},1100);
+  setTimeout(()=>{plotPt(rsvg,-3,2,ac,'(−3, 2) ✓');},1700);
+  // Practice grids
+  setTimeout(()=>{
+    buildPracGrid('p3-1');
+    buildPracGrid('p3-2');
+    makePrac('p3-1','fb3-1',4,-1);
+    makePrac('p3-2','fb3-2',-2,-3);
+  },200);
+});
+
+function buildPracGrid(id){
+  const svg=document.getElementById(id);
+  buildMysteryGrid(svg,true,true);
+}
+function makePrac(svgId,fbId,tx,ty){
+  const svg=document.getElementById(svgId);
+  svg.addEventListener('click',function(evt){
+    const{x,y}=clickToGrid(evt,svg);
+    buildPracGrid(svgId);
+    const fb=document.getElementById(fbId);
+    if(x===tx&&y===ty){plotPt(svg,x,y,accent(),`(${x},${y}) ✓`);fb.textContent='✓ Correct!';fb.className='feedback ok';}
+    else{plotPt(svg,x,y,'#ef4444',`(${x},${y})`);fb.textContent=`That's (${x},${y}) — try again.`;fb.className='feedback no';}
+  });
+}
+
+function setAct(act){
+  document.querySelectorAll('.act-section').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.act-tab').forEach(el=>el.classList.remove('active'));
+  document.getElementById(act).classList.add('active');
+  const map={act1:'tab-act1',act2:'tab-act2',act3:'tab-act3'};
+  document.getElementById(map[act]).classList.add('active');
+  if(act==='act2'||act==='act3')document.getElementById('tab-act1').classList.add('done');
+  if(act==='act3')document.getElementById('tab-act2').classList.add('done');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+initGrids();
+</script>
+</body>
+</html>

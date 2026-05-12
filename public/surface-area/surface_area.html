@@ -4,7 +4,89 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Box Net – Surface Area</title>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-C19PRJPV7K"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-C19PRJPV7K');
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
   <style>
+    /* ═══ THEME TOKENS ═══ */
+    body.theme-a {
+      --accent: #1a8a5e; --accent-soft: #d3f0e5;
+      --font: 'Plus Jakarta Sans', 'Segoe UI', sans-serif;
+      background: #f4f1eb; color: #1a2e3b;
+    }
+    body.theme-b {
+      --accent: #f5c842; --accent-soft: rgba(245,200,66,.15);
+      --font: 'Inter', 'Segoe UI', sans-serif;
+      /* keeps the existing dark purple gradient — matches Dark Academy */
+    }
+    body.theme-c {
+      --accent: #0d9488; --accent-soft: #ccfbf1;
+      --font: 'Nunito', 'Segoe UI', sans-serif;
+      background: linear-gradient(165deg, #fef3c7 0%, #fde68a 40%, #fbbf24 100%);
+      background-attachment: fixed; color: #1e293b;
+    }
+    /* ─── top bar ─── */
+    .top-bar {
+      position: sticky; top: 0; z-index: 200; width: 100%;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; flex-wrap: wrap; padding: 10px 20px;
+      background: rgba(0,0,0,.45);
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      transition: background .4s, border-color .3s;
+    }
+    body.theme-a .top-bar { background: rgba(255,255,255,.9); border-bottom-color: rgba(0,0,0,.08); }
+    body.theme-c .top-bar { background: rgba(255,255,255,.75); border-bottom-color: rgba(0,0,0,.06); }
+    .back-link { font-size: .82rem; font-weight: 700; color: #f5c842; text-decoration: none; white-space: nowrap; }
+    body.theme-a .back-link { color: var(--accent); }
+    body.theme-c .back-link { color: var(--accent); }
+    .back-link:hover { text-decoration: underline; }
+    .picker { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .pick-label { font-size: .74rem; font-weight: 700; color: rgba(255,255,255,.6); margin-right: 2px; white-space: nowrap; }
+    body.theme-a .pick-label { color: #71717a; }
+    body.theme-c .pick-label { color: #64748b; }
+    .pick-btn {
+      display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px 5px 7px;
+      background: transparent; border: 1.5px solid rgba(255,255,255,.2); border-radius: 999px;
+      cursor: pointer; font-family: var(--font, 'Segoe UI', sans-serif); font-size: .76rem; font-weight: 700;
+      color: rgba(255,255,255,.65); transition: border-color .2s, color .2s, background .2s;
+    }
+    body.theme-a .pick-btn { border-color: rgba(0,0,0,.1); color: #71717a; }
+    body.theme-c .pick-btn { border-color: rgba(0,0,0,.08); color: #64748b; }
+    .pick-btn:hover  { border-color: #f5c842; color: #fff; }
+    body.theme-a .pick-btn:hover { border-color: var(--accent); color: #1a2e3b; }
+    body.theme-c .pick-btn:hover { border-color: var(--accent); color: #1e293b; }
+    .pick-btn.active { background: #f5c842; border-color: #f5c842; color: #1a1a1a; }
+    body.theme-a .pick-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    body.theme-c .pick-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .swatch { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; border: 2px solid rgba(128,128,128,.2); }
+    .swatch-a { background: conic-gradient(#f9f8f5 0 50%, #2563eb 50%); }
+    .swatch-b { background: conic-gradient(#0f172a 0 50%, #f59e0b 50%); }
+    .swatch-c { background: conic-gradient(#fde68a 0 50%, #0d9488 50%); }
+    /* ─── structural overrides for light themes ─── */
+    body { font-family: var(--font, 'Segoe UI', Tahoma, sans-serif); transition: color .3s, background-color .4s; }
+    body.theme-a h1 { color: var(--accent); }
+    body.theme-a .sub { color: #5a7080; }
+    body.theme-a .controls { background: rgba(255,255,255,.9); border-color: rgba(0,0,0,.08); }
+    body.theme-a .inp-g label { color: #5a7080; }
+    body.theme-a .inp-g input { background: #fff; border-color: #d1d5db; color: #1a2e3b; }
+    body.theme-a .inp-g input:focus { border-color: var(--accent); }
+    body.theme-a #btn-reset { background: #fff; color: #1a2e3b; border: 1px solid #d1d5db; }
+    body.theme-c h1 { color: var(--accent); }
+    body.theme-c .sub { color: #64748b; }
+    body.theme-c .controls { background: rgba(255,255,255,.75); border-color: rgba(255,255,255,.5); }
+    body.theme-c .inp-g label { color: #64748b; }
+    body.theme-c .inp-g input { background: rgba(255,255,255,.7); border-color: rgba(0,0,0,.1); color: #1e293b; }
+    body.theme-c #btn-reset { background: rgba(255,255,255,.6); color: #1e293b; border: 1px solid rgba(0,0,0,.08); }
+
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: 'Segoe UI', Tahoma, sans-serif;
@@ -148,7 +230,16 @@
     .step-final.show { opacity: 1; transform: translateY(0); }
   </style>
 </head>
-<body>
+<body class="theme-b">
+<div class="top-bar">
+  <a class="back-link" href="../index.html">← All lessons</a>
+  <div class="picker" role="navigation" aria-label="Visual style">
+    <span class="pick-label">Style:</span>
+    <button class="pick-btn" data-theme="a" aria-pressed="false"><span class="swatch swatch-a"></span>Explorer</button>
+    <button class="pick-btn active" data-theme="b" aria-pressed="true"><span class="swatch swatch-b"></span>Academy</button>
+    <button class="pick-btn" data-theme="c" aria-pressed="false"><span class="swatch swatch-c"></span>Notebook</button>
+  </div>
+</div>
 
 <h1>📦 Box Net &amp; Surface Area</h1>
 <p class="sub">Watch the box unfold into its flat net!</p>
@@ -190,6 +281,20 @@
 <div id="formula-area"></div>
 
 <script>
+/* ── theme switcher ── */
+(function () {
+  var body = document.body, btns = document.querySelectorAll('.pick-btn');
+  function applyTheme(t, save) {
+    body.classList.remove('theme-a', 'theme-b', 'theme-c');
+    body.classList.add('theme-' + t);
+    btns.forEach(function (b) { var on = b.dataset.theme === t; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on); });
+    if (save) localStorage.setItem('edu-theme', t);
+  }
+  btns.forEach(function (b) { b.addEventListener('click', function () { applyTheme(b.dataset.theme, true); }); });
+  var saved = localStorage.getItem('edu-theme');
+  if (saved && ['a', 'b', 'c'].includes(saved)) applyTheme(saved, false);
+})();
+
 (function () {
 
   /* ════════════════════════════════════════════════

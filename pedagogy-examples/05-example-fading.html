@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Example Fading — Graphing Coordinates</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    body.theme-a{--accent:#be185d;--accent-soft:#fce7f3;--bg:#f9f8f5;--surface:#fff;--border:#e4e4e7;--ink:#18181b;--muted:#71717a;--radius:16px;--shadow:0 1px 3px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.07);--font:'Plus Jakarta Sans',system-ui,sans-serif;background:#f9f8f5}
+    body.theme-b{--accent:#f59e0b;--accent-soft:rgba(245,158,11,.12);--bg:#0f172a;--surface:#1e293b;--border:rgba(255,255,255,.08);--ink:#f1f5f9;--muted:#94a3b8;--radius:10px;--shadow:0 4px 24px rgba(0,0,0,.45);--font:'Inter',system-ui,sans-serif;background:#0f172a}
+    body.theme-c{--accent:#0d9488;--accent-soft:#ccfbf1;--bg:#fef3c7;--surface:rgba(255,255,255,.88);--border:rgba(255,255,255,.55);--ink:#1e293b;--muted:#64748b;--radius:24px;--shadow:0 4px 6px rgba(0,0,0,.04),0 16px 48px rgba(0,0,0,.1);--font:'Nunito',system-ui,sans-serif;background:linear-gradient(165deg,#fef3c7 0%,#fde68a 40%,#fbbf24 100%);background-attachment:fixed}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--font);color:var(--ink);min-height:100vh;line-height:1.6;transition:color .3s,background-color .4s}
+    .top-bar{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 20px;background:var(--surface);border-bottom:1px solid var(--border);backdrop-filter:blur(14px);transition:background .4s,border-color .3s}
+    .back-link{font-size:.82rem;font-weight:700;color:var(--accent);text-decoration:none}
+    .back-link:hover{text-decoration:underline}
+    .picker{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+    .pick-label{font-size:.74rem;font-weight:700;color:var(--muted);margin-right:2px}
+    .pick-btn{display:inline-flex;align-items:center;gap:6px;padding:5px 12px 5px 7px;background:transparent;border:1.5px solid var(--border);border-radius:999px;cursor:pointer;font-family:var(--font);font-size:.76rem;font-weight:700;color:var(--muted);transition:border-color .2s,color .2s,background .2s}
+    .pick-btn:hover{border-color:var(--accent);color:var(--ink)}
+    .pick-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+    .swatch{width:14px;height:14px;border-radius:50%;flex-shrink:0;border:2px solid rgba(128,128,128,.2)}
+    .swatch-a{background:conic-gradient(#f9f8f5 0 50%,#be185d 50%)}
+    .swatch-b{background:conic-gradient(#0f172a 0 50%,#f59e0b 50%)}
+    .swatch-c{background:conic-gradient(#fde68a 0 50%,#0d9488 50%)}
+    .approach-badge{position:sticky;top:53px;z-index:99;padding:6px 20px;background:var(--accent);color:#fff;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;text-align:center}
+    /* Progress bar */
+    .progress-bar{display:flex;background:var(--surface);border-bottom:1px solid var(--border)}
+    .prog-step{flex:1;padding:10px 4px;text-align:center;font-size:.78rem;font-weight:700;color:var(--muted);border-right:1px solid var(--border);transition:all .3s;cursor:pointer}
+    .prog-step:last-child{border-right:none}
+    .prog-step.active{background:var(--accent-soft);color:var(--accent)}
+    .prog-step.done{background:var(--accent);color:#fff}
+    .wrap{max-width:860px;margin:0 auto;padding:28px 24px 80px;display:flex;flex-direction:column;gap:22px}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px 28px;transition:background .4s,border-radius .4s}
+    .card-head{font-size:1rem;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+    .chip{padding:3px 11px;background:var(--accent-soft);color:var(--accent);border-radius:999px;font-size:.72rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+    .scaffold-level{padding:8px 14px;border-radius:8px;font-size:.8rem;font-weight:700;margin-bottom:14px;display:inline-block}
+    .scaffold-full{background:#dcfce7;color:#15803d}
+    .scaffold-partial{background:#fef9c3;color:#854d0e}
+    .scaffold-light{background:#ffedd5;color:#9a3412}
+    .scaffold-none{background:#fce7f3;color:#be185d}
+    p{color:var(--muted);font-size:.93rem;line-height:1.7;margin-bottom:8px}
+    strong{color:var(--ink)}
+    .problem-layout{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:start}
+    @media(max-width:540px){.problem-layout{grid-template-columns:1fr}}
+    .svg-bg{background:var(--accent-soft);border-radius:calc(var(--radius) - 4px);padding:6px;transition:background .4s}
+    .steps-list{display:flex;flex-direction:column;gap:8px}
+    .step-item{display:flex;align-items:flex-start;gap:10px}
+    .step-num{width:26px;height:26px;background:var(--accent);color:#fff;border-radius:50%;display:grid;place-items:center;font-size:.72rem;font-weight:800;flex-shrink:0;margin-top:2px;transition:background .3s}
+    .step-content{flex:1;padding:10px 14px;border-radius:10px;background:var(--accent-soft);font-size:.88rem;transition:background .4s,opacity .3s,transform .3s;line-height:1.5}
+    .step-content em{font-style:normal;color:var(--accent);font-weight:700}
+    .step-content.shown{opacity:1;transform:none}
+    .step-content.hidden{opacity:.35;background:var(--surface);border:1.5px dashed var(--border)}
+    .step-fill{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
+    select,.fill-input{padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--surface);color:var(--ink);font-family:var(--font);font-size:.86rem;cursor:pointer}
+    select:focus,.fill-input:focus{outline:none;border-color:var(--accent)}
+    .check-btn{padding:8px 18px;border:none;border-radius:999px;background:var(--accent);color:#fff;font-family:var(--font);font-size:.82rem;font-weight:700;cursor:pointer;transition:filter .15s}
+    .check-btn:hover{filter:brightness(1.1)}
+    .step-fb{font-size:.8rem;font-weight:700;margin-top:6px;min-height:18px}
+    .step-fb.ok{color:#16a34a}
+    .step-fb.no{color:#dc2626}
+    .prob-section{display:none}
+    .prob-section.active{display:flex;flex-direction:column;gap:18px}
+    .next-btn{padding:11px 26px;border:none;border-radius:999px;background:var(--accent);color:#fff;font-family:var(--font);font-size:.9rem;font-weight:700;cursor:pointer;transition:filter .15s;margin-top:6px;align-self:flex-start}
+    .next-btn:hover{filter:brightness(1.1)}
+    .final-msg{background:var(--accent);color:#fff;border-radius:var(--radius);padding:22px 26px;text-align:center;font-size:1.1rem;font-weight:800}
+    .feedback-box{padding:12px 16px;border-radius:10px;font-size:.88rem;font-weight:700;margin-top:10px;min-height:32px;transition:background .3s}
+    .feedback-box.ok{background:#dcfce7;color:#15803d}
+    .feedback-box.no{background:#fee2e2;color:#dc2626}
+    @media(max-width:600px){.card{padding:18px}.wrap{padding:20px 16px 60px;gap:16px}}
+  </style>
+</head>
+<body class="theme-a">
+
+<div class="top-bar">
+  <a class="back-link" href="index.html">← All approaches</a>
+  <div class="picker">
+    <span class="pick-label">Style:</span>
+    <button class="pick-btn active" data-theme="a"><span class="swatch swatch-a"></span>Explorer</button>
+    <button class="pick-btn" data-theme="b"><span class="swatch swatch-b"></span>Academy</button>
+    <button class="pick-btn" data-theme="c"><span class="swatch swatch-c"></span>Notebook</button>
+  </div>
+</div>
+<div class="approach-badge">Approach 5 — Worked Example Fading (Full → Partial → Light → Independent)</div>
+<div class="progress-bar">
+  <div class="prog-step active" data-prob="1">P1<br><small>Fully worked</small></div>
+  <div class="prog-step" data-prob="2">P2<br><small>Last step yours</small></div>
+  <div class="prog-step" data-prob="3">P3<br><small>Most steps yours</small></div>
+  <div class="prog-step" data-prob="4">P4<br><small>Independent</small></div>
+</div>
+
+<main class="wrap">
+
+  <!-- PROBLEM 1: Fully worked -->
+  <div class="prob-section active" id="prob1">
+    <div class="card">
+      <div class="card-head">Problem 1: Plot (4, 2) <span class="chip">Fully worked</span></div>
+      <span class="scaffold-level scaffold-full">📗 All steps shown for you</span>
+      <div class="problem-layout">
+        <div class="svg-bg"><svg id="g1" viewBox="0 0 260 260" width="200" aria-label="Grid 1"></svg></div>
+        <div class="steps-list">
+          <div class="step-item">
+            <div class="step-num">1</div>
+            <div class="step-content shown" id="s1-1">Start at the <em>origin (0, 0)</em> — the center of the grid.</div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">2</div>
+            <div class="step-content" id="s1-2" style="opacity:.35">x = <em>+4</em> → move <em>4 units right</em> (positive = right).</div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">3</div>
+            <div class="step-content" id="s1-3" style="opacity:.35">y = <em>+2</em> → move <em>2 units up</em> (positive = up).</div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">4</div>
+            <div class="step-content" id="s1-4" style="opacity:.35;background:var(--accent);color:white">Mark the spot. <em style="color:white">Point plotted at (4, 2) ✓</em></div>
+          </div>
+        </div>
+      </div>
+      <button class="next-btn" id="play-p1">▶ Play through steps</button>
+    </div>
+    <button class="next-btn" id="to-p2" style="display:none">Next problem →</button>
+  </div>
+
+  <!-- PROBLEM 2: Last step yours -->
+  <div class="prob-section" id="prob2">
+    <div class="card">
+      <div class="card-head">Problem 2: Plot (−3, 1) <span class="chip">Last step yours</span></div>
+      <span class="scaffold-level scaffold-partial">📒 First 3 steps shown — you plot the point</span>
+      <div class="problem-layout">
+        <div class="svg-bg"><svg id="g2" viewBox="0 0 260 260" width="200" style="cursor:crosshair" aria-label="Grid 2"></svg></div>
+        <div class="steps-list">
+          <div class="step-item"><div class="step-num">1</div><div class="step-content shown">Start at the <em>origin (0, 0)</em>.</div></div>
+          <div class="step-item"><div class="step-num">2</div><div class="step-content shown">x = <em>−3</em> → move <em>3 units left</em>.</div></div>
+          <div class="step-item"><div class="step-num">3</div><div class="step-content shown">y = <em>+1</em> → move <em>1 unit up</em>.</div></div>
+          <div class="step-item">
+            <div class="step-num">4</div>
+            <div class="step-content hidden">Click the grid to place the point at <em>(−3, 1)</em>.</div>
+          </div>
+        </div>
+      </div>
+      <div class="feedback-box" id="fb2"></div>
+    </div>
+    <button class="next-btn" id="to-p3" style="display:none">Next problem →</button>
+  </div>
+
+  <!-- PROBLEM 3: Most steps yours -->
+  <div class="prob-section" id="prob3">
+    <div class="card">
+      <div class="card-head">Problem 3: Plot (2, −4) <span class="chip">Most steps yours</span></div>
+      <span class="scaffold-level scaffold-light">📙 Only the first step shown</span>
+      <div class="problem-layout">
+        <div class="svg-bg"><svg id="g3" viewBox="0 0 260 260" width="200" style="cursor:crosshair" aria-label="Grid 3"></svg></div>
+        <div class="steps-list">
+          <div class="step-item"><div class="step-num">1</div><div class="step-content shown">Start at the <em>origin (0, 0)</em>.</div></div>
+          <div class="step-item">
+            <div class="step-num">2</div>
+            <div class="step-content hidden">
+              x = 2, so move:
+              <div class="step-fill">
+                <select id="p3-dir">
+                  <option value="">pick direction</option>
+                  <option value="right">right (+)</option>
+                  <option value="left">left (−)</option>
+                </select>
+                <select id="p3-dist">
+                  <option value="">pick units</option>
+                  <option value="1">1 unit</option>
+                  <option value="2">2 units</option>
+                  <option value="3">3 units</option>
+                  <option value="4">4 units</option>
+                </select>
+                <button class="check-btn" id="p3-check-x">Check</button>
+              </div>
+              <div class="step-fb" id="fb3-x"></div>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">3</div>
+            <div class="step-content hidden" id="p3-s3">
+              y = −4, so move:
+              <div class="step-fill">
+                <select id="p3-dir2">
+                  <option value="">pick direction</option>
+                  <option value="up">up (+)</option>
+                  <option value="down">down (−)</option>
+                </select>
+                <select id="p3-dist2">
+                  <option value="">pick units</option>
+                  <option value="1">1 unit</option>
+                  <option value="2">2 units</option>
+                  <option value="3">3 units</option>
+                  <option value="4">4 units</option>
+                </select>
+                <button class="check-btn" id="p3-check-y">Check</button>
+              </div>
+              <div class="step-fb" id="fb3-y"></div>
+            </div>
+          </div>
+          <div class="step-item">
+            <div class="step-num">4</div>
+            <div class="step-content hidden" id="p3-s4">Click the grid to place the point at <em>(2, −4)</em>.</div>
+          </div>
+        </div>
+      </div>
+      <div class="feedback-box" id="fb3"></div>
+    </div>
+    <button class="next-btn" id="to-p4" style="display:none">Final problem →</button>
+  </div>
+
+  <!-- PROBLEM 4: Independent -->
+  <div class="prob-section" id="prob4">
+    <div class="card">
+      <div class="card-head">Problem 4: Plot (−5, 3) <span class="chip">Independent</span></div>
+      <span class="scaffold-level scaffold-none">📕 No hints — you've got this</span>
+      <div class="svg-bg" style="max-width:260px">
+        <svg id="g4" viewBox="0 0 260 260" width="260" style="cursor:crosshair" aria-label="Grid 4"></svg>
+      </div>
+      <div class="feedback-box" id="fb4"></div>
+    </div>
+    <div class="final-msg" id="final-msg" style="display:none">
+      🎉 You worked through 4 problems — each time doing more yourself. That's how you build real skill.
+    </div>
+  </div>
+
+</main>
+
+<script>
+const NS='http://www.w3.org/2000/svg',S=24,CX=130,CY=130;
+
+(function(){var b=document.body,bs=document.querySelectorAll('.pick-btn');function at(t,s){b.classList.remove('theme-a','theme-b','theme-c');b.classList.add('theme-'+t);bs.forEach(function(btn){var on=btn.dataset.theme===t;btn.classList.toggle('active',on);btn.setAttribute('aria-pressed',on);});if(s)localStorage.setItem('edu-theme',t);initAll();}bs.forEach(function(btn){btn.addEventListener('click',function(){at(btn.dataset.theme,true);});});var sv=localStorage.getItem('edu-theme');if(sv&&['a','b','c'].includes(sv))at(sv,false);})();
+function mkE(tag,a){const el=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(a))el.setAttribute(k,v);return el;}
+function isDark(){return document.body.classList.contains('theme-b');}
+function accent(){return getComputedStyle(document.body).getPropertyValue('--accent').trim();}
+
+function buildGrid(svg){
+  svg.innerHTML='';
+  const dark=isDark();
+  const gc=dark?'rgba(255,255,255,.1)':'rgba(0,0,0,.1)';
+  const ac=dark?'rgba(255,255,255,.5)':'rgba(0,0,0,.45)';
+  const lc=dark?'#94a3b8':'#64748b';
+  for(let i=-5;i<=5;i++){
+    svg.appendChild(mkE('line',{x1:CX+i*S,y1:10,x2:CX+i*S,y2:250,stroke:i===0?ac:gc,'stroke-width':i===0?2:1}));
+    svg.appendChild(mkE('line',{x1:10,y1:CY-i*S,x2:250,y2:CY-i*S,stroke:i===0?ac:gc,'stroke-width':i===0?2:1}));
+    if(i!==0){
+      const xt=mkE('text',{x:CX+i*S,y:CY+15,'text-anchor':'middle',fill:lc,'font-size':'10','font-family':'Arial'});xt.textContent=i;svg.appendChild(xt);
+      const yt=mkE('text',{x:CX-7,y:CY-i*S+4,'text-anchor':'end',fill:lc,'font-size':'10','font-family':'Arial'});yt.textContent=i;svg.appendChild(yt);
+    }
+  }
+  const xl=mkE('text',{x:255,y:CY+4,fill:ac,'font-size':'12','font-weight':'bold','font-family':'Arial'});xl.textContent='x';svg.appendChild(xl);
+  const yl=mkE('text',{x:CX+4,y:7,fill:ac,'font-size':'12','font-weight':'bold','font-family':'Arial'});yl.textContent='y';svg.appendChild(yl);
+  const o=mkE('text',{x:CX-7,y:CY+15,'text-anchor':'end',fill:lc,'font-size':'10','font-family':'Arial'});o.textContent='0';svg.appendChild(o);
+}
+function plotPt(svg,gx,gy,color,label){
+  const px=CX+gx*S,py=CY-gy*S,g=mkE('g',{});
+  g.appendChild(mkE('circle',{cx:px,cy:py,r:7,fill:color,stroke:'white','stroke-width':2.5}));
+  if(label){const t=mkE('text',{x:px+10,y:py-10,fill:color,'font-size':'12','font-weight':'bold','font-family':'Arial'});t.textContent=label;g.appendChild(t);}
+  svg.appendChild(g);return g;
+}
+function drawArrow(svg,x1,y1,x2,y2,color){
+  svg.appendChild(mkE('line',{x1,y1,x2,y2,stroke:color,'stroke-width':2.5,'stroke-dasharray':'6,3'}));
+}
+function clickToGrid(evt,svgEl){
+  const r=svgEl.getBoundingClientRect();
+  const sx=(evt.clientX-r.left)*260/r.width,sy=(evt.clientY-r.top)*260/r.height;
+  return{x:Math.max(-5,Math.min(5,Math.round((sx-CX)/S))),y:Math.max(-5,Math.min(5,Math.round((CY-sy)/S)))};
+}
+
+function showStep(id){document.getElementById(id).style.opacity='1';}
+
+/* PROBLEM 1 */
+let p1Playing=false;
+document.getElementById('play-p1').addEventListener('click',function(){
+  if(p1Playing)return;p1Playing=true;this.disabled=true;
+  const svg=document.getElementById('g1');
+  const ac=accent();
+  buildGrid(svg);
+  setTimeout(()=>{svg.appendChild(mkE('circle',{cx:CX,cy:CY,r:5,fill:'#94a3b8'}));showStep('s1-1');},200);
+  setTimeout(()=>{drawArrow(svg,CX,CY,CX+4*S,CY,ac);showStep('s1-2');},700);
+  setTimeout(()=>{drawArrow(svg,CX+4*S,CY,CX+4*S,CY-2*S,ac);showStep('s1-3');},1400);
+  setTimeout(()=>{plotPt(svg,4,2,ac,'(4,2) ✓');document.getElementById('s1-4').style.opacity='1';document.getElementById('s1-4').style.background='var(--accent)';document.getElementById('s1-4').style.color='white';},2100);
+  setTimeout(()=>{document.getElementById('to-p2').style.display='block';},2600);
+});
+
+/* PROBLEM 2 */
+let p2Done=false;
+document.getElementById('g2').addEventListener('click',function(evt){
+  if(p2Done)return;
+  const{x,y}=clickToGrid(evt,this);
+  buildGrid(this);
+  const fb=document.getElementById('fb2');
+  if(x===-3&&y===1){
+    p2Done=true;
+    plotPt(this,-3,1,accent(),'(−3,1) ✓');
+    fb.textContent='✓ Correct! You plotted (−3, 1).';fb.className='feedback-box ok';
+    setTimeout(()=>document.getElementById('to-p3').style.display='block',600);
+  } else {
+    plotPt(this,x,y,'#ef4444',`(${x},${y})`);
+    fb.textContent=`That's (${x}, ${y}) — not quite. Remember: x=−3 means 3 left, y=+1 means 1 up.`;fb.className='feedback-box no';
+  }
+});
+
+/* PROBLEM 3 */
+let p3xOk=false,p3yOk=false,p3Done=false;
+document.getElementById('p3-check-x').addEventListener('click',function(){
+  const dir=document.getElementById('p3-dir').value;
+  const dist=document.getElementById('p3-dist').value;
+  const fb=document.getElementById('fb3-x');
+  if(dir==='right'&&dist==='2'){
+    fb.textContent='✓ Correct — 2 units right.';fb.className='step-fb ok';
+    p3xOk=true;document.getElementById('p3-s3').style.opacity='1';
+  } else {
+    fb.textContent='Not quite — x=2 means move right 2.';fb.className='step-fb no';
+  }
+});
+document.getElementById('p3-check-y').addEventListener('click',function(){
+  const dir=document.getElementById('p3-dir2').value;
+  const dist=document.getElementById('p3-dist2').value;
+  const fb=document.getElementById('fb3-y');
+  if(dir==='down'&&dist==='4'){
+    fb.textContent='✓ Correct — 4 units down.';fb.className='step-fb ok';
+    p3yOk=true;document.getElementById('p3-s4').style.opacity='1';
+    document.getElementById('p3-s4').style.background='var(--accent-soft)';
+  } else {
+    fb.textContent='Not quite — y=−4 means move down 4.';fb.className='step-fb no';
+  }
+});
+document.getElementById('g3').addEventListener('click',function(evt){
+  if(p3Done||!p3xOk||!p3yOk)return;
+  const{x,y}=clickToGrid(evt,this);
+  buildGrid(this);
+  const fb=document.getElementById('fb3');
+  if(x===2&&y===-4){
+    p3Done=true;
+    plotPt(this,2,-4,accent(),'(2,−4) ✓');
+    fb.textContent='✓ Correct!';fb.className='feedback-box ok';
+    setTimeout(()=>document.getElementById('to-p4').style.display='block',600);
+  } else {
+    plotPt(this,x,y,'#ef4444',`(${x},${y})`);
+    fb.textContent=`That's (${x}, ${y}) — try again.`;fb.className='feedback-box no';
+  }
+});
+
+/* PROBLEM 4 */
+let p4Done=false;
+document.getElementById('g4').addEventListener('click',function(evt){
+  if(p4Done)return;
+  const{x,y}=clickToGrid(evt,this);
+  buildGrid(this);
+  const fb=document.getElementById('fb4');
+  if(x===-5&&y===3){
+    p4Done=true;
+    plotPt(this,-5,3,accent(),'(−5,3) ✓');
+    fb.textContent='✓ Perfect — (−5, 3) is 5 left and 3 up.';fb.className='feedback-box ok';
+    setTimeout(()=>document.getElementById('final-msg').style.display='block',600);
+  } else {
+    plotPt(this,x,y,'#ef4444',`(${x},${y})`);
+    fb.textContent=`You clicked (${x}, ${y}). Remember: first move left/right, then up/down.`;fb.className='feedback-box no';
+  }
+});
+
+/* Navigation */
+function goToProb(n){
+  document.querySelectorAll('.prob-section').forEach(el=>el.classList.remove('active'));
+  document.querySelectorAll('.prog-step').forEach(el=>el.classList.remove('active'));
+  document.getElementById('prob'+n).classList.add('active');
+  document.querySelectorAll('.prog-step')[n-1].classList.add('active');
+  for(let i=1;i<n;i++)document.querySelectorAll('.prog-step')[i-1].classList.add('done');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+document.getElementById('to-p2').addEventListener('click',()=>goToProb(2));
+document.getElementById('to-p3').addEventListener('click',()=>goToProb(3));
+document.getElementById('to-p4').addEventListener('click',()=>goToProb(4));
+
+function initAll(){
+  ['g1','g2','g3','g4'].forEach(id=>buildGrid(document.getElementById(id)));
+}
+initAll();
+</script>
+</body>
+</html>

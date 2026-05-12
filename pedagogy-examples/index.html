@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pedagogy Comparison — Graphing Coordinates</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Plus Jakarta Sans',system-ui,sans-serif;background:#f0f2f8;color:#1a1f36;min-height:100vh;line-height:1.6}
+    .hero{background:linear-gradient(135deg,#1a1f36 0%,#2d3561 100%);color:white;padding:52px 24px 48px;text-align:center}
+    .hero h1{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:800;letter-spacing:-.03em;line-height:1.1}
+    .hero h1 em{font-style:normal;color:#a5b4fc}
+    .hero p{margin-top:12px;font-size:1.05rem;opacity:.8;max-width:54ch;margin-inline:auto}
+    .hero .topic{display:inline-block;margin-top:18px;padding:5px 18px;background:rgba(165,180,252,.15);border:1px solid rgba(165,180,252,.3);border-radius:999px;font-size:.8rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:#a5b4fc}
+    .wrap{max-width:1100px;margin:0 auto;padding:48px 24px 80px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:24px}
+    .card{background:white;border-radius:20px;box-shadow:0 2px 4px rgba(0,0,0,.05),0 12px 32px rgba(0,0,0,.06);overflow:hidden;display:flex;flex-direction:column;transition:transform .2s,box-shadow .2s}
+    .card:hover{transform:translateY(-4px);box-shadow:0 4px 8px rgba(0,0,0,.06),0 20px 44px rgba(0,0,0,.1)}
+    .card-top{padding:24px 24px 0;display:flex;align-items:flex-start;gap:14px}
+    .num{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;font-size:1.1rem;font-weight:800;flex-shrink:0}
+    .card-title{font-size:1.05rem;font-weight:800;margin-bottom:4px}
+    .card-subtitle{font-size:.82rem;color:#64748b;font-weight:600;letter-spacing:.04em;text-transform:uppercase}
+    .card-body{padding:16px 24px;flex:1}
+    .card-body p{font-size:.9rem;color:#475569;line-height:1.65;margin-bottom:10px}
+    .flow{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+    .flow-step{padding:3px 10px;border-radius:999px;font-size:.75rem;font-weight:700}
+    .card-footer{padding:16px 24px 24px}
+    a.btn{display:block;padding:11px;border-radius:12px;text-align:center;text-decoration:none;font-weight:800;font-size:.9rem;transition:filter .15s}
+    a.btn:hover{filter:brightness(1.08)}
+    .note{margin-top:32px;padding:20px 24px;background:white;border-radius:16px;border-left:4px solid #4f46e5;font-size:.9rem;color:#475569;line-height:1.7}
+    .note strong{color:#1a1f36}
+    @media(max-width:600px){.wrap{padding:28px 16px 60px}}
+  </style>
+</head>
+<body>
+<header class="hero">
+  <h1>Five Ways to Teach the <em>Same Lesson</em></h1>
+  <p>The same topic — graphing coordinates — taught five different ways. Each approach has a different theory of how learning sticks.</p>
+  <span class="topic">6th Grade · Graphing Coordinates</span>
+</header>
+
+<main class="wrap">
+  <div class="grid">
+
+    <div class="card">
+      <div class="card-top">
+        <div class="num" style="background:#ede9fe;color:#6d28d9">1</div>
+        <div>
+          <div class="card-title">Explore First</div>
+          <div class="card-subtitle">Hook → Discover → Name</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>Students play with the coordinate grid <em>before</em> the concept is named. The label "ordered pair" arrives as an explanation of what they already noticed, not as a definition to memorize.</p>
+        <p>Based on the <strong>generation effect</strong> — brains that struggle first remember the explanation better.</p>
+        <div class="flow">
+          <span class="flow-step" style="background:#ede9fe;color:#6d28d9">Story hook</span>
+          <span class="flow-step" style="background:#ede9fe;color:#6d28d9">Free explore</span>
+          <span class="flow-step" style="background:#ede9fe;color:#6d28d9">Concept name</span>
+          <span class="flow-step" style="background:#ede9fe;color:#6d28d9">Apply</span>
+          <span class="flow-step" style="background:#ede9fe;color:#6d28d9">Try it</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <a class="btn" href="01-explore-first.html" style="background:#6d28d9;color:white">Open lesson →</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <div class="num" style="background:#dbeafe;color:#1d4ed8">2</div>
+        <div>
+          <div class="card-title">Direct Instruction</div>
+          <div class="card-subtitle">Define → Model → Practice</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>Concept and vocabulary come first, explicitly. The teacher (this page) models three worked examples, then hands off to guided practice, then independent practice.</p>
+        <p>Based on <strong>Rosenshine's Principles</strong> — high-effect-size approach especially for students with limited prior knowledge.</p>
+        <div class="flow">
+          <span class="flow-step" style="background:#dbeafe;color:#1d4ed8">Objective</span>
+          <span class="flow-step" style="background:#dbeafe;color:#1d4ed8">Definitions</span>
+          <span class="flow-step" style="background:#dbeafe;color:#1d4ed8">3 worked examples</span>
+          <span class="flow-step" style="background:#dbeafe;color:#1d4ed8">Guided</span>
+          <span class="flow-step" style="background:#dbeafe;color:#1d4ed8">Independent</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <a class="btn" href="02-direct-instruction.html" style="background:#1d4ed8;color:white">Open lesson →</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <div class="num" style="background:#dcfce7;color:#15803d">3</div>
+        <div>
+          <div class="card-title">Concrete → Pictorial → Abstract</div>
+          <div class="card-subtitle">CPA · Singapore Math</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>Three distinct stages: first a city-map metaphor students can touch and relate to; then a visual coordinate grid; then pure (x, y) notation. Students cannot skip stages.</p>
+        <p>Based on <strong>Bruner's CPA model</strong> — widely used in Singapore's top-ranked math curriculum.</p>
+        <div class="flow">
+          <span class="flow-step" style="background:#dcfce7;color:#15803d">Concrete map</span>
+          <span class="flow-step" style="background:#dcfce7;color:#15803d">→ Grid diagram</span>
+          <span class="flow-step" style="background:#dcfce7;color:#15803d">→ (x, y) symbols</span>
+          <span class="flow-step" style="background:#dcfce7;color:#15803d">Practice</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <a class="btn" href="03-cpa.html" style="background:#15803d;color:white">Open lesson →</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <div class="num" style="background:#fef3c7;color:#b45309">4</div>
+        <div>
+          <div class="card-title">Three-Act Structure</div>
+          <div class="card-subtitle">Dan Meyer's Model</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>Act 1 poses an unresolvable mystery — a location on an unlabeled grid. Act 2 lets students request information piece by piece. Act 3 resolves the mystery and introduces the formal math.</p>
+        <p>Designed to make students <em>want</em> the concept before they receive it.</p>
+        <div class="flow">
+          <span class="flow-step" style="background:#fef3c7;color:#b45309">Mystery</span>
+          <span class="flow-step" style="background:#fef3c7;color:#b45309">Request info</span>
+          <span class="flow-step" style="background:#fef3c7;color:#b45309">Resolution</span>
+          <span class="flow-step" style="background:#fef3c7;color:#b45309">Formal math</span>
+          <span class="flow-step" style="background:#fef3c7;color:#b45309">Practice</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <a class="btn" href="04-three-act.html" style="background:#b45309;color:white">Open lesson →</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <div class="num" style="background:#fce7f3;color:#be185d">5</div>
+        <div>
+          <div class="card-title">Worked Example Fading</div>
+          <div class="card-subtitle">Cognitive Load Theory</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <p>Four problems, each with less scaffolding than the last. Problem 1 is fully solved for you. Problem 4 is completely independent. The transition is gradual so the "blank page" never appears suddenly.</p>
+        <p>Based on <strong>Sweller's Cognitive Load Theory</strong> — reduces frustration at the guided-to-independent handoff.</p>
+        <div class="flow">
+          <span class="flow-step" style="background:#fce7f3;color:#be185d">Fully worked</span>
+          <span class="flow-step" style="background:#fce7f3;color:#be185d">Last step missing</span>
+          <span class="flow-step" style="background:#fce7f3;color:#be185d">Most missing</span>
+          <span class="flow-step" style="background:#fce7f3;color:#be185d">Independent</span>
+        </div>
+      </div>
+      <div class="card-footer">
+        <a class="btn" href="05-example-fading.html" style="background:#be185d;color:white">Open lesson →</a>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="note">
+    <strong>These are comparison prototypes</strong> — not production lessons. Each page uses the same content (graphing coordinates, 6th grade) but a different information architecture. After comparing, decide which approach or combination fits your students best, then apply it to new lessons using <code>_template.html</code>.
+  </div>
+</main>
+</body>
+</html>

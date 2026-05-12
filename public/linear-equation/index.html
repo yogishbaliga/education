@@ -4,7 +4,83 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Linear Equations Lab</title>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-C19PRJPV7K"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-C19PRJPV7K');
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
   <style>
+    /* ═══ THEME TOKENS ═══ */
+    body.theme-a {
+      --accent: #c85b1b; --accent-soft: #fce8db;
+      --font: 'Plus Jakarta Sans', "Avenir Next", system-ui, sans-serif;
+      /* keep the warm gradient background native to this page */
+    }
+    body.theme-b {
+      --accent: #f59e0b; --accent-soft: rgba(245,158,11,.12);
+      --bg: #0f172a; --paper: #1e293b; --ink: #f1f5f9;
+      --font: 'Inter', "Avenir Next", system-ui, sans-serif;
+      background: #0f172a;
+    }
+    body.theme-c {
+      --accent: #0d9488; --accent-soft: #ccfbf1;
+      --font: 'Nunito', "Avenir Next", system-ui, sans-serif;
+      background: linear-gradient(165deg, #fef3c7 0%, #fde68a 40%, #fbbf24 100%);
+      background-attachment: fixed;
+    }
+    /* ─── top bar ─── */
+    .top-bar {
+      position: sticky; top: 0; z-index: 200;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; flex-wrap: wrap; padding: 10px 20px;
+      background: rgba(255,255,255,.85); border-bottom: 1px solid rgba(23,48,66,.1);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      transition: background .4s, border-color .3s;
+    }
+    body.theme-b .top-bar { background: rgba(30,41,59,.95); border-bottom-color: rgba(255,255,255,.08); }
+    .back-link { font-size: .82rem; font-weight: 700; color: var(--accent); text-decoration: none; white-space: nowrap; }
+    .back-link:hover { text-decoration: underline; }
+    .picker { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .pick-label { font-size: .74rem; font-weight: 700; color: #64748b; margin-right: 2px; white-space: nowrap; }
+    body.theme-b .pick-label { color: #94a3b8; }
+    .pick-btn {
+      display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px 5px 7px;
+      background: transparent; border: 1.5px solid rgba(23,48,66,.12); border-radius: 999px;
+      cursor: pointer; font-family: var(--font, "Avenir Next", sans-serif); font-size: .76rem; font-weight: 700;
+      color: #64748b; transition: border-color .2s, color .2s, background .2s;
+    }
+    body.theme-b .pick-btn { border-color: rgba(255,255,255,.08); color: #94a3b8; }
+    .pick-btn:hover  { border-color: var(--accent); color: var(--ink, #173042); }
+    .pick-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .swatch { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; border: 2px solid rgba(128,128,128,.2); }
+    .swatch-a { background: conic-gradient(#f9f8f5 0 50%, #2563eb 50%); }
+    .swatch-b { background: conic-gradient(#0f172a 0 50%, #f59e0b 50%); }
+    .swatch-c { background: conic-gradient(#fde68a 0 50%, #0d9488 50%); }
+    /* ─── structural overrides ─── */
+    body { font-family: var(--font, "Avenir Next", "Trebuchet MS", sans-serif); transition: color .3s, background-color .4s; }
+    body.theme-b::before, body.theme-b::after { display: none; }
+    body.theme-c::before, body.theme-c::after { display: none; }
+    body.theme-b .hero, body.theme-b .section, body.theme-b .practice-card {
+      background: rgba(30,41,59,.95); border-color: rgba(255,255,255,.08);
+    }
+    body.theme-b .mini-card, body.theme-b .tip {
+      background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.08);
+    }
+    body.theme-b .concept-list li, body.theme-b .steps-list li {
+      background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.08);
+    }
+    body.theme-b .step-card { background: rgba(255,255,255,.05); border-color: rgba(255,255,255,.06); color: #f1f5f9; }
+    body.theme-b .caption { background: rgba(30,41,59,.8); color: #f1f5f9; }
+    body.theme-b input { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.12); color: #f1f5f9; }
+    body.theme-b .feedback.good { color: #34d399; }
+    body.theme-b .feedback.try  { color: #fbbf24; }
+
     :root {
       --bg: #f5efe2;
       --paper: #fff9ef;
@@ -603,7 +679,16 @@
     }
   </style>
 </head>
-<body>
+<body class="theme-a">
+<div class="top-bar">
+  <a class="back-link" href="../index.html">← All lessons</a>
+  <div class="picker" role="navigation" aria-label="Visual style">
+    <span class="pick-label">Style:</span>
+    <button class="pick-btn active" data-theme="a" aria-pressed="true"><span class="swatch swatch-a"></span>Explorer</button>
+    <button class="pick-btn" data-theme="b" aria-pressed="false"><span class="swatch swatch-b"></span>Academy</button>
+    <button class="pick-btn" data-theme="c" aria-pressed="false"><span class="swatch swatch-c"></span>Notebook</button>
+  </div>
+</div>
   <main class="page">
     <section class="hero fade-up visible">
       <div>
@@ -881,6 +966,20 @@
   </main>
 
   <script>
+    /* ── theme switcher ── */
+    (function () {
+      var body = document.body, btns = document.querySelectorAll('.pick-btn');
+      function applyTheme(t, save) {
+        body.classList.remove('theme-a', 'theme-b', 'theme-c');
+        body.classList.add('theme-' + t);
+        btns.forEach(function (b) { var on = b.dataset.theme === t; b.classList.toggle('active', on); b.setAttribute('aria-pressed', on); });
+        if (save) localStorage.setItem('edu-theme', t);
+      }
+      btns.forEach(function (b) { b.addEventListener('click', function () { applyTheme(b.dataset.theme, true); }); });
+      var saved = localStorage.getItem('edu-theme');
+      if (saved && ['a', 'b', 'c'].includes(saved)) applyTheme(saved, false);
+    })();
+
     const stepStates = [
       {
         equationLeft: "y = 0.75x + 5",

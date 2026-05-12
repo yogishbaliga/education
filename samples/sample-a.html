@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sample A — Focused Explorer | Pythagorean Theorem</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg:           #f9f8f5;
+      --surface:      #ffffff;
+      --border:       #e4e4e7;
+      --ink:          #18181b;
+      --muted:        #71717a;
+      --accent:       #2563eb;
+      --accent-soft:  #eff6ff;
+      --green:        #16a34a;
+      --green-soft:   #dcfce7;
+      --radius:       16px;
+      --shadow:       0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.07);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    /* ── compare nav ── */
+    .cmp-nav {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 10px 24px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      flex-wrap: wrap;
+    }
+    .cmp-nav strong { color: var(--ink); font-weight: 700; margin-right: 4px; }
+    .cmp-nav a {
+      padding: 5px 14px;
+      border-radius: 7px;
+      font-weight: 600;
+      text-decoration: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      transition: all .15s;
+    }
+    .cmp-nav a:hover { border-color: var(--accent); color: var(--accent); }
+    .cmp-nav a.here { background: var(--accent); border-color: var(--accent); color: white; }
+
+    /* ── hero ── */
+    .hero {
+      background: white;
+      border-bottom: 1px solid var(--border);
+      padding: 52px 24px 48px;
+      text-align: center;
+    }
+    .badge {
+      display: inline-block;
+      padding: 5px 14px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 999px;
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800;
+      letter-spacing: -.03em;
+      line-height: 1.1;
+    }
+    .hero h1 em { font-style: normal; color: var(--accent); }
+    .hero-sub {
+      margin-top: 12px;
+      font-size: 1.05rem;
+      color: var(--muted);
+      max-width: 52ch;
+      margin-inline: auto;
+    }
+    .formula-display {
+      display: inline-block;
+      margin-top: 26px;
+      padding: 14px 36px;
+      background: var(--ink);
+      color: white;
+      border-radius: 14px;
+      font-size: 1.65rem;
+      font-weight: 800;
+      letter-spacing: -.01em;
+    }
+    .formula-display sup { font-size: .62em; vertical-align: super; }
+
+    /* ── layout ── */
+    .wrap {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 44px 24px 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* ── card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px 32px;
+    }
+    .card-heading {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.05rem;
+      font-weight: 800;
+      margin-bottom: 18px;
+    }
+    .card-heading .icon {
+      width: 32px; height: 32px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-size: .88rem;
+      flex-shrink: 0;
+    }
+
+    /* ── story ── */
+    .story-body p {
+      color: var(--muted);
+      font-size: .95rem;
+      line-height: 1.75;
+      margin-bottom: 10px;
+    }
+    .story-body strong { color: var(--ink); }
+    .callout {
+      margin-top: 16px;
+      padding: 13px 18px;
+      background: var(--accent-soft);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 10px 10px 0;
+      font-size: .9rem;
+      font-weight: 500;
+    }
+
+    /* ── interactive ── */
+    .interact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      align-items: center;
+    }
+    @media (max-width: 600px) { .interact-grid { grid-template-columns: 1fr; } }
+
+    .sliders { display: flex; flex-direction: column; gap: 22px; }
+    .sl-row label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: .86rem;
+      font-weight: 700;
+      margin-bottom: 9px;
+    }
+    .sl-row label .v { font-size: 1.15rem; color: var(--accent); font-variant-numeric: tabular-nums; }
+    input[type=range] {
+      width: 100%; appearance: none; -webkit-appearance: none;
+      height: 6px; border-radius: 999px;
+      background: var(--border); outline: none; cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px; height: 20px;
+      background: var(--accent);
+      border: 3px solid white;
+      border-radius: 50%;
+      box-shadow: 0 1px 4px rgba(37,99,235,.35);
+    }
+    input[type=range]::-moz-range-thumb {
+      width: 20px; height: 20px;
+      background: var(--accent);
+      border: 3px solid white;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    .perfect {
+      display: none;
+      margin-top: 14px;
+      padding: 9px 14px;
+      background: var(--green-soft);
+      color: var(--green);
+      border-radius: 9px;
+      font-size: .82rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .tri-bg {
+      background: var(--accent-soft);
+      border-radius: 12px;
+      padding: 6px;
+    }
+    #tri-svg text { font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 700; font-size: 13px; }
+
+    /* ── steps ── */
+    .steps { display: flex; flex-direction: column; gap: 10px; }
+    .step { display: flex; align-items: flex-start; gap: 12px; }
+    .step-n {
+      width: 28px; height: 28px;
+      background: var(--accent);
+      color: white;
+      border-radius: 50%;
+      display: grid; place-items: center;
+      font-size: .75rem; font-weight: 800;
+      flex-shrink: 0; margin-top: 3px;
+    }
+    .step-box {
+      flex: 1;
+      padding: 12px 16px;
+      background: var(--bg);
+      border-radius: 10px;
+    }
+    .step-label { color: var(--muted); font-size: .78rem; margin-bottom: 4px; }
+    .step-eq { font-weight: 700; font-size: .98rem; }
+    .step-eq em { font-style: normal; color: var(--accent); }
+
+    /* ── insight ── */
+    .insight {
+      background: var(--accent);
+      color: white;
+      border-radius: var(--radius);
+      padding: 24px 28px;
+    }
+    .insight .eyebrow {
+      font-size: .72rem; font-weight: 800;
+      letter-spacing: .07em; text-transform: uppercase;
+      opacity: .7; margin-bottom: 8px;
+    }
+    .insight p { font-size: .95rem; line-height: 1.65; opacity: .92; }
+    .insight strong { font-weight: 800; opacity: 1; }
+
+    @media (max-width: 600px) {
+      .card { padding: 20px 18px; }
+      .wrap { padding: 28px 16px 60px; gap: 20px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="cmp-nav">
+  <strong>Compare styles:</strong>
+  <a href="sample-a.html" class="here">A · Focused Explorer</a>
+  <a href="sample-b.html">B · Dark Academy</a>
+  <a href="sample-c.html">C · Notebook Energy</a>
+</nav>
+
+<header class="hero">
+  <div class="badge">Grades 6–12 · Geometry</div>
+  <h1>The <em>Pythagorean</em> Theorem</h1>
+  <p class="hero-sub">Discover why a² + b² = c² has been reshaping the world for 2,500 years — and solve a real problem right now.</p>
+  <div class="formula-display">a<sup>2</sup> + b<sup>2</sup> = c<sup>2</sup></div>
+</header>
+
+<main class="wrap">
+
+  <div class="card">
+    <div class="card-heading"><div class="icon">🚒</div> The Ladder Problem</div>
+    <div class="story-body">
+      <p>Maya is a firefighter. She parks her truck <strong>5 meters</strong> from the base of a burning building. The window she needs to reach is <strong>12 meters</strong> above the ground.</p>
+      <p>Her ladder runs from the truck to the window in a straight line — forming the longest side of a right triangle. How long must it be?</p>
+      <p>The Pythagorean Theorem gives us the answer instantly. No measuring tape needed.</p>
+    </div>
+    <div class="callout"><strong>Key idea:</strong> In any right triangle, the square of the hypotenuse (longest side, opposite the 90° corner) equals the sum of the squares of the two legs.</div>
+  </div>
+
+  <div class="card">
+    <div class="card-heading"><div class="icon">△</div> Explore the Triangle</div>
+    <div class="interact-grid">
+      <div class="sliders">
+        <div class="sl-row">
+          <label>Side <i>a</i> — horizontal leg <span class="v" id="va">5</span></label>
+          <input type="range" id="sa" min="1" max="15" value="5"/>
+        </div>
+        <div class="sl-row">
+          <label>Side <i>b</i> — vertical leg <span class="v" id="vb">12</span></label>
+          <input type="range" id="sb" min="1" max="15" value="12"/>
+        </div>
+        <div class="perfect" id="perfect">✓ Pythagorean Triple — c is a whole number!</div>
+      </div>
+      <div class="tri-bg">
+        <svg id="tri-svg" viewBox="0 0 320 240" width="100%" aria-label="Right triangle">
+          <polygon id="tf" points="60,215 125,215 60,59" fill="rgba(37,99,235,.1)"/>
+          <line id="la" x1="60" y1="215" x2="125" y2="215" stroke="#2563eb" stroke-width="2.5" stroke-linecap="round"/>
+          <line id="lb" x1="60" y1="215" x2="60"  y2="59"  stroke="#2563eb" stroke-width="2.5" stroke-linecap="round"/>
+          <line id="lc" x1="125" y1="215" x2="60" y2="59"  stroke="#18181b" stroke-width="3"   stroke-linecap="round"/>
+          <path d="M 70,215 L 70,205 L 60,205" stroke="#2563eb" fill="none" stroke-width="1.5"/>
+          <text id="ta" x="92"  y="232" text-anchor="middle" fill="#2563eb">a = 5</text>
+          <text id="tb" x="43"  y="140" text-anchor="end"    fill="#2563eb">b = 12</text>
+          <text id="tc" x="104" y="109" text-anchor="middle" fill="#18181b">c = 13</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-heading"><div class="icon">📐</div> Step-by-Step Solution</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-n">1</div>
+        <div class="step-box">
+          <div class="step-label">Square each leg</div>
+          <div class="step-eq">a² = <em id="a2">25</em> &nbsp;·&nbsp; b² = <em id="b2">144</em></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">2</div>
+        <div class="step-box">
+          <div class="step-label">Add them together</div>
+          <div class="step-eq">a² + b² = <em id="sm">169</em></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">3</div>
+        <div class="step-box">
+          <div class="step-label">Take the square root — that's your hypotenuse</div>
+          <div class="step-eq">c = √<em id="sm2">169</em> = <em id="cv">13</em></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="insight">
+    <div class="eyebrow">Did you know?</div>
+    <p>The <strong>(3, 4, 5)</strong> triple is the oldest known Pythagorean triple — three whole numbers that perfectly satisfy the theorem. Ancient Egyptian builders used knotted ropes in this ratio to create perfect right angles when constructing the pyramids. Set a = 3 and b = 4 to see c become exactly 5.</p>
+  </div>
+
+</main>
+
+<script>
+(function () {
+  const OX = 60, OY = 215, S = 13;
+  const TRIPLES = [[3,4],[4,3],[5,12],[12,5],[8,15],[15,8],[6,8],[8,6],[9,12],[12,9],[7,24],[24,7]];
+
+  function fmt(n) { return Number.isInteger(n) ? String(n) : n.toFixed(2); }
+
+  function render() {
+    const a = +document.getElementById('sa').value;
+    const b = +document.getElementById('sb').value;
+    const c2 = a * a + b * b;
+    const c  = Math.sqrt(c2);
+    const ax = OX + a * S, bby = OY - b * S;
+
+    document.getElementById('tf').setAttribute('points', `${OX},${OY} ${ax},${OY} ${OX},${bby}`);
+    document.getElementById('la').setAttribute('x2', ax);
+    document.getElementById('lb').setAttribute('y2', bby);
+    const lc = document.getElementById('lc');
+    lc.setAttribute('x1', ax); lc.setAttribute('y1', OY);
+    lc.setAttribute('x2', OX); lc.setAttribute('y2', bby);
+
+    const midX = (ax + OX) / 2, midY = (OY + bby) / 2;
+    const offX = (a / c) * 28, offY = (b / c) * 28;
+    const tA = document.getElementById('ta'), tB = document.getElementById('tb'), tC = document.getElementById('tc');
+    tA.setAttribute('x', (OX + ax) / 2); tA.textContent = `a = ${a}`;
+    tB.setAttribute('y', (OY + bby) / 2 + 5); tB.textContent = `b = ${b}`;
+    tC.setAttribute('x', midX + offX); tC.setAttribute('y', midY - offY); tC.textContent = `c = ${fmt(c)}`;
+
+    document.getElementById('va').textContent = a;
+    document.getElementById('vb').textContent = b;
+    document.getElementById('a2').textContent = a * a;
+    document.getElementById('b2').textContent = b * b;
+    document.getElementById('sm').textContent  = c2;
+    document.getElementById('sm2').textContent = c2;
+    document.getElementById('cv').textContent  = fmt(c);
+
+    document.getElementById('perfect').style.display =
+      TRIPLES.some(([ta, tb]) => ta === a && tb === b) ? 'block' : 'none';
+  }
+
+  document.getElementById('sa').addEventListener('input', render);
+  document.getElementById('sb').addEventListener('input', render);
+  render();
+})();
+</script>
+</body>
+</html>

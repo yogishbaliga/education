@@ -2,7 +2,9 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "education",
   "compatibility_date": "2026-04-27",
+  "main": "src/worker.js",
   "assets": {
-    "directory": "."
+    "directory": "public",
+    "binding": "ASSETS"
   }
 }

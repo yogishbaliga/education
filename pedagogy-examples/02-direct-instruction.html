@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Direct Instruction — Graphing Coordinates</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    body.theme-a{--accent:#1d4ed8;--accent-soft:#dbeafe;--bg:#f9f8f5;--surface:#fff;--border:#e4e4e7;--ink:#18181b;--muted:#71717a;--radius:16px;--shadow:0 1px 3px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.07);--font:'Plus Jakarta Sans',system-ui,sans-serif;background:#f9f8f5}
+    body.theme-b{--accent:#f59e0b;--accent-soft:rgba(245,158,11,.12);--bg:#0f172a;--surface:#1e293b;--border:rgba(255,255,255,.08);--ink:#f1f5f9;--muted:#94a3b8;--radius:10px;--shadow:0 4px 24px rgba(0,0,0,.45);--font:'Inter',system-ui,sans-serif;background:#0f172a}
+    body.theme-c{--accent:#0d9488;--accent-soft:#ccfbf1;--bg:#fef3c7;--surface:rgba(255,255,255,.88);--border:rgba(255,255,255,.55);--ink:#1e293b;--muted:#64748b;--radius:24px;--shadow:0 4px 6px rgba(0,0,0,.04),0 16px 48px rgba(0,0,0,.1);--font:'Nunito',system-ui,sans-serif;background:linear-gradient(165deg,#fef3c7 0%,#fde68a 40%,#fbbf24 100%);background-attachment:fixed}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--font);color:var(--ink);min-height:100vh;line-height:1.6;transition:color .3s,background-color .4s}
+    .top-bar{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 20px;background:var(--surface);border-bottom:1px solid var(--border);backdrop-filter:blur(14px);transition:background .4s,border-color .3s}
+    .back-link{font-size:.82rem;font-weight:700;color:var(--accent);text-decoration:none}
+    .back-link:hover{text-decoration:underline}
+    .picker{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+    .pick-label{font-size:.74rem;font-weight:700;color:var(--muted);margin-right:2px}
+    .pick-btn{display:inline-flex;align-items:center;gap:6px;padding:5px 12px 5px 7px;background:transparent;border:1.5px solid var(--border);border-radius:999px;cursor:pointer;font-family:var(--font);font-size:.76rem;font-weight:700;color:var(--muted);transition:border-color .2s,color .2s,background .2s}
+    .pick-btn:hover{border-color:var(--accent);color:var(--ink)}
+    .pick-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+    .swatch{width:14px;height:14px;border-radius:50%;flex-shrink:0;border:2px solid rgba(128,128,128,.2)}
+    .swatch-a{background:conic-gradient(#f9f8f5 0 50%,#1d4ed8 50%)}
+    .swatch-b{background:conic-gradient(#0f172a 0 50%,#f59e0b 50%)}
+    .swatch-c{background:conic-gradient(#fde68a 0 50%,#0d9488 50%)}
+    .approach-badge{position:sticky;top:53px;z-index:99;padding:6px 20px;background:var(--accent);color:#fff;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;text-align:center}
+    .objective{padding:14px 20px;background:var(--accent-soft);border:1.5px solid var(--accent);border-radius:12px;font-size:.9rem;font-weight:700;color:var(--accent);display:flex;align-items:center;gap:10px}
+    .objective::before{content:'🎯';font-size:1.1rem}
+    .wrap{max-width:860px;margin:0 auto;padding:28px 24px 80px;display:flex;flex-direction:column;gap:22px}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:24px 28px;transition:background .4s,border-radius .4s}
+    .card-head{font-size:1rem;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+    .chip{padding:3px 11px;background:var(--accent-soft);color:var(--accent);border-radius:999px;font-size:.72rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+    p{color:var(--muted);font-size:.93rem;line-height:1.7;margin-bottom:8px}
+    .def-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:4px}
+    @media(max-width:540px){.def-grid{grid-template-columns:1fr}}
+    .def-item{background:var(--accent-soft);border-radius:12px;padding:14px}
+    .def-item .term{font-size:.78rem;font-weight:800;color:var(--accent);letter-spacing:.05em;text-transform:uppercase;margin-bottom:4px}
+    .def-item .defn{font-size:.88rem;color:var(--ink);line-height:1.55}
+    .diagram-row{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:start;margin-top:14px}
+    @media(max-width:540px){.diagram-row{grid-template-columns:1fr}}
+    .svg-bg{background:var(--accent-soft);border-radius:calc(var(--radius) - 4px);padding:6px;transition:background .4s}
+    .rule-box{background:var(--ink);color:white;border-radius:12px;padding:16px 20px;font-size:.9rem;line-height:1.7}
+    .rule-box strong{color:var(--accent-soft) if dark else #fff}
+    .eg-controls{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+    .btn{padding:10px 22px;border:none;border-radius:999px;background:var(--accent);color:#fff;font-family:var(--font);font-size:.86rem;font-weight:700;cursor:pointer;transition:filter .15s}
+    .btn:hover{filter:brightness(1.1)}
+    .btn-outline{background:transparent;color:var(--accent);border:2px solid var(--accent)}
+    .eg-row{display:grid;grid-template-columns:auto 1fr;gap:20px;align-items:start}
+    @media(max-width:540px){.eg-row{grid-template-columns:1fr}}
+    .eg-steps{display:flex;flex-direction:column;gap:8px}
+    .eg-step{padding:10px 14px;background:var(--accent-soft);border-radius:10px;font-size:.88rem;opacity:.4;transform:translateY(6px);transition:opacity .3s,transform .3s}
+    .eg-step.show{opacity:1;transform:none}
+    .eg-step strong{color:var(--accent)}
+    .eg-step.final-step{background:var(--accent);color:#fff;text-align:center;font-weight:700}
+    .eg-step.final-step strong{color:#fff}
+    .eg-dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--accent);margin-right:6px;vertical-align:middle}
+    .practice-row{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+    @media(max-width:600px){.practice-row{grid-template-columns:1fr}}
+    .prac-card{background:var(--accent-soft);border-radius:12px;padding:16px}
+    .prac-card h3{font-size:.9rem;font-weight:800;margin-bottom:8px;color:var(--accent)}
+    .feedback{margin-top:10px;min-height:24px;font-size:.82rem;font-weight:700}
+    .feedback.ok{color:#16a34a}
+    .feedback.no{color:#dc2626}
+    @media(max-width:600px){.card{padding:18px}.wrap{padding:20px 16px 60px;gap:16px}}
+  </style>
+</head>
+<body class="theme-a">
+
+<div class="top-bar">
+  <a class="back-link" href="index.html">← All approaches</a>
+  <div class="picker">
+    <span class="pick-label">Style:</span>
+    <button class="pick-btn active" data-theme="a"><span class="swatch swatch-a"></span>Explorer</button>
+    <button class="pick-btn" data-theme="b"><span class="swatch swatch-b"></span>Academy</button>
+    <button class="pick-btn" data-theme="c"><span class="swatch swatch-c"></span>Notebook</button>
+  </div>
+</div>
+<div class="approach-badge">Approach 2 — Direct Instruction (Define → Model → Practice)</div>
+
+<main class="wrap">
+
+  <div class="objective">By the end of this lesson you will be able to plot any ordered pair (x, y) on a coordinate plane.</div>
+
+  <!-- DEFINITIONS -->
+  <div class="card">
+    <div class="card-head">Key vocabulary <span class="chip">Definitions</span></div>
+    <div class="def-grid">
+      <div class="def-item"><div class="term">Coordinate plane</div><div class="defn">A flat grid made by two number lines crossing at right angles.</div></div>
+      <div class="def-item"><div class="term">Origin</div><div class="defn">The center point (0, 0) where the two axes cross.</div></div>
+      <div class="def-item"><div class="term">x-axis</div><div class="defn">The horizontal number line. Positive goes right, negative goes left.</div></div>
+      <div class="def-item"><div class="term">y-axis</div><div class="defn">The vertical number line. Positive goes up, negative goes down.</div></div>
+      <div class="def-item"><div class="term">Ordered pair</div><div class="defn">Two numbers written as (x, y) that name one exact point.</div></div>
+      <div class="def-item"><div class="term">Quadrants</div><div class="defn">The four regions of the plane, numbered I–IV counterclockwise.</div></div>
+    </div>
+    <div class="diagram-row">
+      <div class="svg-bg"><svg id="def-grid" viewBox="0 0 260 260" width="220" aria-label="Labeled coordinate plane"></svg></div>
+      <div style="font-size:.85rem;color:var(--muted);line-height:1.8">
+        <strong style="color:var(--ink);display:block;margin-bottom:6px">The coordinate plane:</strong>
+        • <strong>Right (+x)</strong> and <strong>Up (+y)</strong> are positive.<br>
+        • <strong>Left (−x)</strong> and <strong>Down (−y)</strong> are negative.<br>
+        • Any point can be reached from the origin using exactly two moves.<br><br>
+        <strong style="color:var(--accent)">Remember: x always comes first.</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- WORKED EXAMPLES -->
+  <div class="card">
+    <div class="card-head">Worked examples <span class="chip">I do</span></div>
+    <p>Watch how each point is plotted. Use the buttons to move between examples.</p>
+    <div class="eg-row">
+      <div class="svg-bg"><svg id="eg-grid" viewBox="0 0 260 260" width="220" aria-label="Example grid"></svg></div>
+      <div>
+        <div id="eg-label" style="font-weight:800;font-size:1.1rem;color:var(--accent);margin-bottom:10px"></div>
+        <div class="eg-steps" id="eg-steps"></div>
+        <div class="eg-controls">
+          <button class="btn" id="eg-next">Next step ▶</button>
+          <button class="btn btn-outline" id="eg-prev">◀ Back</button>
+          <button class="btn btn-outline" id="eg-skip">Skip to next example</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GUIDED PRACTICE -->
+  <div class="card">
+    <div class="card-head">Guided practice <span class="chip">We do</span></div>
+    <p>Plot each point. A hint is available if you need it. Click the grid where you think the point belongs.</p>
+    <div class="practice-row">
+      <div class="prac-card">
+        <h3>Plot (5, −2)</h3>
+        <div class="svg-bg"><svg id="gp1-grid" viewBox="0 0 260 260" width="100%" style="cursor:crosshair"></svg></div>
+        <div class="feedback" id="gp1-fb"></div>
+        <button class="btn btn-outline" id="gp1-hint" style="margin-top:8px;padding:7px 16px;font-size:.8rem">Show hint</button>
+        <div id="gp1-hint-text" style="display:none;margin-top:8px;font-size:.82rem;color:var(--muted)">Start at origin → move 5 right → move 2 down.</div>
+      </div>
+      <div class="prac-card">
+        <h3>Plot (−4, 0)</h3>
+        <div class="svg-bg"><svg id="gp2-grid" viewBox="0 0 260 260" width="100%" style="cursor:crosshair"></svg></div>
+        <div class="feedback" id="gp2-fb"></div>
+        <button class="btn btn-outline" id="gp2-hint" style="margin-top:8px;padding:7px 16px;font-size:.8rem">Show hint</button>
+        <div id="gp2-hint-text" style="display:none;margin-top:8px;font-size:.82rem;color:var(--muted)">Start at origin → move 4 left → y = 0 means stay on x-axis.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- INDEPENDENT PRACTICE -->
+  <div class="card">
+    <div class="card-head">Independent practice <span class="chip">You do</span></div>
+    <p>No hints this time. Plot each point on your own.</p>
+    <div class="practice-row">
+      <div class="prac-card">
+        <h3>Plot (−1, 3)</h3>
+        <div class="svg-bg"><svg id="ip1-grid" viewBox="0 0 260 260" width="100%" style="cursor:crosshair"></svg></div>
+        <div class="feedback" id="ip1-fb"></div>
+      </div>
+      <div class="prac-card">
+        <h3>Plot (3, −5)</h3>
+        <div class="svg-bg"><svg id="ip2-grid" viewBox="0 0 260 260" width="100%" style="cursor:crosshair"></svg></div>
+        <div class="feedback" id="ip2-fb"></div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+(function(){var b=document.body,bs=document.querySelectorAll('.pick-btn');function at(t,s){b.classList.remove('theme-a','theme-b','theme-c');b.classList.add('theme-'+t);bs.forEach(function(btn){var on=btn.dataset.theme===t;btn.classList.toggle('active',on);btn.setAttribute('aria-pressed',on);});if(s)localStorage.setItem('edu-theme',t);rebuildAll();}bs.forEach(function(btn){btn.addEventListener('click',function(){at(btn.dataset.theme,true);});});var sv=localStorage.getItem('edu-theme');if(sv&&['a','b','c'].includes(sv))at(sv,false);})();
+
+const NS='http://www.w3.org/2000/svg',S=24,CX=130,CY=130;
+function e(tag,a){const el=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(a))el.setAttribute(k,v);return el;}
+function isDark(){return document.body.classList.contains('theme-b');}
+function buildGrid(svg,quadLabels=false){
+  svg.innerHTML='';
+  const gc=isDark()?'rgba(255,255,255,.1)':'rgba(0,0,0,.1)';
+  const ac=isDark()?'rgba(255,255,255,.5)':'rgba(0,0,0,.45)';
+  const lc=isDark()?'#94a3b8':'#64748b';
+  for(let i=-5;i<=5;i++){
+    svg.appendChild(e('line',{x1:CX+i*S,y1:10,x2:CX+i*S,y2:250,stroke:i===0?ac:gc,'stroke-width':i===0?2:1}));
+    svg.appendChild(e('line',{x1:10,y1:CY-i*S,x2:250,y2:CY-i*S,stroke:i===0?ac:gc,'stroke-width':i===0?2:1}));
+    if(i!==0){
+      const xt=e('text',{x:CX+i*S,y:CY+15,'text-anchor':'middle',fill:lc,'font-size':'10','font-family':'Arial'});xt.textContent=i;svg.appendChild(xt);
+      const yt=e('text',{x:CX-7,y:CY-i*S+4,'text-anchor':'end',fill:lc,'font-size':'10','font-family':'Arial'});yt.textContent=i;svg.appendChild(yt);
+    }
+  }
+  const xl=e('text',{x:255,y:CY+4,fill:ac,'font-size':'12','font-weight':'bold','font-family':'Arial'});xl.textContent='x';svg.appendChild(xl);
+  const yl=e('text',{x:CX+4,y:7,fill:ac,'font-size':'12','font-weight':'bold','font-family':'Arial'});yl.textContent='y';svg.appendChild(yl);
+  const o=e('text',{x:CX-7,y:CY+15,'text-anchor':'end',fill:lc,'font-size':'10','font-family':'Arial'});o.textContent='0';svg.appendChild(o);
+  if(quadLabels){
+    const qs=[{x:175,y:55,label:'I'},{x:70,y:55,label:'II'},{x:70,y:210,label:'III'},{x:175,y:210,label:'IV'}];
+    qs.forEach(q=>{const t=e('text',{x:q.x,y:q.y,'text-anchor':'middle',fill:lc,'font-size':'14','font-weight':'bold','font-family':'Arial','opacity':'.5'});t.textContent=q.label;svg.appendChild(t);});
+    // Origin dot
+    svg.appendChild(e('circle',{cx:CX,cy:CY,r:4,fill:ac}));
+    const ot=e('text',{x:CX+8,y:CY-6,fill:ac,'font-size':'10','font-family':'Arial'});ot.textContent='Origin';svg.appendChild(ot);
+  }
+}
+function plotPt(svg,gx,gy,color,label){
+  const px=CX+gx*S,py=CY-gy*S;
+  const g=e('g',{});
+  g.appendChild(e('circle',{cx:px,cy:py,r:6,fill:color,stroke:'white','stroke-width':2}));
+  if(label){const t=e('text',{x:px+9,y:py-9,fill:color,'font-size':'12','font-weight':'bold','font-family':'Arial'});t.textContent=label;g.appendChild(t);}
+  svg.appendChild(g);return g;
+}
+function clickToGrid(evt,svgEl){
+  const r=svgEl.getBoundingClientRect();
+  const sx=(evt.clientX-r.left)*260/r.width,sy=(evt.clientY-r.top)*260/r.height;
+  return{x:Math.max(-5,Math.min(5,Math.round((sx-CX)/S))),y:Math.max(-5,Math.min(5,Math.round((CY-sy)/S)))};
+}
+function accent(){return getComputedStyle(document.body).getPropertyValue('--accent').trim();}
+
+buildGrid(document.getElementById('def-grid'),true);
+
+// Worked examples
+const EXAMPLES=[
+  {label:'Plot (4, 3)',gx:4,gy:3,steps:['Start at the <strong>origin (0, 0)</strong>.','x = +4 → move <strong>4 units right</strong>.','y = +3 → move <strong>3 units up</strong>.','<strong>Mark the point!</strong> It lands in <strong>Quadrant I</strong> (both positive).']},
+  {label:'Plot (−2, 5)',gx:-2,gy:5,steps:['Start at the <strong>origin</strong>.','x = −2 → move <strong>2 units left</strong>.','y = +5 → move <strong>5 units up</strong>.','<strong>Mark the point!</strong> It lands in <strong>Quadrant II</strong> (x negative, y positive).']},
+  {label:'Plot (−3, −4)',gx:-3,gy:-4,steps:['Start at the <strong>origin</strong>.','x = −3 → move <strong>3 units left</strong>.','y = −4 → move <strong>4 units down</strong>.','<strong>Mark the point!</strong> It lands in <strong>Quadrant III</strong> (both negative).']},
+];
+let egIdx=0,stepIdx=0;
+
+function renderExample(){
+  const ex=EXAMPLES[egIdx];
+  const svg=document.getElementById('eg-grid');
+  buildGrid(svg);
+  document.getElementById('eg-label').textContent=ex.label;
+  const steps=document.getElementById('eg-steps');
+  steps.innerHTML='';
+  ex.steps.forEach((s,i)=>{
+    const d=document.createElement('div');
+    d.className='eg-step'+(i<stepIdx?' show':'');
+    if(i===ex.steps.length-1)d.classList.add('final-step');
+    d.innerHTML=s;
+    steps.appendChild(d);
+  });
+  if(stepIdx>=3)plotPt(svg,ex.gx,ex.gy,accent(),`(${ex.gx},${ex.gy})`);
+  document.getElementById('eg-next').disabled=stepIdx>=ex.steps.length;
+}
+
+document.getElementById('eg-next').addEventListener('click',()=>{
+  if(stepIdx<EXAMPLES[egIdx].steps.length){stepIdx++;renderExample();}
+});
+document.getElementById('eg-prev').addEventListener('click',()=>{
+  if(stepIdx>0){stepIdx--;renderExample();}
+});
+document.getElementById('eg-skip').addEventListener('click',()=>{
+  egIdx=(egIdx+1)%EXAMPLES.length;stepIdx=0;renderExample();
+});
+
+renderExample();
+
+// Practice grids
+function makePractice(svgId,fbId,targetX,targetY,hasHint,hintId){
+  const svg=document.getElementById(svgId);
+  buildGrid(svg);
+  svg.addEventListener('click',function(evt){
+    const{x,y}=clickToGrid(evt,svg);
+    buildGrid(svg);
+    const fb=document.getElementById(fbId);
+    if(x===targetX&&y===targetY){
+      plotPt(svg,x,y,accent(),`(${x},${y}) ✓`);
+      fb.textContent='✓ Correct!';fb.className='feedback ok';
+    } else {
+      plotPt(svg,x,y,'#ef4444',`(${x},${y})`);
+      fb.textContent=`Not quite — you plotted (${x}, ${y}). Try again.`;fb.className='feedback no';
+    }
+  });
+  if(hasHint){
+    document.getElementById(hintId).addEventListener('click',()=>{
+      document.getElementById(hintId+'-text').style.display='block';
+    });
+  }
+}
+
+makePractice('gp1-grid','gp1-fb',5,-2,true,'gp1-hint');
+makePractice('gp2-grid','gp2-fb',-4,0,true,'gp2-hint');
+makePractice('ip1-grid','ip1-fb',-1,3,false,null);
+makePractice('ip2-grid','ip2-fb',3,-5,false,null);
+
+function rebuildAll(){
+  buildGrid(document.getElementById('def-grid'),true);
+  renderExample();
+  ['gp1-grid','gp2-grid','ip1-grid','ip2-grid'].forEach(id=>buildGrid(document.getElementById(id)));
+}
+</script>
+</body>
+</html>

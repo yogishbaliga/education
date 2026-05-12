@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Percentage Basics — Math &amp; Science Lab</title>
+  <meta name="description" content="A quick 6th grade lesson that explains percentages as parts out of 100 with a snack-vote example and visual practice." />
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-C19PRJPV7K"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-C19PRJPV7K');
+  </script>
+
+  <!-- All three theme fonts loaded upfront -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ═══════════════════════════════════════════════════════
+       THEME TOKENS
+    ═══════════════════════════════════════════════════════ */
+    body.theme-a {
+      --accent:      #7b38c4;
+      --accent-soft: #ede0f9;
+
+      --bg:      #f9f8f5;
+      --surface: #ffffff;
+      --border:  #e4e4e7;
+      --ink:     #18181b;
+      --muted:   #71717a;
+      --hyp:     #18181b;
+      --ok:      #16a34a;
+      --ok-soft: #dcfce7;
+      --bad:     #dc2626;
+      --bad-soft:#fee2e2;
+      --radius:  16px;
+      --shadow:  0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.07);
+      --font:    'Plus Jakarta Sans', system-ui, sans-serif;
+    }
+    body.theme-b {
+      --accent:      #f59e0b;
+      --accent-soft: rgba(245,158,11,.12);
+      --bg:      #0f172a;
+      --surface: #1e293b;
+      --border:  rgba(255,255,255,.08);
+      --ink:     #f1f5f9;
+      --muted:   #94a3b8;
+      --hyp:     #f59e0b;
+      --ok:      #34d399;
+      --ok-soft: rgba(52,211,153,.15);
+      --bad:     #f87171;
+      --bad-soft: rgba(248,113,113,.14);
+      --radius:  10px;
+      --shadow:  0 4px 24px rgba(0,0,0,.45);
+      --font:    'Inter', system-ui, sans-serif;
+    }
+    body.theme-c {
+      --accent:      #0d9488;
+      --accent-soft: #ccfbf1;
+      --bg:      #fef3c7;
+      --surface: rgba(255,255,255,.86);
+      --border:  rgba(255,255,255,.55);
+      --ink:     #1e293b;
+      --muted:   #64748b;
+      --hyp:     #ef4444;
+      --ok:      #0d9488;
+      --ok-soft: rgba(13,148,136,.15);
+      --bad:     #dc2626;
+      --bad-soft:#fee2e2;
+      --radius:  24px;
+      --shadow:  0 4px 6px rgba(0,0,0,.04), 0 16px 48px rgba(0,0,0,.1);
+      --font:    'Nunito', system-ui, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      color: var(--ink);
+      min-height: 100vh;
+      line-height: 1.6;
+      background: var(--bg);
+      transition: color .3s, background-color .4s;
+    }
+    body.theme-c {
+      background: linear-gradient(165deg, #fef3c7 0%, #fde68a 40%, #fbbf24 100%);
+      background-attachment: fixed;
+    }
+
+    .top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 10px 24px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: background .4s, border-color .3s;
+    }
+    .back-link {
+      font-size: .82rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .back-link:hover { text-decoration: underline; }
+
+    .picker {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+    .pick-label {
+      font-size: .74rem;
+      font-weight: 700;
+      color: var(--muted);
+      margin-right: 2px;
+      white-space: nowrap;
+    }
+    .pick-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px 5px 7px;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: var(--font);
+      font-size: .76rem;
+      font-weight: 700;
+      color: var(--muted);
+      transition: border-color .2s, color .2s, background .2s;
+    }
+    .pick-btn:hover { border-color: var(--accent); color: var(--ink); }
+    .pick-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: 2px solid rgba(128,128,128,.2);
+    }
+    .swatch-a { background: conic-gradient(#f9f8f5 0 50%, #2563eb 50%); }
+    .swatch-b { background: conic-gradient(#0f172a 0 50%, #f59e0b 50%); }
+    .swatch-c { background: conic-gradient(#fde68a 0 50%, #0d9488 50%); }
+
+    .hero {
+      padding: 42px 24px 38px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: background .4s, border-color .3s;
+    }
+    .hero-badge {
+      display: inline-block;
+      padding: 5px 16px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 999px;
+      font-size: .75rem;
+      font-weight: 800;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .hero h1 {
+      font-size: clamp(1.9rem, 4.5vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -.03em;
+      line-height: 1.1;
+    }
+    .hero h1 em { font-style: normal; color: var(--accent); }
+    .hero p {
+      margin-top: 12px;
+      font-size: 1.05rem;
+      color: var(--muted);
+      max-width: 50ch;
+      margin-inline: auto;
+    }
+
+    .wrap {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 32px 24px 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 24px 28px;
+      transition: background .4s, border-color .3s, border-radius .4s, box-shadow .4s;
+    }
+    .card-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.02rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+    .c-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-size: .88rem;
+      flex-shrink: 0;
+    }
+    .c-chip {
+      padding: 3px 12px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 999px;
+      font-size: .73rem;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+
+    .objective {
+      border-left: 5px solid var(--accent);
+      padding: 18px 22px;
+    }
+    .objective p {
+      font-size: 1.05rem;
+      font-weight: 700;
+    }
+    .muted { color: var(--muted); }
+
+    .concept-grid {
+      display: grid;
+      grid-template-columns: minmax(180px, 260px) 1fr;
+      gap: 24px;
+      align-items: center;
+    }
+    .hundred-grid {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 4px;
+      width: min(100%, 260px);
+      aspect-ratio: 1;
+      padding: 10px;
+      background: var(--accent-soft);
+      border: 1px solid var(--border);
+      border-radius: calc(var(--radius) - 4px);
+    }
+    .sq {
+      border-radius: 4px;
+      background: var(--surface);
+      border: 1px solid color-mix(in srgb, var(--accent) 22%, transparent);
+      transition: background .2s, transform .2s;
+    }
+    .sq.on {
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+    .grid-caption {
+      margin-top: 10px;
+      text-align: center;
+      font-weight: 800;
+      color: var(--accent);
+    }
+    .vocab {
+      display: grid;
+      gap: 10px;
+    }
+    .term {
+      padding: 12px 14px;
+      background: var(--accent-soft);
+      border-radius: calc(var(--radius) - 8px);
+    }
+    .term strong {
+      display: block;
+      margin-bottom: 2px;
+      color: var(--accent);
+    }
+
+    .rule-box {
+      display: grid;
+      gap: 10px;
+      padding: 16px 18px;
+      background: var(--accent-soft);
+      border-radius: calc(var(--radius) - 4px);
+      font-weight: 700;
+    }
+    .rule-box div {
+      display: flex;
+      gap: 10px;
+      align-items: baseline;
+    }
+    .step-n {
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--accent);
+      color: #fff;
+      font-size: .78rem;
+      font-weight: 800;
+      flex: 0 0 auto;
+    }
+
+    .example-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    .example-card {
+      padding: 16px;
+      border: 1px solid var(--border);
+      border-radius: calc(var(--radius) - 4px);
+      background: color-mix(in srgb, var(--surface) 88%, var(--accent-soft));
+    }
+    .example-card h3 {
+      font-size: 1rem;
+      margin-bottom: 8px;
+    }
+    .step-list {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+      margin-top: 12px;
+    }
+    .step {
+      display: none;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      font-weight: 700;
+    }
+    .step.show { display: block; }
+    .btn-primary, .check-btn, .hint-btn {
+      border: none;
+      border-radius: 999px;
+      background: var(--accent);
+      color: white;
+      font-size: .92rem;
+      font-weight: 800;
+      cursor: pointer;
+      font-family: var(--font);
+      transition: filter .15s, transform .15s;
+    }
+    .btn-primary { padding: 10px 22px; margin-top: 14px; }
+    .check-btn, .hint-btn { padding: 9px 14px; }
+    .hint-btn {
+      background: transparent;
+      color: var(--accent);
+      border: 1.5px solid var(--accent);
+    }
+    .btn-primary:hover, .check-btn:hover, .hint-btn:hover {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+    }
+
+    .slider-box {
+      display: grid;
+      gap: 12px;
+    }
+    .sl-row label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      font-size: .88rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+    }
+    .sl-row .v {
+      font-size: 1.2rem;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+    }
+    input[type=range] {
+      width: 100%;
+      appearance: none;
+      -webkit-appearance: none;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--border);
+      outline: none;
+      cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      background: var(--accent);
+      border: 3px solid var(--surface);
+      border-radius: 50%;
+    }
+    input[type=range]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      background: var(--accent);
+      border: 3px solid var(--surface);
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    .practice-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+    .practice {
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: calc(var(--radius) - 6px);
+      background: color-mix(in srgb, var(--surface) 92%, var(--accent-soft));
+    }
+    .practice label {
+      display: block;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+    .answer-row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .answer-row input {
+      width: 84px;
+      padding: 9px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      font: inherit;
+      font-weight: 700;
+      color: var(--ink);
+      background: var(--surface);
+    }
+    .feedback {
+      margin-top: 9px;
+      min-height: 1.35em;
+      font-size: .88rem;
+      font-weight: 800;
+    }
+    .feedback.ok { color: var(--ok); }
+    .feedback.bad { color: var(--bad); }
+
+    .note {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-left: 4px solid var(--accent);
+      background: var(--accent-soft);
+      border-radius: 0 12px 12px 0;
+      font-weight: 700;
+    }
+
+    body.theme-a .hero {
+      background: #fff;
+      border-bottom: 1px solid #e4e4e7;
+    }
+    body.theme-b .hero {
+      background: linear-gradient(180deg, #131f38 0%, #0f172a 100%);
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+    body.theme-b .hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(245,158,11,.15) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    body.theme-b .hero-badge {
+      font-family: 'SF Mono','Fira Code', monospace;
+      letter-spacing: .1em;
+      border: 1px solid rgba(245,158,11,.3);
+    }
+    body.theme-b .card { border-top: 2px solid var(--accent); }
+    body.theme-b .card-head {
+      font-size: .82rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-family: 'SF Mono','Fira Code', monospace;
+    }
+    body.theme-b .c-icon { display: none; }
+    body.theme-b .c-chip { display: none; }
+    body.theme-b .sq { background: rgba(255,255,255,.08); }
+    body.theme-b .sq.on { background: var(--accent); }
+    body.theme-c .hero { background: transparent; }
+    body.theme-c .card {
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+    body.theme-c .c-icon { display: none; }
+
+    @media (max-width: 760px) {
+      .concept-grid,
+      .example-layout,
+      .practice-grid {
+        grid-template-columns: 1fr;
+      }
+      .hundred-grid {
+        margin-inline: auto;
+      }
+    }
+    @media (max-width: 600px) {
+      .card { padding: 20px 18px; }
+      .wrap { padding: 24px 16px 64px; gap: 18px; }
+      .hero { padding: 36px 18px 36px; }
+      .top-bar { padding: 8px 16px; }
+    }
+  </style>
+</head>
+<body class="theme-a">
+
+<div class="top-bar">
+  <a class="back-link" href="../index.html">← All lessons</a>
+  <div class="picker" role="navigation" aria-label="Visual style">
+    <span class="pick-label">Style:</span>
+    <button class="pick-btn active" data-theme="a" aria-pressed="true">
+      <span class="swatch swatch-a"></span>Explorer
+    </button>
+    <button class="pick-btn" data-theme="b" aria-pressed="false">
+      <span class="swatch swatch-b"></span>Academy
+    </button>
+    <button class="pick-btn" data-theme="c" aria-pressed="false">
+      <span class="swatch swatch-c"></span>Notebook
+    </button>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="hero-badge">Proportions &amp; Ratios · Grade 6</div>
+  <h1>Percent Means <em>Out of 100</em></h1>
+  <p>Learn the idea first, then solve a snack-vote example using a 100-square picture.</p>
+</header>
+
+<main class="wrap">
+  <section class="card objective">
+    <p>By the end of this lesson you will be able to tell what a percent means and find a percent of a number.</p>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div class="c-icon">%</div>
+      The Concept
+      <span class="c-chip">Definition</span>
+    </div>
+    <div class="concept-grid">
+      <div>
+        <div class="hundred-grid" id="conceptGrid" aria-label="100-square grid showing 35 shaded squares"></div>
+        <div class="grid-caption">35% = 35 out of 100</div>
+      </div>
+      <div class="vocab">
+        <div class="term">
+          <strong>Percent</strong>
+          Percent means "for every 100." So 35% means 35 out of every 100 equal parts.
+        </div>
+        <div class="term">
+          <strong>Whole</strong>
+          The whole is the full group, full price, or full amount.
+        </div>
+        <div class="term">
+          <strong>Part</strong>
+          The part is the piece you are finding.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div class="c-icon">1</div>
+      The Rule
+      <span class="c-chip">Plain steps</span>
+    </div>
+    <div class="rule-box">
+      <div><span class="step-n">1</span><span>Change the percent to a fraction out of 100.</span></div>
+      <div><span class="step-n">2</span><span>Multiply that fraction by the whole.</span></div>
+      <div><span class="step-n">3</span><span>The answer is the part.</span></div>
+    </div>
+    <div class="note">Shortcut: 25% means 25/100. That is the same as one fourth.</div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div class="c-icon">2</div>
+      I Do: Snack Vote Example
+      <span class="c-chip">Worked example</span>
+    </div>
+    <div class="example-layout">
+      <div class="example-card">
+        <h3>Question</h3>
+        <p>A class has 28 students. In a snack vote, 25% chose popcorn. How many students chose popcorn?</p>
+        <button class="btn-primary" id="nextStep" type="button">Show first step</button>
+      </div>
+      <div class="example-card">
+        <h3>Steps</h3>
+        <div class="step-list">
+          <div class="step" data-step="1">25% means 25 out of 100.</div>
+          <div class="step" data-step="2">25/100 is the same as 1/4.</div>
+          <div class="step" data-step="3">One fourth of 28 is 28 ÷ 4 = 7.</div>
+          <div class="step" data-step="4">So 7 students chose popcorn.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div class="c-icon">3</div>
+      We Do: Move the Percent
+      <span class="c-chip">Guided</span>
+    </div>
+    <div class="example-layout">
+      <div>
+        <div class="hundred-grid" id="sliderGrid" aria-label="Interactive 100-square percent grid"></div>
+        <div class="grid-caption"><span id="percentText">40</span>% of 50 = <span id="partText">20</span></div>
+      </div>
+      <div class="slider-box">
+        <div class="sl-row">
+          <label for="percentRange">Percent <span class="v"><span id="rangeText">40</span>%</span></label>
+          <input id="percentRange" type="range" min="0" max="100" step="5" value="40" />
+        </div>
+        <p class="muted">Use the slider. The grid shows the percent. The answer shows that percent of 50.</p>
+        <div class="note" id="guidedNote">40% means 40 out of 100, so 40% of 50 is 20.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div class="c-icon">4</div>
+      You Do
+      <span class="c-chip">Practice</span>
+    </div>
+    <div class="practice-grid">
+      <div class="practice" data-answer="15" data-hint="Hint: 50% means half. What is half of 30?">
+        <label>1. 50% of 30 = ?</label>
+        <div class="answer-row">
+          <input type="number" inputmode="numeric" aria-label="Answer for 50 percent of 30" />
+          <button class="check-btn" type="button">Check</button>
+        </div>
+        <div class="feedback" aria-live="polite"></div>
+      </div>
+      <div class="practice" data-answer="10" data-hint="Hint: 20% is two groups of 10%. First find 10% of 50.">
+        <label>2. 20% of 50 = ?</label>
+        <div class="answer-row">
+          <input type="number" inputmode="numeric" aria-label="Answer for 20 percent of 50" />
+          <button class="check-btn" type="button">Check</button>
+        </div>
+        <div class="feedback" aria-live="polite"></div>
+      </div>
+      <div class="practice" data-answer="9" data-hint="Hint: 10% means one tenth. Divide 90 by 10.">
+        <label>3. 10% of 90 = ?</label>
+        <div class="answer-row">
+          <input type="number" inputmode="numeric" aria-label="Answer for 10 percent of 90" />
+          <button class="check-btn" type="button">Check</button>
+        </div>
+        <div class="feedback" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  const body = document.body;
+  const btns = document.querySelectorAll('.pick-btn');
+
+  function applyTheme(t, save) {
+    body.classList.remove('theme-a', 'theme-b', 'theme-c');
+    body.classList.add('theme-' + t);
+    btns.forEach(b => {
+      const on = b.dataset.theme === t;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-pressed', on);
+    });
+    if (save) localStorage.setItem('edu-theme', t);
+  }
+
+  btns.forEach(b => b.addEventListener('click', () => applyTheme(b.dataset.theme, true)));
+
+  const saved = localStorage.getItem('edu-theme');
+  if (saved && ['a', 'b', 'c'].includes(saved)) applyTheme(saved, false);
+
+  function makeGrid(el, count) {
+    el.innerHTML = '';
+    for (let i = 1; i <= 100; i += 1) {
+      const sq = document.createElement('span');
+      sq.className = 'sq' + (i <= count ? ' on' : '');
+      el.appendChild(sq);
+    }
+  }
+
+  const conceptGrid = document.getElementById('conceptGrid');
+  const sliderGrid = document.getElementById('sliderGrid');
+  makeGrid(conceptGrid, 35);
+  makeGrid(sliderGrid, 40);
+
+  const steps = Array.from(document.querySelectorAll('.step'));
+  const nextStep = document.getElementById('nextStep');
+  let shownStep = 0;
+  nextStep.addEventListener('click', () => {
+    shownStep = Math.min(shownStep + 1, steps.length);
+    steps.slice(0, shownStep).forEach(step => step.classList.add('show'));
+    if (shownStep < steps.length) {
+      nextStep.textContent = 'Show next step';
+    } else {
+      nextStep.textContent = 'Example complete';
+      nextStep.disabled = true;
+    }
+  });
+
+  const range = document.getElementById('percentRange');
+  const rangeText = document.getElementById('rangeText');
+  const percentText = document.getElementById('percentText');
+  const partText = document.getElementById('partText');
+  const guidedNote = document.getElementById('guidedNote');
+
+  function updateSlider() {
+    const percent = Number(range.value);
+    const part = percent * 50 / 100;
+    makeGrid(sliderGrid, percent);
+    rangeText.textContent = percent;
+    percentText.textContent = percent;
+    partText.textContent = Number.isInteger(part) ? part : part.toFixed(1);
+    guidedNote.textContent = percent + '% means ' + percent + ' out of 100, so ' + percent + '% of 50 is ' + partText.textContent + '.';
+  }
+  range.addEventListener('input', updateSlider);
+
+  let completed = false;
+  const practiceCards = Array.from(document.querySelectorAll('.practice'));
+  practiceCards.forEach(card => {
+    const input = card.querySelector('input');
+    const button = card.querySelector('.check-btn');
+    const feedback = card.querySelector('.feedback');
+    const answer = Number(card.dataset.answer);
+    button.addEventListener('click', () => {
+      const value = Number(input.value);
+      feedback.classList.remove('ok', 'bad');
+      if (value === answer) {
+        feedback.textContent = 'Correct.';
+        feedback.classList.add('ok');
+      } else {
+        feedback.textContent = card.dataset.hint;
+        feedback.classList.add('bad');
+      }
+      const allCorrect = practiceCards.every(p => p.querySelector('.feedback').classList.contains('ok'));
+      if (allCorrect && !completed) {
+        completed = true;
+        gtag('event', 'lesson_complete', { lesson: 'percentage-basics' });
+      }
+    });
+  });
+})();
+</script>
+
+</body>
+</html>

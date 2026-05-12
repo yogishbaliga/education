@@ -136,13 +136,24 @@
     }
 
     .lesson-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      display: flex;
       gap: 20px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;          /* Firefox */
+      /* top padding: room for the hover lift; bottom: room for the drop shadow */
+      padding: 6px 0 24px;
+      margin-bottom: -12px;           /* compensate so section spacing stays even */
     }
+    .lesson-grid::-webkit-scrollbar { display: none; }
 
     /* ── LESSON CARD ──────────────────────────── */
     .card {
+      /* desktop: show 3 full cards; the 4th peeks ~40 px */
+      flex: 0 0 calc((100% - 100px) / 3);
+      min-width: 200px;
+      scroll-snap-align: start;
       background: white;
       border-radius: var(--radius);
       box-shadow: var(--shadow);
@@ -207,34 +218,6 @@
       font-weight: 700;
     }
 
-    /* ── ADD-MORE PLACEHOLDER ─────────────────── */
-    .card-add {
-      background: transparent;
-      border: 2px dashed rgba(26,46,59,0.18);
-      border-radius: var(--radius);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 32px 20px;
-      color: var(--muted);
-      font-size: 0.9rem;
-      text-align: center;
-      min-height: 180px;
-    }
-
-    .card-add-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      border: 2px dashed currentColor;
-      display: grid;
-      place-items: center;
-      font-size: 1.4rem;
-      line-height: 1;
-    }
-
     /* ── SUBJECT COLOURS ──────────────────────── */
     .stat  .subject-icon { background: var(--stat-soft); color: var(--stat-hue); }
     .stat  .card-label   { color: var(--stat-hue); }
@@ -270,6 +253,17 @@
       .hero { padding: 40px 18px 48px; }
       .wrap { padding: 28px 16px 56px; }
       .subject-title { font-size: 1.3rem; }
+
+      /* mobile: show 2 full cards; the 3rd peeks ~30 px */
+      .lesson-grid { gap: 14px; }
+      .card {
+        flex: 0 0 calc(50% - 29px);
+        min-width: 0;
+      }
+      /* shorter thumbnail = shorter overall card height on mobile */
+      .card-thumb { aspect-ratio: 4 / 3; }
+      .card-body  { padding: 12px 14px 16px; }
+      .card-desc  { display: none; }
     }
   </style>
 </head>
@@ -347,12 +341,6 @@
         </div>
       </a>
 
-      <!-- placeholder -->
-      <div class="card-add">
-        <div class="card-add-icon">+</div>
-        <span>Add a statistics lesson here</span>
-      </div>
-
     </div>
   </section>
 
@@ -423,11 +411,66 @@
         </div>
       </a>
 
-      <!-- placeholder -->
-      <div class="card-add">
-        <div class="card-add-icon">+</div>
-        <span>Add an algebra lesson here</span>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════
+       PROPORTIONS & RATIOS
+  ══════════════════════════════════════════ -->
+  <section class="subject prop" id="proportions-ratios">
+    <div class="subject-header">
+      <div class="subject-icon">
+        <svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="8" cy="8" r="3"/>
+          <circle cx="18" cy="18" r="3"/>
+          <line x1="19" y1="5" x2="7" y2="21"/>
+        </svg>
       </div>
+      <div>
+        <div class="subject-title">Proportions &amp; Ratios</div>
+        <div class="subject-desc">Percents, rates, equivalent ratios, and part-whole reasoning</div>
+      </div>
+    </div>
+
+    <div class="lesson-grid">
+
+      <!-- Percentage Basics -->
+      <a class="card" href="proportions-ratios/percentage-basics.html">
+        <div class="card-thumb">
+          <!-- 100-grid percent model -->
+          <svg viewBox="0 0 320 180" xmlns="http://www.w3.org/2000/svg">
+            <rect width="320" height="180" fill="#ede0f9"/>
+            <text x="18" y="28" font-family="Arial" font-size="14" fill="#1a2e3b" font-weight="800">Percent Means Out of 100</text>
+            <g transform="translate(36 46)">
+              <rect x="-10" y="-10" width="120" height="120" rx="12" fill="rgba(123,56,196,0.12)" stroke="#7b38c4" stroke-width="2"/>
+              <g fill="#fff" stroke="rgba(123,56,196,0.35)" stroke-width="1">
+                <rect x="0" y="0" width="9" height="9" rx="2"/><rect x="11" y="0" width="9" height="9" rx="2"/><rect x="22" y="0" width="9" height="9" rx="2"/><rect x="33" y="0" width="9" height="9" rx="2"/><rect x="44" y="0" width="9" height="9" rx="2"/><rect x="55" y="0" width="9" height="9" rx="2"/><rect x="66" y="0" width="9" height="9" rx="2"/><rect x="77" y="0" width="9" height="9" rx="2"/><rect x="88" y="0" width="9" height="9" rx="2"/><rect x="99" y="0" width="9" height="9" rx="2"/>
+                <rect x="0" y="11" width="9" height="9" rx="2"/><rect x="11" y="11" width="9" height="9" rx="2"/><rect x="22" y="11" width="9" height="9" rx="2"/><rect x="33" y="11" width="9" height="9" rx="2"/><rect x="44" y="11" width="9" height="9" rx="2"/><rect x="55" y="11" width="9" height="9" rx="2"/><rect x="66" y="11" width="9" height="9" rx="2"/><rect x="77" y="11" width="9" height="9" rx="2"/><rect x="88" y="11" width="9" height="9" rx="2"/><rect x="99" y="11" width="9" height="9" rx="2"/>
+                <rect x="0" y="22" width="9" height="9" rx="2"/><rect x="11" y="22" width="9" height="9" rx="2"/><rect x="22" y="22" width="9" height="9" rx="2"/><rect x="33" y="22" width="9" height="9" rx="2"/><rect x="44" y="22" width="9" height="9" rx="2"/><rect x="55" y="22" width="9" height="9" rx="2"/><rect x="66" y="22" width="9" height="9" rx="2"/><rect x="77" y="22" width="9" height="9" rx="2"/><rect x="88" y="22" width="9" height="9" rx="2"/><rect x="99" y="22" width="9" height="9" rx="2"/>
+                <rect x="0" y="33" width="9" height="9" rx="2"/><rect x="11" y="33" width="9" height="9" rx="2"/><rect x="22" y="33" width="9" height="9" rx="2"/><rect x="33" y="33" width="9" height="9" rx="2"/><rect x="44" y="33" width="9" height="9" rx="2"/><rect x="55" y="33" width="9" height="9" rx="2"/><rect x="66" y="33" width="9" height="9" rx="2"/><rect x="77" y="33" width="9" height="9" rx="2"/><rect x="88" y="33" width="9" height="9" rx="2"/><rect x="99" y="33" width="9" height="9" rx="2"/>
+                <rect x="0" y="44" width="9" height="9" rx="2"/><rect x="11" y="44" width="9" height="9" rx="2"/><rect x="22" y="44" width="9" height="9" rx="2"/><rect x="33" y="44" width="9" height="9" rx="2"/><rect x="44" y="44" width="9" height="9" rx="2"/><rect x="55" y="44" width="9" height="9" rx="2"/><rect x="66" y="44" width="9" height="9" rx="2"/><rect x="77" y="44" width="9" height="9" rx="2"/><rect x="88" y="44" width="9" height="9" rx="2"/><rect x="99" y="44" width="9" height="9" rx="2"/>
+                <rect x="0" y="55" width="9" height="9" rx="2"/><rect x="11" y="55" width="9" height="9" rx="2"/><rect x="22" y="55" width="9" height="9" rx="2"/><rect x="33" y="55" width="9" height="9" rx="2"/><rect x="44" y="55" width="9" height="9" rx="2"/><rect x="55" y="55" width="9" height="9" rx="2"/><rect x="66" y="55" width="9" height="9" rx="2"/><rect x="77" y="55" width="9" height="9" rx="2"/><rect x="88" y="55" width="9" height="9" rx="2"/><rect x="99" y="55" width="9" height="9" rx="2"/>
+                <rect x="0" y="66" width="9" height="9" rx="2"/><rect x="11" y="66" width="9" height="9" rx="2"/><rect x="22" y="66" width="9" height="9" rx="2"/><rect x="33" y="66" width="9" height="9" rx="2"/><rect x="44" y="66" width="9" height="9" rx="2"/><rect x="55" y="66" width="9" height="9" rx="2"/><rect x="66" y="66" width="9" height="9" rx="2"/><rect x="77" y="66" width="9" height="9" rx="2"/><rect x="88" y="66" width="9" height="9" rx="2"/><rect x="99" y="66" width="9" height="9" rx="2"/>
+                <rect x="0" y="77" width="9" height="9" rx="2"/><rect x="11" y="77" width="9" height="9" rx="2"/><rect x="22" y="77" width="9" height="9" rx="2"/><rect x="33" y="77" width="9" height="9" rx="2"/><rect x="44" y="77" width="9" height="9" rx="2"/><rect x="55" y="77" width="9" height="9" rx="2"/><rect x="66" y="77" width="9" height="9" rx="2"/><rect x="77" y="77" width="9" height="9" rx="2"/><rect x="88" y="77" width="9" height="9" rx="2"/><rect x="99" y="77" width="9" height="9" rx="2"/>
+                <rect x="0" y="88" width="9" height="9" rx="2"/><rect x="11" y="88" width="9" height="9" rx="2"/><rect x="22" y="88" width="9" height="9" rx="2"/><rect x="33" y="88" width="9" height="9" rx="2"/><rect x="44" y="88" width="9" height="9" rx="2"/><rect x="55" y="88" width="9" height="9" rx="2"/><rect x="66" y="88" width="9" height="9" rx="2"/><rect x="77" y="88" width="9" height="9" rx="2"/><rect x="88" y="88" width="9" height="9" rx="2"/><rect x="99" y="88" width="9" height="9" rx="2"/>
+                <rect x="0" y="99" width="9" height="9" rx="2"/><rect x="11" y="99" width="9" height="9" rx="2"/><rect x="22" y="99" width="9" height="9" rx="2"/><rect x="33" y="99" width="9" height="9" rx="2"/><rect x="44" y="99" width="9" height="9" rx="2"/><rect x="55" y="99" width="9" height="9" rx="2"/><rect x="66" y="99" width="9" height="9" rx="2"/><rect x="77" y="99" width="9" height="9" rx="2"/><rect x="88" y="99" width="9" height="9" rx="2"/><rect x="99" y="99" width="9" height="9" rx="2"/>
+              </g>
+              <rect x="0" y="0" width="9" height="9" rx="2" fill="#7b38c4"/><rect x="11" y="0" width="9" height="9" rx="2" fill="#7b38c4"/><rect x="22" y="0" width="9" height="9" rx="2" fill="#7b38c4"/><rect x="33" y="0" width="9" height="9" rx="2" fill="#7b38c4"/><rect x="44" y="0" width="9" height="9" rx="2" fill="#7b38c4"/><rect x="55" y="0" width="9" height="9" rx="2" fill="#7b38c4"/><rect x="66" y="0" width="9" height="9" rx="2" fill="#7b38c4"/><rect x="77" y="0" width="9" height="9" rx="2" fill="#7b38c4"/><rect x="88" y="0" width="9" height="9" rx="2" fill="#7b38c4"/><rect x="99" y="0" width="9" height="9" rx="2" fill="#7b38c4"/>
+              <rect x="0" y="11" width="9" height="9" rx="2" fill="#7b38c4"/><rect x="11" y="11" width="9" height="9" rx="2" fill="#7b38c4"/><rect x="22" y="11" width="9" height="9" rx="2" fill="#7b38c4"/><rect x="33" y="11" width="9" height="9" rx="2" fill="#7b38c4"/><rect x="44" y="11" width="9" height="9" rx="2" fill="#7b38c4"/><rect x="55" y="11" width="9" height="9" rx="2" fill="#7b38c4"/><rect x="66" y="11" width="9" height="9" rx="2" fill="#7b38c4"/><rect x="77" y="11" width="9" height="9" rx="2" fill="#7b38c4"/><rect x="88" y="11" width="9" height="9" rx="2" fill="#7b38c4"/><rect x="99" y="11" width="9" height="9" rx="2" fill="#7b38c4"/>
+              <rect x="0" y="22" width="9" height="9" rx="2" fill="#7b38c4"/><rect x="11" y="22" width="9" height="9" rx="2" fill="#7b38c4"/><rect x="22" y="22" width="9" height="9" rx="2" fill="#7b38c4"/><rect x="33" y="22" width="9" height="9" rx="2" fill="#7b38c4"/><rect x="44" y="22" width="9" height="9" rx="2" fill="#7b38c4"/>
+            </g>
+            <rect x="182" y="66" width="104" height="48" rx="14" fill="#fff" stroke="#7b38c4" stroke-width="2"/>
+            <text x="201" y="97" font-family="Arial" font-size="26" fill="#7b38c4" font-weight="800">25%</text>
+            <text x="179" y="132" font-family="Arial" font-size="13" fill="#1a2e3b" font-weight="700">25 out of every 100</text>
+          </svg>
+        </div>
+        <div class="card-body">
+          <div class="card-label">Proportions</div>
+          <div class="card-title">Percentage Basics</div>
+          <div class="card-desc">See percent as “out of 100,” then solve a quick snack-vote example with guided practice.</div>
+          <div class="card-arrow">Open lesson →</div>
+        </div>
+      </a>
 
     </div>
   </section>
@@ -526,98 +569,6 @@
         </div>
       </a>
 
-      <!-- placeholder -->
-      <div class="card-add">
-        <div class="card-add-icon">+</div>
-        <span>Add a geometry lesson here</span>
-      </div>
-
-    </div>
-  </section>
-
-  <!-- ══════════════════════════════════════════
-       PROPORTIONS & RATIOS
-  ══════════════════════════════════════════ -->
-  <section class="subject prop" id="proportions">
-    <div class="subject-header">
-      <div class="subject-icon">
-        <svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <circle cx="7" cy="19" r="4"/>
-          <circle cx="19" cy="7" r="4"/>
-          <line x1="10" y1="16" x2="16" y2="10"/>
-          <line x1="3" y1="13" x2="3" y2="23" stroke-width="1.5"/>
-          <line x1="23" y1="3" x2="23" y2="13" stroke-width="1.5"/>
-        </svg>
-      </div>
-      <div>
-        <div class="subject-title">Proportions &amp; Ratios</div>
-        <div class="subject-desc">Equivalent ratios, unit rates, percent, and scaling</div>
-      </div>
-    </div>
-
-    <div class="lesson-grid">
-      <div class="card-add">
-        <div class="card-add-icon">+</div>
-        <span>Add a proportions lesson here</span>
-      </div>
-      <div class="card-add">
-        <div class="card-add-icon">+</div>
-        <span>Add a ratios lesson here</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════════════════════════════════════════
-       NUMBER SENSE
-  ══════════════════════════════════════════ -->
-  <section class="subject num" id="number-sense">
-    <div class="subject-header">
-      <div class="subject-icon">
-        <svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-          <rect x="3" y="3" width="9" height="9" rx="2"/>
-          <rect x="14" y="3" width="9" height="9" rx="2"/>
-          <rect x="3" y="14" width="9" height="9" rx="2"/>
-          <rect x="14" y="14" width="9" height="9" rx="2"/>
-        </svg>
-      </div>
-      <div>
-        <div class="subject-title">Number Sense &amp; Operations</div>
-        <div class="subject-desc">Integers, fractions, decimals, exponents, and prime factors</div>
-      </div>
-    </div>
-
-    <div class="lesson-grid">
-      <div class="card-add">
-        <div class="card-add-icon">+</div>
-        <span>Add a number sense lesson here</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- ══════════════════════════════════════════
-       SCIENCE
-  ══════════════════════════════════════════ -->
-  <section class="subject sci" id="science">
-    <div class="subject-header">
-      <div class="subject-icon">
-        <svg viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M10 3v8L4 21h18L16 11V3"/>
-          <line x1="10" y1="3" x2="16" y2="3"/>
-          <circle cx="9" cy="17" r="1.5" fill="currentColor" stroke="none"/>
-          <circle cx="15" cy="19" r="1.5" fill="currentColor" stroke="none"/>
-        </svg>
-      </div>
-      <div>
-        <div class="subject-title">Science</div>
-        <div class="subject-desc">Life science, earth science, physical science, and experiments</div>
-      </div>
-    </div>
-
-    <div class="lesson-grid">
-      <div class="card-add">
-        <div class="card-add-icon">+</div>
-        <span>Add a science lesson here</span>
-      </div>
     </div>
   </section>
 

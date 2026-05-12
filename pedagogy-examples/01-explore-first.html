@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Explore First — Graphing Coordinates</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+  <style>
+    body.theme-a{--accent:#6d28d9;--accent-soft:#ede9fe;--bg:#f9f8f5;--surface:#fff;--border:#e4e4e7;--ink:#18181b;--muted:#71717a;--radius:16px;--shadow:0 1px 3px rgba(0,0,0,.06),0 8px 24px rgba(0,0,0,.07);--font:'Plus Jakarta Sans',system-ui,sans-serif;background:#f9f8f5}
+    body.theme-b{--accent:#f59e0b;--accent-soft:rgba(245,158,11,.12);--bg:#0f172a;--surface:#1e293b;--border:rgba(255,255,255,.08);--ink:#f1f5f9;--muted:#94a3b8;--radius:10px;--shadow:0 4px 24px rgba(0,0,0,.45);--font:'Inter',system-ui,sans-serif;background:#0f172a}
+    body.theme-c{--accent:#0d9488;--accent-soft:#ccfbf1;--bg:#fef3c7;--surface:rgba(255,255,255,.88);--border:rgba(255,255,255,.55);--ink:#1e293b;--muted:#64748b;--radius:24px;--shadow:0 4px 6px rgba(0,0,0,.04),0 16px 48px rgba(0,0,0,.1);--font:'Nunito',system-ui,sans-serif;background:linear-gradient(165deg,#fef3c7 0%,#fde68a 40%,#fbbf24 100%);background-attachment:fixed}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:var(--font);color:var(--ink);min-height:100vh;line-height:1.6;transition:color .3s,background-color .4s}
+    .top-bar{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:10px 20px;background:var(--surface);border-bottom:1px solid var(--border);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);transition:background .4s,border-color .3s}
+    .back-link{font-size:.82rem;font-weight:700;color:var(--accent);text-decoration:none;white-space:nowrap}
+    .back-link:hover{text-decoration:underline}
+    .picker{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+    .pick-label{font-size:.74rem;font-weight:700;color:var(--muted);margin-right:2px;white-space:nowrap}
+    .pick-btn{display:inline-flex;align-items:center;gap:6px;padding:5px 12px 5px 7px;background:transparent;border:1.5px solid var(--border);border-radius:999px;cursor:pointer;font-family:var(--font);font-size:.76rem;font-weight:700;color:var(--muted);transition:border-color .2s,color .2s,background .2s}
+    .pick-btn:hover{border-color:var(--accent);color:var(--ink)}
+    .pick-btn.active{background:var(--accent);border-color:var(--accent);color:#fff}
+    .swatch{width:14px;height:14px;border-radius:50%;flex-shrink:0;border:2px solid rgba(128,128,128,.2)}
+    .swatch-a{background:conic-gradient(#f9f8f5 0 50%,#6d28d9 50%)}
+    .swatch-b{background:conic-gradient(#0f172a 0 50%,#f59e0b 50%)}
+    .swatch-c{background:conic-gradient(#fde68a 0 50%,#0d9488 50%)}
+    .approach-badge{position:sticky;top:53px;z-index:99;padding:6px 20px;background:var(--accent);color:#fff;font-size:.72rem;font-weight:800;letter-spacing:.06em;text-transform:uppercase;text-align:center}
+    .wrap{max-width:860px;margin:0 auto;padding:36px 24px 80px;display:flex;flex-direction:column;gap:24px}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:26px 30px;transition:background .4s,border-radius .4s}
+    .card-head{font-size:1rem;font-weight:800;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+    .chip{padding:3px 11px;background:var(--accent-soft);color:var(--accent);border-radius:999px;font-size:.72rem;font-weight:800;letter-spacing:.04em;text-transform:uppercase}
+    p{color:var(--muted);font-size:.95rem;line-height:1.75;margin-bottom:8px}
+    p:last-child{margin-bottom:0}
+    strong{color:var(--ink)}
+    .hero-card{background:var(--accent);color:#fff;border-radius:var(--radius);padding:28px 30px}
+    .hero-card h1{font-size:clamp(1.5rem,3.5vw,2.2rem);font-weight:800;letter-spacing:-.02em;line-height:1.1;margin-bottom:10px}
+    .hero-card p{color:rgba(255,255,255,.88);font-size:1rem;margin:0}
+    .grid-wrap{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:start}
+    @media(max-width:600px){.grid-wrap{grid-template-columns:1fr}}
+    .svg-bg{background:var(--accent-soft);border-radius:calc(var(--radius) - 4px);padding:6px;cursor:crosshair;transition:background .4s}
+    svg{display:block}
+    .explore-prompt{padding:14px;background:var(--accent-soft);border-radius:10px;font-size:.9rem;font-weight:700;color:var(--accent);text-align:center;transition:background .3s,color .3s}
+    .explore-prompt.found{background:var(--accent);color:#fff}
+    .coord-log{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;min-height:32px}
+    .coord-tag{padding:4px 10px;background:var(--surface);border:1.5px solid var(--border);border-radius:8px;font-size:.88rem;font-weight:700;color:var(--accent)}
+    .concept-reveal{opacity:0;max-height:0;overflow:hidden;transition:opacity .5s,max-height .5s}
+    .concept-reveal.show{opacity:1;max-height:600px}
+    .rule-box{background:var(--accent-soft);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:12px 16px;font-size:.9rem;font-weight:600;margin-top:12px;transition:background .3s,border-color .3s}
+    .steps{display:flex;flex-direction:column;gap:10px}
+    .step{display:flex;align-items:flex-start;gap:12px}
+    .step-n{width:28px;height:28px;background:var(--accent);color:#fff;border-radius:50%;display:grid;place-items:center;font-size:.75rem;font-weight:800;flex-shrink:0;margin-top:3px;transition:background .3s,border-radius .4s}
+    .step-box{flex:1;padding:11px 16px;background:var(--accent-soft);border-radius:calc(var(--radius) - 4px);font-size:.92rem;transition:background .4s,border-radius .4s}
+    .step-box em{font-style:normal;color:var(--accent);font-weight:700}
+    .try-points{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}
+    .pt-tag{padding:6px 14px;background:var(--surface);border:2px solid var(--border);border-radius:10px;font-size:.95rem;font-weight:700;transition:border-color .3s,background .3s;cursor:default}
+    .pt-tag.done{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+    .insight{background:var(--accent);color:#fff;border-radius:var(--radius);padding:22px 26px;transition:background .4s,border-radius .4s}
+    .insight .ey{font-size:.72rem;font-weight:800;letter-spacing:.07em;text-transform:uppercase;opacity:.75;margin-bottom:8px}
+    .insight p{color:rgba(255,255,255,.92);font-size:.92rem;margin:0}
+    .btn{padding:11px 24px;border:none;border-radius:999px;background:var(--accent);color:#fff;font-family:var(--font);font-size:.9rem;font-weight:700;cursor:pointer;transition:filter .15s}
+    .btn:hover{filter:brightness(1.1)}
+    .btn-outline{background:transparent;color:var(--accent);border:2px solid var(--accent)}
+    @media(max-width:600px){.card{padding:20px 18px}.wrap{padding:24px 16px 60px;gap:18px}}
+  </style>
+</head>
+<body class="theme-a">
+
+<div class="top-bar">
+  <a class="back-link" href="index.html">← All approaches</a>
+  <div class="picker">
+    <span class="pick-label">Style:</span>
+    <button class="pick-btn active" data-theme="a"><span class="swatch swatch-a"></span>Explorer</button>
+    <button class="pick-btn" data-theme="b"><span class="swatch swatch-b"></span>Academy</button>
+    <button class="pick-btn" data-theme="c"><span class="swatch swatch-c"></span>Notebook</button>
+  </div>
+</div>
+<div class="approach-badge">Approach 1 — Explore First (Hook → Discover → Name)</div>
+
+<main class="wrap">
+
+  <!-- HOOK -->
+  <div class="hero-card">
+    <h1>🗺️ Kai found a treasure map.</h1>
+    <p>The map says the treasure is buried at <strong>(3, −2)</strong>. The island has a grid drawn on it. Where do you dig?</p>
+  </div>
+
+  <!-- FREE EXPLORE -->
+  <div class="card">
+    <div class="card-head">Click anywhere on the grid <span class="chip">Explore</span></div>
+    <p>No instructions — just click around. What do you notice about the two numbers that appear?</p>
+    <div class="grid-wrap">
+      <div>
+        <div class="svg-bg">
+          <svg id="explore-grid" viewBox="0 0 260 260" width="100%" aria-label="Coordinate grid"></svg>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;min-width:160px">
+        <div class="explore-prompt" id="explore-prompt">Click the grid to place a point.</div>
+        <div class="coord-log" id="coord-log"></div>
+        <div id="reveal-btn-wrap" style="display:none">
+          <button class="btn" id="reveal-btn">I noticed a pattern →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONCEPT — revealed after exploration -->
+  <div class="concept-reveal" id="concept-section">
+    <div class="card">
+      <div class="card-head">What you just discovered <span class="chip">Concept</span></div>
+      <p>Every point on the grid has <strong>two numbers</strong> that pinpoint it exactly. We write them as <strong>(x, y)</strong> — called <strong>coordinates</strong> or an <strong>ordered pair</strong>.</p>
+      <div class="rule-box">
+        <strong>First number (x):</strong> how far to move <em>right</em> (positive) or <em>left</em> (negative) from the center.<br>
+        <strong>Second number (y):</strong> how far to move <em>up</em> (positive) or <em>down</em> (negative) from the center.<br>
+        <strong>The center</strong> is called the <em>origin</em>, written as (0, 0).
+      </div>
+      <p style="margin-top:12px">Notice that the <strong>order matters</strong> — (3, −2) is a different spot than (−2, 3). That's why they're called <em>ordered</em> pairs.</p>
+    </div>
+  </div>
+
+  <!-- APPLY -->
+  <div class="concept-reveal" id="apply-section">
+    <div class="card">
+      <div class="card-head">Back to the treasure — plot (3, −2) <span class="chip">Apply</span></div>
+      <div class="grid-wrap">
+        <div>
+          <div class="svg-bg">
+            <svg id="apply-grid" viewBox="0 0 260 260" width="100%" aria-label="Solution grid"></svg>
+          </div>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-n">1</div>
+            <div class="step-box">Start at the <em>origin</em> (0, 0) — the center of the grid.</div>
+          </div>
+          <div class="step">
+            <div class="step-n">2</div>
+            <div class="step-box">The x-value is <em>+3</em> → move <em>3 units right</em>.</div>
+          </div>
+          <div class="step">
+            <div class="step-n">3</div>
+            <div class="step-box">The y-value is <em>−2</em> → move <em>2 units down</em>.</div>
+          </div>
+          <div class="step">
+            <div class="step-n">4</div>
+            <div class="step-box">Mark the spot. <em>Treasure found at (3, −2)!</em> 🎉</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRY IT -->
+  <div class="concept-reveal" id="try-section">
+    <div class="card">
+      <div class="card-head">Complete the treasure map <span class="chip">Try it</span></div>
+      <p>Plot all three remaining X marks. Click the point on the grid, then click the matching coordinate below to mark it done.</p>
+      <div class="try-points">
+        <div class="pt-tag" id="pt-a" data-x="−2" data-gx="-2" data-gy="4">(−2, 4)</div>
+        <div class="pt-tag" id="pt-b" data-x="4" data-gx="4" data-gy="-3">(4, −3)</div>
+        <div class="pt-tag" id="pt-c" data-x="−4" data-gx="-4" data-gy="-1">(−4, −1)</div>
+      </div>
+      <div class="svg-bg">
+        <svg id="try-grid" viewBox="0 0 260 260" width="100%" style="cursor:crosshair" aria-label="Practice grid"></svg>
+      </div>
+      <p id="try-msg" style="margin-top:12px;text-align:center;font-weight:700;min-height:1.4em"></p>
+    </div>
+  </div>
+
+  <!-- INSIGHT -->
+  <div class="concept-reveal" id="insight-section">
+    <div class="insight">
+      <div class="ey">Real-world connection</div>
+      <p>GPS on your phone works the same way — every location on Earth has two coordinates: <strong>latitude</strong> (up/down, the y) and <strong>longitude</strong> (left/right, the x). The (0, 0) origin is in the Gulf of Guinea off the west coast of Africa, where the Equator meets the Prime Meridian.</p>
+    </div>
+  </div>
+
+</main>
+
+<script>
+/* ── theme switcher ── */
+(function(){var b=document.body,bs=document.querySelectorAll('.pick-btn');function at(t,s){b.classList.remove('theme-a','theme-b','theme-c');b.classList.add('theme-'+t);bs.forEach(function(btn){var on=btn.dataset.theme===t;btn.classList.toggle('active',on);btn.setAttribute('aria-pressed',on);});if(s)localStorage.setItem('edu-theme',t);}bs.forEach(function(btn){btn.addEventListener('click',function(){at(btn.dataset.theme,true);});});var sv=localStorage.getItem('edu-theme');if(sv&&['a','b','c'].includes(sv))at(sv,false);})();
+
+/* ── coordinate grid ── */
+const NS='http://www.w3.org/2000/svg';
+const S=24,CX=130,CY=130;
+function e(tag,attrs){const el=document.createElementNS(NS,tag);for(const[k,v]of Object.entries(attrs))el.setAttribute(k,v);return el;}
+function gc(){return getComputedStyle(document.body).getPropertyValue('--ink').trim()||'#18181b';}
+
+function buildGrid(svg){
+  svg.innerHTML='';
+  const dark=document.body.classList.contains('theme-b');
+  const gridC=dark?'rgba(255,255,255,.1)':'rgba(0,0,0,.1)';
+  const axisC=dark?'rgba(255,255,255,.5)':'rgba(0,0,0,.45)';
+  const labC=dark?'#94a3b8':'#64748b';
+  for(let i=-5;i<=5;i++){
+    svg.appendChild(e('line',{x1:CX+i*S,y1:10,x2:CX+i*S,y2:250,stroke:i===0?axisC:gridC,'stroke-width':i===0?2:1}));
+    svg.appendChild(e('line',{x1:10,y1:CY-i*S,x2:250,y2:CY-i*S,stroke:i===0?axisC:gridC,'stroke-width':i===0?2:1}));
+    if(i!==0){
+      const xt=e('text',{x:CX+i*S,y:CY+16,'text-anchor':'middle',fill:labC,'font-size':'10','font-family':'Arial'});xt.textContent=i;svg.appendChild(xt);
+      const yt=e('text',{x:CX-8,y:CY-i*S+4,'text-anchor':'end',fill:labC,'font-size':'10','font-family':'Arial'});yt.textContent=i;svg.appendChild(yt);
+    }
+  }
+  const xl=e('text',{x:255,y:CY+4,fill:axisC,'font-size':'13','font-weight':'bold','font-family':'Arial'});xl.textContent='x';svg.appendChild(xl);
+  const yl=e('text',{x:CX+5,y:8,fill:axisC,'font-size':'13','font-weight':'bold','font-family':'Arial'});yl.textContent='y';svg.appendChild(yl);
+  const o=e('text',{x:CX-8,y:CY+16,'text-anchor':'end',fill:labC,'font-size':'10','font-family':'Arial'});o.textContent='0';svg.appendChild(o);
+}
+
+function plotPt(svg,gx,gy,color,label){
+  const px=CX+gx*S,py=CY-gy*S;
+  const g=e('g',{});
+  g.appendChild(e('circle',{cx:px,cy:py,r:6,fill:color,stroke:'white','stroke-width':2}));
+  if(label){const t=e('text',{x:px+9,y:py-9,fill:color,'font-size':'12','font-weight':'bold','font-family':'Arial'});t.textContent=label;g.appendChild(t);}
+  svg.appendChild(g);return g;
+}
+
+function clickToGrid(evt,svgEl){
+  const r=svgEl.getBoundingClientRect();
+  const sx=(evt.clientX-r.left)*260/r.width,sy=(evt.clientY-r.top)*260/r.height;
+  return{x:Math.max(-5,Math.min(5,Math.round((sx-CX)/S))),y:Math.max(-5,Math.min(5,Math.round((CY-sy)/S)))};
+}
+
+/* ── Explore grid ── */
+const exploreGrid=document.getElementById('explore-grid');
+const prompt=document.getElementById('explore-prompt');
+const log=document.getElementById('coord-log');
+let clickCount=0;
+
+buildGrid(exploreGrid);
+
+exploreGrid.addEventListener('click',function(evt){
+  const{x,y}=clickToGrid(evt,exploreGrid);
+  const accent=getComputedStyle(document.body).getPropertyValue('--accent').trim()||'#6d28d9';
+  plotPt(exploreGrid,x,y,accent,`(${x},${y})`);
+  const tag=document.createElement('div');
+  tag.className='coord-tag';tag.textContent=`(${x}, ${y})`;
+  log.appendChild(tag);
+  clickCount++;
+  if(clickCount===1)prompt.textContent='Notice the two numbers? Keep clicking different spots.';
+  if(clickCount===3){prompt.textContent='What changes when you click left vs right? Up vs down?';prompt.classList.add('found');}
+  if(clickCount>=4){document.getElementById('reveal-btn-wrap').style.display='block';}
+});
+
+document.getElementById('reveal-btn').addEventListener('click',function(){
+  ['concept-section','apply-section','try-section','insight-section'].forEach(function(id){
+    const el=document.getElementById(id);
+    el.classList.add('show');
+  });
+  setTimeout(function(){buildApplyGrid();buildTryGrid();},100);
+  document.getElementById('concept-section').scrollIntoView({behavior:'smooth',block:'start'});
+});
+
+/* ── Apply grid ── */
+function buildApplyGrid(){
+  const svg=document.getElementById('apply-grid');
+  buildGrid(svg);
+  const accent=getComputedStyle(document.body).getPropertyValue('--accent').trim()||'#6d28d9';
+  // Animate steps
+  setTimeout(function(){plotPt(svg,0,0,'#94a3b8','Origin');},400);
+  setTimeout(function(){svg.appendChild(e('line',{x1:CX,y1:CY,x2:CX+3*S,y2:CY,stroke:accent,'stroke-width':2.5,'stroke-dasharray':'6,3'}));},900);
+  setTimeout(function(){svg.appendChild(e('line',{x1:CX+3*S,y1:CY,x2:CX+3*S,y2:CY-(-2)*S,stroke:accent,'stroke-width':2.5,'stroke-dasharray':'6,3'}));},1500);
+  setTimeout(function(){plotPt(svg,3,-2,accent,'(3,−2) 💎');},2100);
+}
+
+/* ── Try grid ── */
+let tryPlotted={};
+function buildTryGrid(){
+  const svg=document.getElementById('try-grid');
+  buildGrid(svg);
+  const accent=getComputedStyle(document.body).getPropertyValue('--accent').trim()||'#6d28d9';
+  // Pre-plot the found treasure
+  plotPt(svg,3,-2,accent,'(3,−2)💎');
+
+  svg.addEventListener('click',function(evt){
+    const{x,y}=clickToGrid(evt,svg);
+    const targets=[{gx:-2,gy:4,id:'pt-a'},{gx:4,gy:-3,id:'pt-b'},{gx:-4,gy:-1,id:'pt-c'}];
+    const hit=targets.find(t=>t.gx===x&&t.gy===y&&!tryPlotted[t.id]);
+    if(hit){
+      tryPlotted[hit.id]=true;
+      plotPt(svg,x,y,accent,`(${x},${y})`);
+      document.getElementById(hit.id).classList.add('done');
+    } else {
+      plotPt(svg,x,y,'#e2e8f0','');
+    }
+    const done=Object.keys(tryPlotted).length;
+    const msg=document.getElementById('try-msg');
+    if(done===3){msg.textContent='🎉 All treasure marked! You can read and plot coordinates.';msg.style.color=getComputedStyle(document.body).getPropertyValue('--accent').trim();}
+    else if(done>0){msg.textContent=`${done}/3 found — keep going!`;}
+  });
+}
+
+// Rebuild grids when theme changes
+const obs=new MutationObserver(function(){
+  buildGrid(document.getElementById('explore-grid'));
+  if(document.getElementById('apply-section').classList.contains('show'))buildApplyGrid();
+  if(document.getElementById('try-section').classList.contains('show'))buildTryGrid();
+});
+obs.observe(document.body,{attributes:true,attributeFilter:['class']});
+</script>
+</body>
+</html>
