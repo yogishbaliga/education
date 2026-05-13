@@ -3,6 +3,16 @@
   "name": "education",
   "compatibility_date": "2026-04-27",
   "main": "src/worker.js",
+  "routes": [
+    {
+      "pattern": "gyanzoo.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "www.gyanzoo.com",
+      "custom_domain": true
+    }
+  ],
   "assets": {
     "directory": "public",
     "binding": "ASSETS"
