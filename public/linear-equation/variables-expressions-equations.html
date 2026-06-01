@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Variables, Expressions, and Equations - Math &amp; Science Lab</title>
+  <meta name="description" content="A 6th grade interactive algebra lesson on variables, expressions, equations, and testing solutions." />
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-C19PRJPV7K"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-C19PRJPV7K');
+  </script>
+
+  <!-- All three theme fonts loaded upfront -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+    body.theme-a {
+      --accent:      #c85b1b;
+      --accent-soft: #fce8db;
+      --bg:      #f9f8f5;
+      --surface: #ffffff;
+      --border:  #e4e4e7;
+      --ink:     #18181b;
+      --muted:   #71717a;
+      --hyp:     #18181b;
+      --ok:      #16a34a;
+      --ok-soft: #dcfce7;
+      --bad:     #dc2626;
+      --bad-soft:#fee2e2;
+      --radius:  16px;
+      --shadow:  0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.07);
+      --font:    'Plus Jakarta Sans', system-ui, sans-serif;
+    }
+    body.theme-b {
+      --accent:      #f59e0b;
+      --accent-soft: rgba(245,158,11,.12);
+      --bg:      #0f172a;
+      --surface: #1e293b;
+      --border:  rgba(255,255,255,.08);
+      --ink:     #f1f5f9;
+      --muted:   #94a3b8;
+      --hyp:     #f59e0b;
+      --ok:      #34d399;
+      --ok-soft: rgba(52,211,153,.15);
+      --bad:     #f87171;
+      --bad-soft: rgba(248,113,113,.14);
+      --radius:  10px;
+      --shadow:  0 4px 24px rgba(0,0,0,.45);
+      --font:    'Inter', system-ui, sans-serif;
+    }
+    body.theme-c {
+      --accent:      #0d9488;
+      --accent-soft: #ccfbf1;
+      --bg:      #fef3c7;
+      --surface: rgba(255,255,255,.86);
+      --border:  rgba(255,255,255,.55);
+      --ink:     #1e293b;
+      --muted:   #64748b;
+      --hyp:     #ef4444;
+      --ok:      #0d9488;
+      --ok-soft: rgba(13,148,136,.15);
+      --bad:     #dc2626;
+      --bad-soft:#fee2e2;
+      --radius:  24px;
+      --shadow:  0 4px 6px rgba(0,0,0,.04), 0 16px 48px rgba(0,0,0,.1);
+      --font:    'Nunito', system-ui, sans-serif;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font);
+      line-height: 1.6;
+      transition: color .3s, background-color .4s;
+    }
+    body.theme-c {
+      background: linear-gradient(165deg, #fef3c7 0%, #fde68a 40%, #fbbf24 100%);
+      background-attachment: fixed;
+    }
+
+    .top-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      padding: 10px 24px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+    .back-link {
+      font-size: .82rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-decoration: none;
+      white-space: nowrap;
+    }
+    .back-link:hover { text-decoration: underline; }
+    .picker { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .pick-label { font-size: .74rem; font-weight: 700; color: var(--muted); margin-right: 2px; white-space: nowrap; }
+    .pick-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 12px 5px 7px;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 999px;
+      cursor: pointer;
+      font-family: var(--font);
+      font-size: .76rem;
+      font-weight: 700;
+      color: var(--muted);
+      transition: border-color .2s, color .2s, background .2s;
+    }
+    .pick-btn:hover { border-color: var(--accent); color: var(--ink); }
+    .pick-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .swatch { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; border: 2px solid rgba(128,128,128,.2); }
+    .swatch-a { background: conic-gradient(#f9f8f5 0 50%, #2563eb 50%); }
+    .swatch-b { background: conic-gradient(#0f172a 0 50%, #f59e0b 50%); }
+    .swatch-c { background: conic-gradient(#fde68a 0 50%, #0d9488 50%); }
+
+    .hero {
+      padding: 46px 24px 40px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: background .4s, border-color .3s;
+    }
+    .hero-badge {
+      display: inline-block;
+      padding: 5px 16px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 999px;
+      font-size: .75rem;
+      font-weight: 800;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+    .hero h1 {
+      font-size: clamp(1.9rem, 4.5vw, 3rem);
+      font-weight: 800;
+      letter-spacing: -.03em;
+      line-height: 1.1;
+    }
+    .hero h1 em { font-style: normal; color: var(--accent); }
+    .hero p {
+      margin: 12px auto 0;
+      font-size: 1.05rem;
+      color: var(--muted);
+      max-width: 56ch;
+    }
+    .formula-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 24px;
+      padding: 12px 24px;
+      border-radius: var(--radius);
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: clamp(1.3rem, 3vw, 1.85rem);
+      font-weight: 800;
+    }
+
+    .wrap {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 34px 24px 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 26px 30px;
+      transition: background .4s, border-color .3s, border-radius .4s, box-shadow .4s;
+    }
+    .card-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 1.04rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+    }
+    .c-icon {
+      width: 32px;
+      height: 32px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      font-size: .82rem;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .c-chip {
+      padding: 3px 12px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 999px;
+      font-size: .73rem;
+      font-weight: 800;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .story p, .explain p { color: var(--muted); font-size: .96rem; line-height: 1.75; margin-bottom: 10px; }
+    .story strong, .explain strong { color: var(--ink); }
+    .callout {
+      margin-top: 16px;
+      padding: 13px 18px;
+      background: var(--accent-soft);
+      border-left: 3px solid var(--accent);
+      border-radius: 0 10px 10px 0;
+      font-size: .92rem;
+      font-weight: 700;
+    }
+
+    .lab-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, .9fr);
+      gap: 22px;
+      align-items: stretch;
+    }
+    .control-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+    .sl-row label {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      font-size: .86rem;
+      font-weight: 700;
+      margin-bottom: 9px;
+    }
+    .sl-row label .v {
+      font-size: 1.15rem;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    input[type=range] {
+      width: 100%;
+      appearance: none;
+      -webkit-appearance: none;
+      height: 6px;
+      border-radius: 999px;
+      background: var(--border);
+      outline: none;
+      cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      background: var(--accent);
+      border: 3px solid var(--surface);
+      border-radius: 50%;
+    }
+    input[type=range]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      background: var(--accent);
+      border: 3px solid var(--surface);
+      border-radius: 50%;
+      cursor: pointer;
+    }
+    .visual {
+      min-height: 300px;
+      padding: 20px;
+      background: var(--accent-soft);
+      border-radius: calc(var(--radius) - 4px);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 18px;
+    }
+    .bag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 92px;
+      align-content: flex-start;
+    }
+    .bag, .loose {
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      font-weight: 800;
+      box-shadow: 0 8px 20px rgba(0,0,0,.08);
+    }
+    .bag {
+      width: 58px;
+      height: 58px;
+      background: var(--surface);
+      color: var(--accent);
+      border: 2px solid var(--accent);
+    }
+    .loose {
+      width: 38px;
+      height: 38px;
+      background: var(--accent);
+      color: #fff;
+    }
+    .math-stack {
+      display: grid;
+      gap: 10px;
+    }
+    .math-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      padding: 12px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .math-label {
+      color: var(--muted);
+      font-size: .78rem;
+      font-weight: 800;
+      letter-spacing: .05em;
+      text-transform: uppercase;
+    }
+    .math-value {
+      color: var(--accent);
+      font-size: 1.08rem;
+      font-weight: 800;
+      text-align: right;
+    }
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    .step-n {
+      width: 28px;
+      height: 28px;
+      background: var(--accent);
+      color: #fff;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-size: .75rem;
+      font-weight: 800;
+      flex-shrink: 0;
+      margin-top: 3px;
+    }
+    .step-box {
+      flex: 1;
+      padding: 11px 16px;
+      background: var(--accent-soft);
+      border-radius: calc(var(--radius) - 4px);
+    }
+    .step-lbl {
+      color: var(--muted);
+      font-size: .78rem;
+      margin-bottom: 3px;
+      font-weight: 700;
+    }
+    .step-eq { font-weight: 800; font-size: .98rem; }
+    .step-eq em { font-style: normal; color: var(--accent); }
+
+    .checker {
+      display: grid;
+      grid-template-columns: minmax(150px, 1fr) auto;
+      gap: 12px;
+      align-items: end;
+      margin-top: 14px;
+    }
+    .checker label {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      font-size: .82rem;
+      color: var(--muted);
+      font-weight: 800;
+    }
+    input[type=number] {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: 12px;
+      padding: 11px 12px;
+      background: var(--surface);
+      color: var(--ink);
+      font: inherit;
+      font-weight: 800;
+    }
+    .btn-primary {
+      padding: 12px 22px;
+      border: none;
+      border-radius: 999px;
+      background: var(--accent);
+      color: white;
+      font-size: .95rem;
+      font-weight: 800;
+      cursor: pointer;
+      font-family: var(--font);
+      min-height: 48px;
+    }
+    .feedback {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      font-weight: 700;
+    }
+    .feedback.good { color: var(--ok); background: var(--ok-soft); }
+    .feedback.try { color: var(--bad); background: var(--bad-soft); }
+    .insight {
+      background: var(--accent);
+      color: #fff;
+      border-radius: var(--radius);
+      padding: 24px 28px;
+    }
+    .insight .eyebrow {
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      opacity: .75;
+      margin-bottom: 8px;
+    }
+    .insight p { font-size: .95rem; line-height: 1.65; opacity: .94; }
+    .insight strong { font-weight: 800; }
+
+    body.theme-a .hero { background: #fff; border-bottom: 1px solid #e4e4e7; }
+    body.theme-b .hero {
+      background: linear-gradient(180deg, #131f38 0%, #0f172a 100%);
+      border-bottom: 1px solid rgba(255,255,255,.07);
+    }
+    body.theme-b .hero::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 0%, rgba(245,158,11,.15) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    body.theme-b .hero-badge {
+      font-family: 'SF Mono','Fira Code', monospace;
+      letter-spacing: .1em;
+      border: 1px solid rgba(245,158,11,.3);
+    }
+    body.theme-b .card { border-top: 2px solid var(--accent); }
+    body.theme-b .card-head {
+      font-size: .82rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--accent);
+      font-family: 'SF Mono','Fira Code', monospace;
+    }
+    body.theme-b .c-icon, body.theme-b .c-chip { display: none; }
+    body.theme-c .hero { background: transparent; }
+    body.theme-c .card { backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+    body.theme-c .c-icon { display: none; }
+
+    @media (max-width: 760px) {
+      .lab-grid { grid-template-columns: 1fr; }
+      .checker { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 600px) {
+      .card { padding: 20px 18px; }
+      .wrap { padding: 24px 16px 64px; gap: 18px; }
+      .hero { padding: 36px 18px 36px; }
+      .top-bar { padding: 8px 16px; }
+      .math-line { align-items: flex-start; flex-direction: column; }
+      .math-value { text-align: left; }
+    }
+  </style>
+</head>
+<body class="theme-a">
+
+<div class="top-bar">
+  <a class="back-link" href="../index.html">&larr; All lessons</a>
+  <div class="picker" role="navigation" aria-label="Visual style">
+    <span class="pick-label">Style:</span>
+    <button class="pick-btn active" data-theme="a" aria-pressed="true"><span class="swatch swatch-a"></span>Explorer</button>
+    <button class="pick-btn" data-theme="b" aria-pressed="false"><span class="swatch swatch-b"></span>Academy</button>
+    <button class="pick-btn" data-theme="c" aria-pressed="false"><span class="swatch swatch-c"></span>Notebook</button>
+  </div>
+</div>
+
+<header class="hero">
+  <div class="hero-badge">Algebra &middot; Grade 6</div>
+  <h1>Variables, <em>Expressions</em>, and Equations</h1>
+  <p>Use a snack stand model to see how a letter can stand for an unknown number, how an expression calculates a value, and how an equation makes a true-or-false statement.</p>
+  <div class="formula-pill"><span>3x + 2</span><span>=</span><span>?</span></div>
+</header>
+
+<main class="wrap">
+  <section class="card story">
+    <div class="card-head">
+      <div class="c-icon">1</div>
+      The Snack Stand Setup
+      <span class="c-chip">Story</span>
+    </div>
+    <p>A student council packs snack bags for a game. Each bag has <strong>3 granola bars</strong>, and there are always <strong>2 extra bars</strong> on the table.</p>
+    <p>The number of bags can change. Instead of writing a new sentence each time, algebra lets us use a letter.</p>
+    <div class="callout"><strong>x</strong> means the number of snack bags. The expression <strong>3x + 2</strong> tells how many bars there are in all.</div>
+  </section>
+
+  <section class="card">
+    <div class="card-head">
+      <div class="c-icon">2</div>
+      Build the Expression
+      <span class="c-chip">Interactive</span>
+    </div>
+    <div class="lab-grid">
+      <div class="control-panel">
+        <div class="sl-row">
+          <label for="bags">Snack bags, x <span class="v"><span id="bagsValue">4</span> bags</span></label>
+          <input id="bags" type="range" min="1" max="9" value="4" />
+        </div>
+        <div class="sl-row">
+          <label for="target">Equation target <span class="v"><span id="targetValue">14</span> bars</span></label>
+          <input id="target" type="range" min="5" max="35" value="14" />
+        </div>
+        <div class="math-stack">
+          <div class="math-line">
+            <span class="math-label">Variable</span>
+            <span class="math-value">x = <span id="varText">4</span></span>
+          </div>
+          <div class="math-line">
+            <span class="math-label">Expression</span>
+            <span class="math-value">3x + 2 = <span id="expressionText">14</span></span>
+          </div>
+          <div class="math-line">
+            <span class="math-label">Equation</span>
+            <span class="math-value">3x + 2 = <span id="equationTarget">14</span></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="visual" aria-live="polite">
+        <div>
+          <div class="math-label">What the expression shows</div>
+          <div class="bag-row" id="bagRow"></div>
+        </div>
+        <div>
+          <div class="math-label">Extra bars</div>
+          <div class="bag-row">
+            <div class="loose">1</div>
+            <div class="loose">1</div>
+          </div>
+        </div>
+        <div class="math-line">
+          <span class="math-label">Total bars</span>
+          <span class="math-value" id="totalText">14</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="card explain">
+    <div class="card-head">
+      <div class="c-icon">3</div>
+      Expression or Equation?
+      <span class="c-chip">Math</span>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-n">1</div>
+        <div class="step-box">
+          <div class="step-lbl">Variable</div>
+          <div class="step-eq"><em>x</em> is a placeholder for a number that can change or may be unknown.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">2</div>
+        <div class="step-box">
+          <div class="step-lbl">Expression</div>
+          <div class="step-eq"><em>3x + 2</em> has numbers, a variable, and operations. It does not have an equal sign.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">3</div>
+        <div class="step-box">
+          <div class="step-lbl">Equation</div>
+          <div class="step-eq"><em>3x + 2 = <span id="stepTarget">14</span></em> says two quantities are equal. It can be true or false.</div>
+        </div>
+      </div>
+    </div>
+    <div class="checker">
+      <label for="guess">Test a value for x
+        <input id="guess" type="number" min="0" max="20" value="4" />
+      </label>
+      <button class="btn-primary" id="checkBtn" type="button">Check</button>
+    </div>
+    <div class="feedback good" id="feedback">Try x = 4. The left side becomes 3(4) + 2 = 14, so the equation is true.</div>
+  </section>
+
+  <section class="insight">
+    <div class="eyebrow">Why it matters</div>
+    <p>Equations are useful because they let us describe a situation before we know every number. Once the equation is written, testing a solution means replacing the variable and asking: <strong>do both sides match?</strong></p>
+  </section>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  const body = document.body;
+  const btns = document.querySelectorAll('.pick-btn');
+
+  function applyTheme(t, save) {
+    body.classList.remove('theme-a', 'theme-b', 'theme-c');
+    body.classList.add('theme-' + t);
+    btns.forEach(b => {
+      const on = b.dataset.theme === t;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-pressed', on);
+    });
+    if (save) localStorage.setItem('edu-theme', t);
+  }
+
+  btns.forEach(b => b.addEventListener('click', () => applyTheme(b.dataset.theme, true)));
+  const saved = localStorage.getItem('edu-theme');
+  if (saved && ['a', 'b', 'c'].includes(saved)) applyTheme(saved, false);
+
+  const bags = document.getElementById('bags');
+  const target = document.getElementById('target');
+  const guess = document.getElementById('guess');
+  const checkBtn = document.getElementById('checkBtn');
+  const bagRow = document.getElementById('bagRow');
+  const feedback = document.getElementById('feedback');
+  let completed = false;
+
+  function totalFor(x) {
+    return 3 * x + 2;
+  }
+
+  function renderBags(x) {
+    bagRow.innerHTML = '';
+    for (let i = 0; i < x; i += 1) {
+      const bag = document.createElement('div');
+      bag.className = 'bag';
+      bag.textContent = '3';
+      bag.setAttribute('aria-label', 'Snack bag with 3 bars');
+      bagRow.appendChild(bag);
+    }
+  }
+
+  function update() {
+    const x = Number(bags.value);
+    const targetValue = Number(target.value);
+    const total = totalFor(x);
+
+    document.getElementById('bagsValue').textContent = x;
+    document.getElementById('targetValue').textContent = targetValue;
+    document.getElementById('varText').textContent = x;
+    document.getElementById('expressionText').textContent = total;
+    document.getElementById('equationTarget').textContent = targetValue;
+    document.getElementById('stepTarget').textContent = targetValue;
+    document.getElementById('totalText').textContent = total;
+    renderBags(x);
+  }
+
+  function checkGuess() {
+    const candidate = Number(guess.value);
+    const targetValue = Number(target.value);
+    const left = totalFor(candidate);
+    const isSolution = left === targetValue;
+    feedback.className = 'feedback ' + (isSolution ? 'good' : 'try');
+    feedback.textContent = isSolution
+      ? 'Yes. 3(' + candidate + ') + 2 = ' + left + ', so x = ' + candidate + ' makes the equation true.'
+      : 'Not yet. 3(' + candidate + ') + 2 = ' + left + ', which does not equal ' + targetValue + '. Try a different value for x.';
+
+    if (isSolution && !completed) {
+      completed = true;
+      if (typeof gtag === 'function') {
+        gtag('event', 'lesson_complete', { lesson: 'variables-expressions-equations' });
+      }
+    }
+  }
+
+  bags.addEventListener('input', update);
+  target.addEventListener('input', update);
+  checkBtn.addEventListener('click', checkGuess);
+  guess.addEventListener('keydown', event => {
+    if (event.key === 'Enter') checkGuess();
+  });
+
+  update();
+})();
+</script>
+
+</body>
+</html>

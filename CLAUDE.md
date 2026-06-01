@@ -84,6 +84,7 @@ Every lesson page ships with **three built-in visual themes** that the user can 
 |---------|-------|------|-------|
 | Statistics & Data | Jump Rope & the IQR | `public/statistics/iqr-jump-rope.html` | 6–7 |
 | Linear Equations | Linear Equations Lab | `public/linear-equation/index.html` | 7 |
+| Linear Equations | Variables, Expressions & Equations | `public/linear-equation/variables-expressions-equations.html` | 6 |
 | Proportions & Ratios | Percentage Basics | `public/proportions-ratios/percentage-basics.html` | 6 |
 | Geometry | Box Net & Surface Area | `public/surface-area/surface_area.html` | 6 |
 | Geometry | Cube Net Explorer | `public/surface-area/open-net.html` | 6 |
