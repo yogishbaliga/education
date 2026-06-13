@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rates &amp; Proportional Relationships — Math &amp; Science Lab</title>
+  <meta name="description" content="Discover unit rates and the constant of proportionality with an interactive taco truck and graph. Aligned to Khan Academy 7.RP standards for 7th grade." />
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-C19PRJPV7K"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-C19PRJPV7K');
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+
+  <style>
+
+    /* ═══════════════════════════════════════════════════════
+       THEME TOKENS — Proportions & Ratios accent
+    ═══════════════════════════════════════════════════════ */
+    body.theme-a {
+      --accent:      #7b38c4;
+      --accent-soft: #ede0f9;
+      --bg:      #f9f8f5;
+      --surface: #ffffff;
+      --border:  #e4e4e7;
+      --ink:     #18181b;
+      --muted:   #71717a;
+      --hyp:     #18181b;
+      --ok:      #16a34a;
+      --ok-soft: #dcfce7;
+      --bad:     #dc2626;
+      --bad-soft:#fee2e2;
+      --radius:  16px;
+      --shadow:  0 1px 3px rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.07);
+      --font:    'Plus Jakarta Sans', system-ui, sans-serif;
+    }
+    body.theme-b {
+      --accent:      #f59e0b;
+      --accent-soft: rgba(245,158,11,.12);
+      --bg:      #0f172a;
+      --surface: #1e293b;
+      --border:  rgba(255,255,255,.08);
+      --ink:     #f1f5f9;
+      --muted:   #94a3b8;
+      --hyp:     #f59e0b;
+      --ok:      #34d399;
+      --ok-soft: rgba(52,211,153,.15);
+      --bad:     #f87171;
+      --bad-soft:rgba(248,113,113,.14);
+      --radius:  10px;
+      --shadow:  0 4px 24px rgba(0,0,0,.45);
+      --font:    'Inter', system-ui, sans-serif;
+    }
+    body.theme-c {
+      --accent:      #0d9488;
+      --accent-soft: #ccfbf1;
+      --bg:      #fef3c7;
+      --surface: rgba(255,255,255,.86);
+      --border:  rgba(255,255,255,.55);
+      --ink:     #1e293b;
+      --muted:   #64748b;
+      --hyp:     #ef4444;
+      --ok:      #0d9488;
+      --ok-soft: rgba(13,148,136,.15);
+      --bad:     #dc2626;
+      --bad-soft:#fee2e2;
+      --radius:  24px;
+      --shadow:  0 4px 6px rgba(0,0,0,.04), 0 16px 48px rgba(0,0,0,.1);
+      --font:    'Nunito', system-ui, sans-serif;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       RESET + BASE
+    ═══════════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: var(--font);
+      color: var(--ink);
+      min-height: 100vh;
+      line-height: 1.6;
+      background: var(--bg);
+      transition: color .3s, background-color .4s;
+    }
+    body.theme-c {
+      background: linear-gradient(165deg, #fef3c7 0%, #fde68a 40%, #fbbf24 100%);
+      background-attachment: fixed;
+    }
+
+    /* ═══════════════════════════════════════════════════════
+       TOP BAR
+    ═══════════════════════════════════════════════════════ */
+    .top-bar {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; flex-wrap: wrap; padding: 10px 24px;
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+      transition: background .4s, border-color .3s;
+    }
+    .back-link {
+      font-size: .82rem; font-weight: 700; color: var(--accent);
+      text-decoration: none; white-space: nowrap; transition: color .3s;
+    }
+    .back-link:hover { text-decoration: underline; }
+    .picker { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .pick-label { font-size: .74rem; font-weight: 700; color: var(--muted); margin-right: 2px; white-space: nowrap; }
+    .pick-btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 5px 12px 5px 7px;
+      background: transparent; border: 1.5px solid var(--border); border-radius: 999px;
+      cursor: pointer; font-family: var(--font); font-size: .76rem; font-weight: 700;
+      color: var(--muted); transition: border-color .2s, color .2s, background .2s;
+    }
+    .pick-btn:hover  { border-color: var(--accent); color: var(--ink); }
+    .pick-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .swatch { width: 14px; height: 14px; border-radius: 50%; flex-shrink: 0; border: 2px solid rgba(128,128,128,.2); }
+    .swatch-a { background: conic-gradient(#f9f8f5 0 50%, #2563eb 50%); }
+    .swatch-b { background: conic-gradient(#0f172a 0 50%, #f59e0b 50%); }
+    .swatch-c { background: conic-gradient(#fde68a 0 50%, #0d9488 50%); }
+
+    /* ═══════════════════════════════════════════════════════
+       HERO
+    ═══════════════════════════════════════════════════════ */
+    .hero {
+      padding: 48px 24px 44px; text-align: center;
+      position: relative; overflow: hidden;
+      transition: background .4s, border-color .3s;
+    }
+    .hero-badge {
+      display: inline-block; padding: 5px 16px;
+      background: var(--accent-soft); color: var(--accent);
+      border-radius: 999px; font-size: .75rem; font-weight: 800;
+      letter-spacing: .05em; text-transform: uppercase;
+      margin-bottom: 16px; transition: background .3s, color .3s;
+    }
+    .hero h1 { font-size: clamp(1.9rem, 4.5vw, 3rem); font-weight: 800; letter-spacing: -.03em; line-height: 1.1; }
+    .hero h1 em { font-style: normal; color: var(--accent); transition: color .3s; }
+    .hero p { margin-top: 12px; font-size: 1.05rem; color: var(--muted); max-width: 52ch; margin-inline: auto; }
+
+    /* ═══════════════════════════════════════════════════════
+       LAYOUT
+    ═══════════════════════════════════════════════════════ */
+    .wrap { max-width: 900px; margin: 0 auto; padding: 40px 24px 80px; display: flex; flex-direction: column; gap: 24px; }
+
+    /* ═══════════════════════════════════════════════════════
+       CARD
+    ═══════════════════════════════════════════════════════ */
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); box-shadow: var(--shadow); padding: 28px 32px;
+      transition: background .4s, border-color .3s, border-radius .4s, box-shadow .4s;
+    }
+    .card-head {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 1.05rem; font-weight: 800; margin-bottom: 18px;
+    }
+    .c-icon {
+      width: 32px; height: 32px; background: var(--accent-soft); color: var(--accent);
+      border-radius: 8px; display: grid; place-items: center;
+      font-size: .88rem; flex-shrink: 0;
+      transition: background .3s, color .3s, border-radius .4s;
+    }
+    .c-chip {
+      padding: 3px 12px; background: var(--accent-soft); color: var(--accent);
+      border-radius: 999px; font-size: .73rem; font-weight: 800;
+      letter-spacing: .04em; text-transform: uppercase;
+      transition: background .3s, color .3s;
+    }
+
+    /* ── Story text ── */
+    .story p { color: var(--muted); font-size: .95rem; line-height: 1.75; margin-bottom: 10px; }
+    .story strong { color: var(--ink); }
+
+    /* ── Callout box ── */
+    .callout {
+      margin-top: 16px; padding: 13px 18px;
+      background: var(--accent-soft); border-left: 3px solid var(--accent);
+      border-radius: 0 10px 10px 0; font-size: .9rem; font-weight: 600;
+      transition: background .3s, border-color .3s, border-radius .4s;
+    }
+
+    /* ── Slider row ── */
+    .sl-row { margin-bottom: 20px; }
+    .sl-row label {
+      display: flex; justify-content: space-between; align-items: baseline;
+      font-size: .86rem; font-weight: 700; margin-bottom: 9px;
+    }
+    .sl-row label .v { font-size: 1.15rem; color: var(--accent); font-variant-numeric: tabular-nums; }
+    input[type=range] {
+      width: 100%; appearance: none; -webkit-appearance: none;
+      height: 6px; border-radius: 999px; background: var(--border); outline: none; cursor: pointer;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 20px; height: 20px;
+      background: var(--accent); border: 3px solid var(--surface); border-radius: 50%;
+    }
+    input[type=range]::-moz-range-thumb {
+      width: 20px; height: 20px; background: var(--accent);
+      border: 3px solid var(--surface); border-radius: 50%; cursor: pointer;
+    }
+
+    /* ── Proportional table ── */
+    .prop-table { width: 100%; border-collapse: collapse; font-size: .9rem; margin-top: 16px; }
+    .prop-table th {
+      background: var(--accent-soft); color: var(--accent);
+      font-weight: 800; font-size: .78rem; letter-spacing: .04em;
+      text-transform: uppercase; padding: 8px 12px; text-align: center;
+      border-bottom: 2px solid var(--accent);
+    }
+    .prop-table td {
+      padding: 8px 12px; text-align: center;
+      border-bottom: 1px solid var(--border);
+      font-variant-numeric: tabular-nums; transition: background .3s;
+    }
+    .prop-table tr.highlight td { background: var(--accent-soft); font-weight: 700; }
+    .prop-table .k-col { color: var(--accent); font-weight: 700; }
+
+    /* ── Two-column layout ── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+    @media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+
+    /* ── Graph SVG wrapper ── */
+    .graph-wrap {
+      margin-top: 4px; background: var(--bg);
+      border: 1px solid var(--border); border-radius: calc(var(--radius) - 4px);
+      overflow: hidden;
+    }
+    .graph-wrap svg { display: block; width: 100%; height: auto; }
+
+    /* ── Formula banner ── */
+    .formula-banner {
+      text-align: center; font-size: clamp(1.3rem, 3vw, 1.9rem);
+      font-weight: 800; padding: 14px 16px;
+      background: var(--accent-soft); border-radius: calc(var(--radius) - 4px);
+      color: var(--accent); letter-spacing: -.01em;
+      margin: 16px 0; transition: background .3s, color .3s, border-radius .4s;
+    }
+    .formula-banner em { font-style: normal; color: var(--ink); transition: color .3s; }
+
+    /* ── Numbered steps ── */
+    .steps { display: flex; flex-direction: column; gap: 10px; }
+    .step  { display: flex; align-items: flex-start; gap: 12px; }
+    .step-n {
+      width: 28px; height: 28px; background: var(--accent); color: #fff;
+      border-radius: 50%; display: grid; place-items: center;
+      font-size: .75rem; font-weight: 800; flex-shrink: 0; margin-top: 3px;
+      transition: background .3s, border-radius .4s;
+    }
+    .step-box {
+      flex: 1; padding: 11px 16px; background: var(--accent-soft);
+      border-radius: calc(var(--radius) - 4px);
+      transition: background .4s, border-radius .4s;
+    }
+    .step-lbl { color: var(--muted); font-size: .78rem; margin-bottom: 3px; }
+    .step-eq  { font-weight: 700; font-size: .98rem; }
+    .step-eq em { font-style: normal; color: var(--accent); transition: color .3s; }
+
+    /* ── Quiz tables ── */
+    .quiz-table-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px; }
+    @media (max-width: 560px) { .quiz-table-wrap { grid-template-columns: 1fr; } }
+    .quiz-block {
+      border: 2px solid var(--border); border-radius: calc(var(--radius) - 4px);
+      overflow: hidden; transition: border-color .3s;
+    }
+    .quiz-block.correct { border-color: var(--ok); }
+    .quiz-block.wrong   { border-color: var(--bad); }
+    .quiz-block .qtitle {
+      padding: 8px 14px; background: var(--accent-soft);
+      font-size: .82rem; font-weight: 800; text-align: center; color: var(--accent);
+    }
+    .quiz-block table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+    .quiz-block td { padding: 7px 12px; text-align: center; border-bottom: 1px solid var(--border); }
+    .quiz-block td:first-child { font-weight: 700; color: var(--muted); font-size: .8rem; }
+    .quiz-btn-row { display: flex; gap: 10px; justify-content: center; margin-top: 16px; flex-wrap: wrap; }
+    .quiz-btn {
+      padding: 9px 22px; border: 2px solid var(--accent); border-radius: 999px;
+      background: transparent; color: var(--accent);
+      font-family: var(--font); font-size: .88rem; font-weight: 700; cursor: pointer;
+      transition: background .2s, color .2s;
+    }
+    .quiz-btn:hover { background: var(--accent); color: #fff; }
+    .quiz-feedback { margin-top: 12px; font-size: .9rem; font-weight: 700; text-align: center; min-height: 1.5em; }
+    .quiz-feedback.ok  { color: var(--ok); }
+    .quiz-feedback.bad { color: var(--bad); }
+
+    /* ── Unit rate tiles ── */
+    .rate-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-top: 16px; }
+    .rate-tile {
+      padding: 14px 16px; background: var(--accent-soft);
+      border-radius: calc(var(--radius) - 4px); font-size: .9rem;
+    }
+    .rate-tile strong { display: block; color: var(--accent); font-size: 1.1rem; margin-bottom: 4px; }
+
+    /* ── Insight ── */
+    .insight {
+      background: var(--accent); color: #fff;
+      border-radius: var(--radius); padding: 24px 28px;
+      transition: background .4s, border-radius .4s;
+    }
+    .insight .eyebrow {
+      font-size: .72rem; font-weight: 800; letter-spacing: .07em;
+      text-transform: uppercase; opacity: .75; margin-bottom: 8px;
+    }
+    .insight p { font-size: .95rem; line-height: 1.65; opacity: .92; }
+    .insight strong { font-weight: 800; }
+
+    /* ═══════════════════════════════════════════════════════
+       THEME STRUCTURAL OVERRIDES
+    ═══════════════════════════════════════════════════════ */
+    body.theme-a .hero { background: #fff; border-bottom: 1px solid #e4e4e7; }
+
+    body.theme-b .hero { background: linear-gradient(180deg, #131f38 0%, #0f172a 100%); border-bottom: 1px solid rgba(255,255,255,.07); }
+    body.theme-b .hero::after { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, rgba(245,158,11,.15) 0%, transparent 60%); pointer-events: none; }
+    body.theme-b .hero-badge { font-family: 'SF Mono','Fira Code', monospace; letter-spacing: .1em; border: 1px solid rgba(245,158,11,.3); }
+    body.theme-b .card { border-top: 2px solid var(--accent); }
+    body.theme-b .card-head { font-size: .82rem; letter-spacing: .08em; text-transform: uppercase; color: var(--accent); font-family: 'SF Mono','Fira Code', monospace; }
+    body.theme-b .c-icon { display: none; }
+    body.theme-b .c-chip { display: none; }
+    body.theme-b .graph-wrap { background: #0f172a; }
+
+    body.theme-c .hero { background: transparent; }
+    body.theme-c .card { backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+    body.theme-c .c-icon { display: none; }
+
+    /* ═══════════════════════════════════════════════════════
+       RESPONSIVE
+    ═══════════════════════════════════════════════════════ */
+    @media (max-width: 600px) {
+      .card    { padding: 20px 18px; }
+      .wrap    { padding: 24px 16px 64px; gap: 18px; }
+      .hero    { padding: 36px 18px 36px; }
+      .top-bar { padding: 8px 16px; }
+    }
+
+  </style>
+</head>
+<body class="theme-a">
+
+<!-- TOP BAR -->
+<div class="top-bar">
+  <a class="back-link" href="../index.html">← All lessons</a>
+  <div class="picker" role="navigation" aria-label="Visual style">
+    <span class="pick-label">Style:</span>
+    <button class="pick-btn active" data-theme="a" aria-pressed="true"><span class="swatch swatch-a"></span>Explorer</button>
+    <button class="pick-btn" data-theme="b" aria-pressed="false"><span class="swatch swatch-b"></span>Academy</button>
+    <button class="pick-btn" data-theme="c" aria-pressed="false"><span class="swatch swatch-c"></span>Notebook</button>
+  </div>
+</div>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-badge">Proportions &amp; Ratios · Grade 7</div>
+  <h1>Rates &amp; <em>Proportional</em> Relationships</h1>
+  <p>Discover how unit rates, tables, graphs, and equations all tell the same story — with a taco truck, a bike ride, and some math magic.</p>
+</header>
+
+<!-- LESSON CONTENT -->
+<main class="wrap">
+
+  <!-- ── 1. STORY ─────────────────────────────────── -->
+  <div class="card">
+    <div class="card-head">
+      <div class="c-icon">🌮</div>
+      The Taco Truck Problem
+      <span class="c-chip">Story</span>
+    </div>
+    <div class="story">
+      <p>Every Friday the <strong>Taco Truck</strong> parks outside Mia's school. Each taco costs <strong>$2.50</strong> — no matter how many you buy.</p>
+      <p>Mia wants to figure out the total cost for <em>any</em> number of tacos without doing mental math at the window. She builds a table:</p>
+    </div>
+    <table class="prop-table" style="margin-top:14px;">
+      <thead>
+        <tr><th>Tacos (x)</th><th>Cost (y)</th><th>y ÷ x</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>1</td><td>$2.50</td><td>2.50</td></tr>
+        <tr><td>2</td><td>$5.00</td><td>2.50</td></tr>
+        <tr><td>5</td><td>$12.50</td><td>2.50</td></tr>
+        <tr><td>10</td><td>$25.00</td><td>2.50</td></tr>
+      </tbody>
+    </table>
+    <div class="callout">
+      She notices <strong>y ÷ x is always 2.50</strong>. That constant ratio means tacos and cost are <strong>proportional</strong> — and 2.50 is the <strong>constant of proportionality</strong> (also called the <strong>unit rate</strong>).
+    </div>
+  </div>
+
+  <!-- ── 2. INTERACTIVE ────────────────────────────── -->
+  <div class="card">
+    <div class="card-head">
+      <div class="c-icon">📊</div>
+      Rate Explorer
+      <span class="c-chip">Interactive</span>
+    </div>
+    <p style="font-size:.9rem;color:var(--muted);margin-bottom:20px;">Drag the sliders to see the table, graph, and equation all update together.</p>
+
+    <div class="sl-row">
+      <label>Price per taco — constant of proportionality (k) <span class="v" id="kVal">$2.50</span></label>
+      <input type="range" id="kSlider" min="0.5" max="5" step="0.25" value="2.5">
+    </div>
+    <div class="sl-row">
+      <label>Highlight x = <span class="v" id="xVal">5</span> tacos on the graph</label>
+      <input type="range" id="xSlider" min="1" max="12" step="1" value="5">
+    </div>
+
+    <div id="formulaBanner" class="formula-banner">y = <em>2.50</em> × x</div>
+
+    <div class="two-col">
+      <div>
+        <table class="prop-table" id="propTable">
+          <thead>
+            <tr><th>x (tacos)</th><th>y (cost)</th><th>y ÷ x</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <p style="font-size:.78rem;color:var(--muted);margin-top:8px;">Every row gives the same y ÷ x. That's k.</p>
+      </div>
+      <div>
+        <div class="graph-wrap">
+          <svg id="propGraph" viewBox="0 0 300 240" xmlns="http://www.w3.org/2000/svg"></svg>
+        </div>
+        <p style="font-size:.78rem;color:var(--muted);text-align:center;margin-top:8px;">
+          Proportional graph = straight line through <strong>(0, 0)</strong>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 3. STEPS ──────────────────────────────────── -->
+  <div class="card">
+    <div class="card-head">
+      <div class="c-icon">🔢</div>
+      Finding k — Step by Step
+      <span class="c-chip">Math</span>
+    </div>
+    <p style="font-size:.9rem;color:var(--muted);margin-bottom:20px;">
+      Given any table or graph, here's how to find the <strong>constant of proportionality k</strong> and write the equation.
+    </p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-n">1</div>
+        <div class="step-box">
+          <div class="step-lbl">Pick any row in the table and divide</div>
+          <div class="step-eq">k = <em>y ÷ x</em> &nbsp;→&nbsp; $12.50 ÷ 5 = <em>$2.50</em></div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">2</div>
+        <div class="step-box">
+          <div class="step-lbl">Verify — every row must give the same k</div>
+          <div class="step-eq">$5.00 ÷ 2 = <em>$2.50</em> ✓ &nbsp; $25.00 ÷ 10 = <em>$2.50</em> ✓</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">3</div>
+        <div class="step-box">
+          <div class="step-lbl">Write the equation using y = kx</div>
+          <div class="step-eq">y = <em>2.50</em>x &nbsp; (cost = $2.50 times the number of tacos)</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-n">4</div>
+        <div class="step-box">
+          <div class="step-lbl">Read the graph: find the point (1, k)</div>
+          <div class="step-eq">Point (<em>1, 2.50</em>) → when x = 1, y = k. The slope of the line equals k.</div>
+        </div>
+      </div>
+    </div>
+    <div class="callout" style="margin-top:20px;">
+      Key graph facts: <strong>(0, 0)</strong> is always on a proportional line (zero tacos = zero cost). <strong>(1, k)</strong> gives the unit rate directly — it's the point where x = 1.
+    </div>
+  </div>
+
+  <!-- ── 4. QUIZ ───────────────────────────────────── -->
+  <div class="card">
+    <div class="card-head">
+      <div class="c-icon">🧪</div>
+      Is It Proportional?
+      <span class="c-chip">Practice</span>
+    </div>
+    <p style="font-size:.9rem;color:var(--muted);margin-bottom:4px;">
+      For each table, check whether <strong>y ÷ x stays the same in every row</strong>. Which table shows a proportional relationship?
+    </p>
+    <div class="quiz-table-wrap">
+      <div class="quiz-block" id="qtA">
+        <div class="qtitle">Table A</div>
+        <table>
+          <tr><td>x</td><td>2</td><td>4</td><td>6</td><td>8</td></tr>
+          <tr><td>y</td><td>6</td><td>12</td><td>18</td><td>24</td></tr>
+          <tr><td>y÷x</td><td>3</td><td>3</td><td>3</td><td>3</td></tr>
+        </table>
+      </div>
+      <div class="quiz-block" id="qtB">
+        <div class="qtitle">Table B</div>
+        <table>
+          <tr><td>x</td><td>2</td><td>4</td><td>6</td><td>8</td></tr>
+          <tr><td>y</td><td>7</td><td>11</td><td>15</td><td>19</td></tr>
+          <tr><td>y÷x</td><td>3.5</td><td>2.75</td><td>2.5</td><td>2.375</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="quiz-btn-row">
+      <button class="quiz-btn" data-ans="A">Table A</button>
+      <button class="quiz-btn" data-ans="B">Table B</button>
+      <button class="quiz-btn" data-ans="both">Both</button>
+    </div>
+    <div class="quiz-feedback" id="quizFeedback"></div>
+  </div>
+
+  <!-- ── 5. UNIT RATES IN THE WILD ─────────────────── -->
+  <div class="card">
+    <div class="card-head">
+      <div class="c-icon">🚴</div>
+      Unit Rates Everywhere
+      <span class="c-chip">Connect</span>
+    </div>
+    <div class="story">
+      <p>A <strong>unit rate</strong> is a ratio where the second quantity is 1. It's always the <em>k</em> in y = kx, and it appears everywhere in daily life:</p>
+    </div>
+    <div class="rate-grid">
+      <div class="rate-tile"><strong>🚗 60 mph</strong>Miles per 1 hour — speed is a unit rate: d = 60t</div>
+      <div class="rate-tile"><strong>💧 $1.29/gal</strong>Cost per 1 gallon — price: cost = 1.29 × gallons</div>
+      <div class="rate-tile"><strong>🫀 70 bpm</strong>Beats per 1 minute — heart rate: beats = 70t</div>
+      <div class="rate-tile"><strong>🌍 1 cm = 50 km</strong>Map scale — distance = 50 × cm on map</div>
+    </div>
+    <div class="callout" style="margin-top:16px;">
+      Whenever you see "per", "each", or "every 1 ___" you're looking at a unit rate — and it's the <em>k</em> in y = kx.
+    </div>
+  </div>
+
+  <!-- ── 6. INSIGHT ────────────────────────────────── -->
+  <div class="insight">
+    <div class="eyebrow">Why it matters — Khan Academy 7.RP standards</div>
+    <p>
+      This lesson covers <strong>CCSS 7.RP.A.1–2</strong> from Khan Academy's 7th-grade unit. Proportional reasoning is the bridge between arithmetic and algebra: once you own y = kx, you can solve <strong>unit rates</strong> (7.RP.A.1), <strong>test tables and graphs</strong> for proportionality (7.RP.A.2a–b), <strong>write equations</strong> (7.RP.A.2c), and <strong>interpret graph points</strong> like (0,0) and (1,k) (7.RP.A.2d). These ideas power everything from cooking recipes and currency exchange to science experiments and map reading.
+    </p>
+  </div>
+
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── Theme switcher ───────────────────────────────── */
+  const body = document.body;
+  const btns = document.querySelectorAll('.pick-btn');
+
+  function applyTheme(t, save) {
+    body.classList.remove('theme-a', 'theme-b', 'theme-c');
+    body.classList.add('theme-' + t);
+    btns.forEach(b => {
+      const on = b.dataset.theme === t;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-pressed', on);
+    });
+    if (save) localStorage.setItem('edu-theme', t);
+    drawGraph();
+  }
+
+  btns.forEach(b => b.addEventListener('click', () => applyTheme(b.dataset.theme, true)));
+  const saved = localStorage.getItem('edu-theme');
+  if (saved && ['a','b','c'].includes(saved)) applyTheme(saved, false);
+
+  /* ── Rate Explorer ────────────────────────────────── */
+  const kSlider = document.getElementById('kSlider');
+  const xSlider = document.getElementById('xSlider');
+  const kValEl  = document.getElementById('kVal');
+  const xValEl  = document.getElementById('xVal');
+  const formulaBanner = document.getElementById('formulaBanner');
+  const tbody = document.querySelector('#propTable tbody');
+
+  const TABLE_ROWS = [1, 2, 3, 5, 8, 10, 12];
+
+  function fmt(n) { return n.toFixed(2); }
+
+  function update() {
+    const k  = parseFloat(kSlider.value);
+    const xH = parseInt(xSlider.value);
+
+    kValEl.textContent = '$' + fmt(k);
+    xValEl.textContent = xH;
+    formulaBanner.innerHTML = `y = <em>${fmt(k)}</em> × x`;
+
+    tbody.innerHTML = '';
+    TABLE_ROWS.forEach(x => {
+      const y = k * x;
+      const tr = document.createElement('tr');
+      if (x === xH) tr.className = 'highlight';
+      tr.innerHTML = `<td>${x}</td><td>$${fmt(y)}</td><td class="k-col">${fmt(k)}</td>`;
+      tbody.appendChild(tr);
+    });
+
+    drawGraph(k, xH);
+  }
+
+  /* ── Graph ────────────────────────────────────────── */
+  const svgEl = document.getElementById('propGraph');
+  const PAD = { left: 44, right: 18, top: 16, bottom: 36 };
+  const VW = 300, VH = 240;
+  const PLOT_W = VW - PAD.left - PAD.right;
+  const PLOT_H = VH - PAD.top - PAD.bottom;
+  const MAX_X = 13;
+
+  function px(x) { return PAD.left + (x / MAX_X) * PLOT_W; }
+  function py(y, maxY) { return PAD.top + PLOT_H - (y / maxY) * PLOT_H; }
+
+  function cssVar(name) {
+    return getComputedStyle(document.body).getPropertyValue(name).trim();
+  }
+
+  function drawGraph(k, xH) {
+    if (k === undefined) { k = parseFloat(kSlider.value); xH = parseInt(xSlider.value); }
+
+    const maxY = Math.max(10, Math.ceil(MAX_X * k / 5) * 5 + 5);
+    const accent = cssVar('--accent') || '#7b38c4';
+    const accentSoft = cssVar('--accent-soft') || '#ede0f9';
+    const ink    = cssVar('--ink')    || '#18181b';
+    const muted  = cssVar('--muted')  || '#71717a';
+    const surface = cssVar('--surface') || '#ffffff';
+
+    let s = '';
+
+    /* grid */
+    const yStep = maxY <= 25 ? 5 : maxY <= 50 ? 10 : 20;
+    for (let yg = 0; yg <= maxY; yg += yStep) {
+      const yp = py(yg, maxY);
+      s += `<line x1="${PAD.left}" y1="${yp}" x2="${VW - PAD.right}" y2="${yp}" stroke="${muted}" stroke-opacity="0.18" stroke-width="1"/>`;
+      s += `<text x="${PAD.left - 4}" y="${yp + 4}" text-anchor="end" font-family="system-ui" font-size="9" fill="${muted}">${yg}</text>`;
+    }
+    for (let xg = 0; xg <= MAX_X; xg += 2) {
+      const xp = px(xg);
+      s += `<line x1="${xp}" y1="${PAD.top}" x2="${xp}" y2="${VH - PAD.bottom}" stroke="${muted}" stroke-opacity="0.18" stroke-width="1"/>`;
+      if (xg > 0) s += `<text x="${xp}" y="${VH - PAD.bottom + 14}" text-anchor="middle" font-family="system-ui" font-size="9" fill="${muted}">${xg}</text>`;
+    }
+
+    /* axes */
+    s += `<line x1="${PAD.left}" y1="${VH - PAD.bottom}" x2="${VW - PAD.right}" y2="${VH - PAD.bottom}" stroke="${ink}" stroke-width="2" stroke-opacity="0.6"/>`;
+    s += `<line x1="${PAD.left}" y1="${PAD.top}" x2="${PAD.left}" y2="${VH - PAD.bottom}" stroke="${ink}" stroke-width="2" stroke-opacity="0.6"/>`;
+    s += `<text x="${PAD.left + PLOT_W / 2}" y="${VH - 1}" text-anchor="middle" font-family="system-ui" font-size="10" fill="${muted}" font-weight="700">tacos (x)</text>`;
+
+    /* proportional line */
+    s += `<line x1="${px(0)}" y1="${py(0, maxY)}" x2="${px(MAX_X)}" y2="${py(MAX_X * k, maxY)}" stroke="${accent}" stroke-width="2.5" stroke-linecap="round"/>`;
+
+    /* table row dots */
+    TABLE_ROWS.forEach(x => {
+      const y = k * x;
+      if (y > maxY * 1.05) return;
+      const cx = px(x), cy = py(y, maxY);
+      s += `<circle cx="${cx}" cy="${cy}" r="4" fill="${accentSoft}" stroke="${accent}" stroke-width="2"/>`;
+    });
+
+    /* (0,0) marker */
+    s += `<circle cx="${px(0)}" cy="${py(0, maxY)}" r="4" fill="${accent}" stroke="${surface}" stroke-width="2"/>`;
+    s += `<text x="${px(0) + 6}" y="${py(0, maxY) - 5}" font-family="system-ui" font-size="9" fill="${accent}" font-weight="700">(0,0)</text>`;
+
+    /* (1, k) marker */
+    if (k <= maxY * 0.92) {
+      const cx1 = px(1), cy1 = py(k, maxY);
+      s += `<circle cx="${cx1}" cy="${cy1}" r="5" fill="${surface}" stroke="${accent}" stroke-width="2"/>`;
+      s += `<text x="${cx1 + 7}" y="${cy1 - 4}" font-family="system-ui" font-size="9" fill="${accent}" font-weight="700">(1, ${fmt(k)})</text>`;
+    }
+
+    /* highlighted point */
+    const yH = k * xH;
+    const cxH = px(xH), cyH = py(yH, maxY);
+    s += `<circle cx="${cxH}" cy="${cyH}" r="7" fill="${accent}" stroke="${surface}" stroke-width="2.5"/>`;
+    const labelX = cxH > VW - PAD.right - 60 ? cxH - 8 : cxH + 9;
+    const labelAnchor = cxH > VW - PAD.right - 60 ? 'end' : 'start';
+    s += `<text x="${labelX}" y="${cyH - 6}" text-anchor="${labelAnchor}" font-family="system-ui" font-size="9.5" fill="${accent}" font-weight="800">(${xH}, ${fmt(yH)})</text>`;
+
+    svgEl.innerHTML = s;
+  }
+
+  kSlider.addEventListener('input', update);
+  xSlider.addEventListener('input', update);
+  update();
+
+  /* ── Quiz ─────────────────────────────────────────── */
+  const qtA = document.getElementById('qtA');
+  const qtB = document.getElementById('qtB');
+  const feedback = document.getElementById('quizFeedback');
+
+  document.querySelectorAll('.quiz-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      qtA.classList.remove('correct','wrong');
+      qtB.classList.remove('correct','wrong');
+      const ans = btn.dataset.ans;
+      if (ans === 'A') {
+        qtA.classList.add('correct');
+        qtB.classList.add('wrong');
+        feedback.className = 'quiz-feedback ok';
+        feedback.textContent = '✓ Correct! Table A has y÷x = 3 in every row — so k = 3 and y = 3x.';
+        gtag('event', 'lesson_complete', { lesson: 'rates-proportional-relationships' });
+      } else if (ans === 'B') {
+        qtA.classList.add('wrong');
+        qtB.classList.add('correct');
+        feedback.className = 'quiz-feedback bad';
+        feedback.textContent = '✗ Not quite. In Table B, y÷x keeps changing (3.5, 2.75, 2.5…) — no constant k.';
+      } else {
+        feedback.className = 'quiz-feedback bad';
+        feedback.textContent = '✗ Only one can be proportional. Look for the table where y÷x is the same every row.';
+      }
+    });
+  });
+
+})();
+</script>
+
+</body>
+</html>
