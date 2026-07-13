@@ -38,18 +38,37 @@ matches near-duplicates within the chosen sensitivity.
 ## The on-disk index
 
 Scanning a large library is slow, so the app builds an index once and stores
-it at:
+it under:
 
 ```
-~/Library/Application Support/PhotoLibrarySync/index-<hash>.json
+~/Library/Application Support/PhotoLibrarySync/
 ```
 
 Each entry holds the asset id, the exact hash, and the perceptual hash.
 On the next run the app computes a **fingerprint** of the library
 (number of image assets + newest modification date). If the fingerprint is
-unchanged the cached index is reused instantly; if the library changed, the
-index is rebuilt (with its own progress bar). A separate cache file is kept
-per selected library.
+unchanged the cached index is reused instantly; if the library changed, only
+the assets that are actually new are fetched and hashed — anything already
+indexed is carried forward as-is, and anything deleted from the library is
+dropped. A separate cache is kept per selected library.
+
+**Versioned, crash-safe storage.** Each save writes a new file
+(`index-<hash>-v<N>.json`) and then updates a small pointer file
+(`index-<hash>-manifest.json`) to reference it — in that order, so an
+interrupted save (app quit, crash) can never leave the app pointing at a
+half-written file. Once the manifest points at the new version, the previous
+version file is deleted, so only one version is ever kept on disk per
+library.
+
+**Live updates while the app is running.** The app registers a
+`PHPhotoLibraryChangeObserver`, so if you delete photos in the Photos app
+while this app is just sitting open, it notices immediately, drops the
+now-gone assets from its in-memory index, and marks it dirty. A background
+task checks every 30 seconds and, if the index is dirty, saves a new version
+— so a crash or quit doesn't lose more than a short window of changes.
+New photos added to the library are deliberately *not* hashed live (to avoid
+competing with an in-progress run or hammering iCloud); they're picked up
+efficiently by the diffing described above the next time you click **Start**.
 
 ---
 

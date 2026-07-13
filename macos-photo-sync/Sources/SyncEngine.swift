@@ -29,7 +29,7 @@ enum Phase: Equatable {
 }
 
 @MainActor
-final class SyncEngine: ObservableObject {
+final class SyncEngine: NSObject, ObservableObject, PHPhotoLibraryChangeObserver {
 
     // MARK: - Inputs (bound from the UI)
     @Published var directoryURL: URL?
@@ -60,6 +60,85 @@ final class SyncEngine: ObservableObject {
     @Published var totalCount = 0
 
     private var runTask: Task<Void, Never>?
+
+    // MARK: - Live library observation
+    //
+    // Keeps the on-disk index cache honest between explicit Start-triggered
+    // runs: if you delete a photo in the Photos app while this app just sits
+    // open, the cached index would otherwise go stale until the next run.
+    //
+    // `liveIndex` mirrors whatever is currently on disk. Both this
+    // observer's own pruning AND every run-triggered save (in
+    // buildOrLoadIndex/persistIncrementalIndexUpdate) keep it in sync, so
+    // the periodic flush below never has a chance to overwrite a more
+    // up-to-date on-disk index with a stale in-memory one.
+    private var liveIndex: LibraryIndex?
+    private var liveIndexDirty = false
+    private var isObservingLibrary = false
+    private var periodicSaveTask: Task<Void, Never>?
+    private let periodicSaveIntervalNanoseconds: UInt64 = 30_000_000_000 // 30s
+
+    /// Starts watching the Photos library for changes made outside this app
+    /// (e.g. deleting a photo in the Photos app) and periodically flushing
+    /// the index to disk so a crash or quit doesn't lose more than a short
+    /// window of changes. Safe to call repeatedly; only registers once.
+    /// Call only after Photos access has been granted.
+    private func startObservingLibraryIfNeeded() {
+        guard !isObservingLibrary else { return }
+        isObservingLibrary = true
+        liveIndex = LibraryIndex.load(libraryKey: libraryKey)
+        PHPhotoLibrary.shared().register(self)
+        periodicSaveTask = Task { [weak self] in
+            while !Task.isCancelled {
+                guard let self else { return }
+                try? await Task.sleep(nanoseconds: self.periodicSaveIntervalNanoseconds)
+                self.flushLiveIndexIfDirty()
+            }
+        }
+    }
+
+    private func flushLiveIndexIfDirty() {
+        guard liveIndexDirty, let liveIndex else { return }
+        liveIndex.save(libraryKey: libraryKey)
+        liveIndexDirty = false
+        appendLog("Index cache saved in the background (library changed while idle).")
+    }
+
+    /// Records a run-triggered save as the new source of truth for the live
+    /// index, so the background flush above never clobbers it with a
+    /// stale in-memory copy.
+    private func syncLiveIndex(with index: LibraryIndex) {
+        liveIndex = index
+        liveIndexDirty = false
+    }
+
+    /// PHPhotoLibraryChangeObserver requires this to be callable from any
+    /// thread, so it can't be MainActor-isolated like the rest of this
+    /// class. It hops back to the main actor to do the actual work; nothing
+    /// about `changeInstance` itself is needed since we just re-fetch and
+    /// diff by identifier below, which sidesteps the whole question of
+    /// whether the change-details types are safe to carry across threads.
+    nonisolated func photoLibraryDidChange(_ changeInstance: PHChange) {
+        Task { @MainActor [weak self] in
+            self?.pruneLiveIndexOfDeletedAssets()
+        }
+    }
+
+    /// Cheap on every notification: PHAsset identifiers only, no image data
+    /// or hashing involved. Drops any index entry whose asset no longer
+    /// exists in the library. New assets are deliberately left for the next
+    /// Start-triggered run to hash — see buildOrLoadIndex's existing
+    /// reuse-by-identifier diff, which already only hashes what's new.
+    private func pruneLiveIndexOfDeletedAssets() {
+        guard var index = liveIndex else { return }
+        let currentIDs = Set(fetchLibraryImageAssets().map { $0.localIdentifier })
+        let before = index.assets.count
+        index.assets.removeAll { !currentIDs.contains($0.localIdentifier) }
+        guard index.assets.count != before else { return }
+        liveIndex = index
+        liveIndexDirty = true
+        appendLog("📷 \(before - index.assets.count) photo(s) removed from the library — will drop from the index cache shortly.")
+    }
 
     var isRunning: Bool {
         switch phase {
@@ -132,6 +211,7 @@ final class SyncEngine: ObservableObject {
         if status == .limited {
             appendLog("⚠️ Photos access is limited — only a subset of the library is visible, so matching may be incomplete.")
         }
+        startObservingLibraryIfNeeded()
 
         // 2. Build or load the library index
         phase = .indexing
@@ -291,6 +371,7 @@ final class SyncEngine: ObservableObject {
         if let cached, cached.fingerprint == fingerprint {
             appendLog("Loaded cached index (\(cached.assets.count) assets) — library unchanged.")
             statusLine = "Using cached library index."
+            syncLiveIndex(with: cached)
             return cached
         }
 
@@ -327,6 +408,7 @@ final class SyncEngine: ObservableObject {
                 : "Library is empty — nothing to index.")
             let index = LibraryIndex(fingerprint: fingerprint, assets: entries)
             index.save(libraryKey: libraryKey)
+            syncLiveIndex(with: index)
             currentThumbnail = nil
             return index
         }
@@ -418,6 +500,7 @@ final class SyncEngine: ObservableObject {
             appendLog("⚠️ \(failures) asset(s) were skipped this time and were NOT saved to the index cache, so those will be retried from scratch next launch instead of trusting an incomplete result.")
         } else {
             index.save(libraryKey: libraryKey)
+            syncLiveIndex(with: index)
             appendLog("Index updated and saved (\(entries.count) total asset(s): \(reusedCount) reused, \(entries.count - reusedCount) newly hashed).")
         }
         currentThumbnail = nil
@@ -446,7 +529,9 @@ final class SyncEngine: ObservableObject {
             return
         }
         let fingerprint = computeFingerprint(assets: liveAssets)
-        LibraryIndex(fingerprint: fingerprint, assets: workingAssets).save(libraryKey: libraryKey)
+        let index = LibraryIndex(fingerprint: fingerprint, assets: workingAssets)
+        index.save(libraryKey: libraryKey)
+        syncLiveIndex(with: index)
         appendLog("Library index updated in place with \(importedCount) newly imported photo(s) — the next run won't need to re-index the whole library.")
     }
 
