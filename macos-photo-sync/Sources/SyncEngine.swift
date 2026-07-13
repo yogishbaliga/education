@@ -126,6 +126,12 @@ final class SyncEngine: ObservableObject {
 
         var exactHashes = index.exactHashSet()
         var perceptualHashes = index.perceptualHashes()
+        // Mutable copy of the index's assets; newly imported photos are folded
+        // in below and the result is persisted at the end of the run, so a
+        // later run (even against a different folder) doesn't have to
+        // re-fetch and re-hash the whole library just to learn about photos
+        // this very run already imported and knows the hashes of.
+        var workingAssets = index.assets
 
         // 3. Enumerate directory images
         phase = .comparing
@@ -141,7 +147,12 @@ final class SyncEngine: ObservableObject {
 
         // 4. Compare each file
         for (i, url) in files.enumerated() {
-            if Task.isCancelled { phase = .idle; statusLine = "Cancelled."; return }
+            if Task.isCancelled {
+                persistIncrementalIndexUpdate(workingAssets: workingAssets)
+                phase = .idle
+                statusLine = "Cancelled."
+                return
+            }
 
             scannedCount = i + 1
             currentName = url.lastPathComponent
@@ -178,13 +189,18 @@ final class SyncEngine: ObservableObject {
                 toDelete.append(DeletionItem(url: url, reason: "Already in library"))
                 appendLog("✓ \(url.lastPathComponent) already in library — marked for deletion.")
             } else {
-                let imported = await importImage(at: url)
-                if imported {
+                if let newID = await importImage(at: url) {
                     importedCount += 1
                     // Keep the in-memory index current so later duplicates in this
                     // same run also match without re-scanning the library.
                     if let exact { exactHashes.insert(exact) }
                     if let phash { perceptualHashes.append(phash) }
+                    if let exact, let phash {
+                        workingAssets.append(IndexedAsset(localIdentifier: newID,
+                                                          exactHash: exact,
+                                                          perceptualHash: phash,
+                                                          filename: url.lastPathComponent))
+                    }
                     toDelete.append(DeletionItem(url: url, reason: "Imported now"))
                     appendLog("＋ \(url.lastPathComponent) imported (copied into library) — marked for deletion.")
                 } else {
@@ -192,6 +208,8 @@ final class SyncEngine: ObservableObject {
                 }
             }
         }
+
+        persistIncrementalIndexUpdate(workingAssets: workingAssets)
 
         progress = 1
         currentThumbnail = nil
@@ -320,6 +338,32 @@ final class SyncEngine: ObservableObject {
         return index
     }
 
+    /// Called at the end of a run that imported one or more photos. Saves an
+    /// updated index — old entries plus this run's new imports — so a later
+    /// run (a different folder, or this same one re-run) can reuse it instead
+    /// of paying for a full library re-index just to relearn what this run
+    /// already knows.
+    ///
+    /// Safety check: re-fetches the live asset count and only saves if it
+    /// matches exactly what we expect (the index we loaded/built + this run's
+    /// imports). If it doesn't — e.g. the user also added or removed photos
+    /// via the Photos app while this ran — our in-memory view is incomplete
+    /// relative to the library's real current state, so saving it under a
+    /// fingerprint that claims full coverage would risk the same
+    /// permanently-hidden-asset bug fixed earlier. Skipping the save in that
+    /// case just falls back to a full rebuild on the next run.
+    private func persistIncrementalIndexUpdate(workingAssets: [IndexedAsset]) {
+        guard importedCount > 0 else { return }
+        let liveAssets = fetchLibraryImageAssets()
+        guard liveAssets.count == workingAssets.count else {
+            appendLog("⚠️ Library changed by more than this run's imports (now \(liveAssets.count) asset(s), expected \(workingAssets.count)) — skipping incremental index update; a full re-index will run next time.")
+            return
+        }
+        let fingerprint = computeFingerprint(assets: liveAssets)
+        LibraryIndex(fingerprint: fingerprint, assets: workingAssets).save(libraryKey: libraryKey)
+        appendLog("Library index updated in place with \(importedCount) newly imported photo(s) — the next run won't need to re-index the whole library.")
+    }
+
     // MARK: - Deletion (after user confirmation)
 
     func confirmDeletion() {
@@ -407,8 +451,12 @@ final class SyncEngine: ObservableObject {
         }
     }
 
-    private func importImage(at url: URL) async -> Bool {
+    /// Imports the file and, on success, returns the new asset's local
+    /// identifier so the caller can fold it straight into the in-memory index
+    /// instead of waiting for a future full re-index to discover it.
+    private func importImage(at url: URL) async -> String? {
         await withCheckedContinuation { cont in
+            var newIdentifier: String?
             PHPhotoLibrary.shared().performChanges {
                 let request = PHAssetCreationRequest.forAsset()
                 let options = PHAssetResourceCreationOptions()
@@ -416,8 +464,9 @@ final class SyncEngine: ObservableObject {
                 // leaving the original in place (which we then trash).
                 options.shouldMoveFile = false
                 request.addResource(with: .photo, fileURL: url, options: options)
+                newIdentifier = request.placeholderForCreatedAsset?.localIdentifier
             } completionHandler: { success, _ in
-                cont.resume(returning: success)
+                cont.resume(returning: success ? newIdentifier : nil)
             }
         }
     }
