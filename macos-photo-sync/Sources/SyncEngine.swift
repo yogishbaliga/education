@@ -238,35 +238,59 @@ final class SyncEngine: ObservableObject {
             return cached
         }
 
-        appendLog("Library changed or no cache — building index for \(assets.count) assets…")
+        // Fetching each asset's data from PhotoKit and hashing its pixels are both
+        // independent, one-asset-at-a-time operations, so a bounded pool of
+        // concurrent workers speeds this up substantially on multi-core Macs.
+        // The pool size is capped (not just set to core count) because each
+        // in-flight worker may be holding a full-size decoded image in memory,
+        // and some may be triggering iCloud downloads over the network.
+        let concurrency = max(2, min(ProcessInfo.processInfo.activeProcessorCount, 6))
+        appendLog("Library changed or no cache — building index for \(assets.count) assets using up to \(concurrency) parallel workers…")
+
+        let total = assets.count
         var entries: [IndexedAsset] = []
-        entries.reserveCapacity(assets.count)
+        entries.reserveCapacity(total)
+        var completed = 0
 
-        for (i, asset) in assets.enumerated() {
-            if Task.isCancelled { throw CancellationError() }
-            progress = assets.isEmpty ? 1 : Double(i) / Double(assets.count)
-            statusLine = "Indexing library \(i + 1) of \(assets.count)…"
+        try await withThrowingTaskGroup(of: (IndexedAsset?, NSImage?).self) { group in
+            var nextIndex = 0
 
-            guard let data = await requestImageData(for: asset) else { continue }
-
-            let makeThumb = (i % 25 == 0)
-            let hashed = await Task.detached(priority: .userInitiated) {
-                () -> (exact: String, phash: UInt64, thumb: NSImage?)? in
-                guard let cg = ImageHasher.decode(data: data),
-                      let exact = ImageHasher.exactHash(cg),
-                      let phash = ImageHasher.perceptualHash(cg) else {
-                    return nil
+            func submitNext() {
+                guard nextIndex < total else { return }
+                let asset = assets[nextIndex]
+                let wantsThumb = (nextIndex % 25 == 0)
+                nextIndex += 1
+                group.addTask { [weak self] in
+                    guard let self else { return (nil, nil) }
+                    if Task.isCancelled { throw CancellationError() }
+                    guard let data = await self.requestImageData(for: asset) else { return (nil, nil) }
+                    return await Task.detached(priority: .userInitiated) {
+                        guard let cg = ImageHasher.decode(data: data),
+                              let exact = ImageHasher.exactHash(cg),
+                              let phash = ImageHasher.perceptualHash(cg) else {
+                            return (nil, nil)
+                        }
+                        let filename = PHAssetResource.assetResources(for: asset).first?.originalFilename
+                        let entry = IndexedAsset(localIdentifier: asset.localIdentifier,
+                                                 exactHash: exact,
+                                                 perceptualHash: phash,
+                                                 filename: filename)
+                        return (entry, wantsThumb ? NSImage(data: data) : nil)
+                    }.value
                 }
-                return (exact, phash, makeThumb ? NSImage(data: data) : nil)
-            }.value
+            }
 
-            guard let hashed else { continue }
-            if let thumb = hashed.thumb { currentThumbnail = thumb }
-            let filename = PHAssetResource.assetResources(for: asset).first?.originalFilename
-            entries.append(IndexedAsset(localIdentifier: asset.localIdentifier,
-                                        exactHash: hashed.exact,
-                                        perceptualHash: hashed.phash,
-                                        filename: filename))
+            for _ in 0..<concurrency { submitNext() }
+
+            while let (entry, thumb) = try await group.next() {
+                if Task.isCancelled { throw CancellationError() }
+                completed += 1
+                if let entry { entries.append(entry) }
+                if let thumb { currentThumbnail = thumb }
+                progress = total == 0 ? 1 : Double(completed) / Double(total)
+                statusLine = "Indexing library \(completed) of \(total) (\(concurrency)x parallel)…"
+                submitNext()
+            }
         }
 
         let index = LibraryIndex(fingerprint: fingerprint, assets: entries)
@@ -343,7 +367,7 @@ final class SyncEngine: ObservableObject {
         return assets
     }
 
-    private func requestImageData(for asset: PHAsset) async -> Data? {
+    nonisolated private func requestImageData(for asset: PHAsset) async -> Data? {
         await withCheckedContinuation { cont in
             let opts = PHImageRequestOptions()
             opts.isNetworkAccessAllowed = true
