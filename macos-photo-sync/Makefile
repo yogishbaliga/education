@@ -27,7 +27,7 @@ FRAMEWORKS := -framework SwiftUI -framework AppKit -framework Photos \
 
 SWIFTFLAGS := -O
 
-.PHONY: all universal run clean
+.PHONY: all universal run clean reset-tcc
 
 all: bundle
 	swiftc $(SWIFTFLAGS) -target $$(uname -m)-apple-macosx$(DEPLOY_TGT) \
@@ -51,11 +51,18 @@ bundle:
 	@mkdir -p $(MACOS_DIR) $(RES_DIR)
 	@cp Info.plist $(CONTENTS)/Info.plist
 
-# Ad-hoc code signature. Required for the Photos-access (TCC) prompt to
-# appear and for the app to launch. No paid Developer ID needed.
+# Plain ad-hoc code signature. Required for the Photos-access (TCC) prompt
+# to appear and for the app to launch. No paid Developer ID needed.
+#
+# Deliberately NOT using Hardened Runtime (--options runtime) here: this
+# app is never notarized, so Hardened Runtime buys nothing, and it actively
+# breaks things — it gates access to protected resources (Photos, Camera,
+# etc.) behind entitlements, and without those entitlements the OS blocks
+# the request *before* it reaches TCC. That looks exactly like "access
+# denied" but with no prompt ever shown and no entry appearing in
+# System Settings > Privacy & Security > Photos.
 sign:
-	@codesign --force --deep --sign - --options runtime $(APP_BUNDLE) \
-		2>/dev/null || codesign --force --deep --sign - $(APP_BUNDLE)
+	@codesign --force --deep --sign - $(APP_BUNDLE)
 	@echo "Ad-hoc signed."
 
 run: all
@@ -63,3 +70,10 @@ run: all
 
 clean:
 	rm -rf $(BUILD_DIR)
+
+# Clears any cached Photos permission decision for this app (e.g. a stale
+# "denied" recorded by an earlier build signed with Hardened Runtime).
+# Run this once after upgrading, then `make run` again.
+reset-tcc:
+	tccutil reset Photos $(BUNDLE_ID)
+	@echo "Cleared cached Photos permission for $(BUNDLE_ID)."

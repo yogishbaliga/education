@@ -113,6 +113,24 @@ The app is fully self-contained. To use it on any Mac:
    access is required so the app can both read and add photos). You can later
    manage this in *System Settings ▸ Privacy & Security ▸ Photos*.
 
+### Troubleshooting: "Photos access was not granted" with no prompt and no entry in Settings
+
+This happens if the app was ever signed with **Hardened Runtime** (some
+earlier builds did this) without the matching Photos entitlement: macOS
+blocks the request before it reaches the permission system, so no dialog
+ever appears and no entry shows up in *Privacy & Security ▸ Photos* to
+approve. Fix:
+
+```sh
+make reset-tcc   # clears any stale cached decision for this app
+make clean
+make run         # rebuild with the current (plain ad-hoc, no Hardened Runtime) signature
+```
+
+Click **Start** again — the standard "PhotoLibrarySync would like to access
+your Photos" dialog should now appear, and after you allow it, the app will
+also show up in *System Settings ▸ Privacy & Security ▸ Photos*.
+
 For a universal build (`make universal`) the same `.app` runs on both Apple
 Silicon and Intel Macs.
 
