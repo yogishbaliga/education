@@ -44,6 +44,13 @@ final class SyncEngine: ObservableObject {
     @Published var currentName: String = ""
     @Published var currentThumbnail: NSImage?
     @Published var log: [String] = []
+    @Published var elapsedSeconds: Double = 0
+    @Published var etaMinutes: Double?          // nil until there's enough data to estimate
+
+    /// When the current timed phase (indexing's hashing loop, or the folder
+    /// comparison loop) started. Reset per-phase so elapsed/ETA reflect just
+    /// that phase's own progress, not the whole run.
+    private var phaseStartTime: Date?
 
     // MARK: - Results
     @Published var toDelete: [DeletionItem] = []
@@ -83,8 +90,27 @@ final class SyncEngine: ObservableObject {
         progress = 0
         currentThumbnail = nil
         currentName = ""
+        elapsedSeconds = 0
+        etaMinutes = nil
+        phaseStartTime = nil
 
         runTask = Task { await run(directory: directoryURL) }
+    }
+
+    /// Call after each unit of work completes in a timed phase. Updates
+    /// elapsed time and, once there's at least one completed item, a
+    /// straight-line ETA (remaining items ÷ observed rate so far).
+    private func updateTiming(completed: Int, total: Int) {
+        guard let phaseStartTime else { return }
+        let elapsed = Date().timeIntervalSince(phaseStartTime)
+        elapsedSeconds = elapsed
+        guard completed > 0, elapsed > 0 else {
+            etaMinutes = nil
+            return
+        }
+        let rate = Double(completed) / elapsed // items per second
+        let remaining = Double(max(0, total - completed))
+        etaMinutes = (remaining / rate) / 60
     }
 
     func cancel() {
@@ -136,6 +162,9 @@ final class SyncEngine: ObservableObject {
         // 3. Enumerate directory images
         phase = .comparing
         statusLine = "Scanning folder for images…"
+        elapsedSeconds = 0
+        etaMinutes = nil
+        phaseStartTime = nil
         let files = enumerateImages(in: directory)
         totalCount = files.count
         if files.isEmpty {
@@ -144,6 +173,7 @@ final class SyncEngine: ObservableObject {
             return
         }
         appendLog("Found \(files.count) image file(s) in the folder.")
+        phaseStartTime = Date()
 
         // 4. Compare each file
         for (i, url) in files.enumerated() {
@@ -157,6 +187,7 @@ final class SyncEngine: ObservableObject {
             scannedCount = i + 1
             currentName = url.lastPathComponent
             progress = Double(i) / Double(files.count)
+            updateTiming(completed: i, total: files.count)
             statusLine = "Comparing \(i + 1) of \(files.count) — \(url.lastPathComponent)"
 
             // Decode + hash + thumbnail off the main thread so the UI stays responsive.
@@ -217,6 +248,7 @@ final class SyncEngine: ObservableObject {
         persistIncrementalIndexUpdate(workingAssets: workingAssets)
 
         progress = 1
+        updateTiming(completed: files.count, total: files.count)
         currentThumbnail = nil
         currentName = ""
         phase = .confirming
@@ -314,6 +346,7 @@ final class SyncEngine: ObservableObject {
         let total = assetsToHash.count
         var completed = 0
         var failures = 0
+        phaseStartTime = Date()
 
         // The thumbnail crosses task/actor boundaries as a CGImage (see the note on
         // ImageHasher.thumbnailCGImage) and is only wrapped as an NSImage once we're
@@ -355,6 +388,7 @@ final class SyncEngine: ObservableObject {
                 completed += 1
                 if let entry {
                     entries.append(entry)
+                    currentName = entry.filename ?? entry.localIdentifier
                 } else if let failedID {
                     failures += 1
                     appendLog("⚠️ Could not read asset \(failedID) — likely still syncing with iCloud; will retry next launch.")
@@ -363,6 +397,7 @@ final class SyncEngine: ObservableObject {
                     currentThumbnail = NSImage(cgImage: thumb, size: NSSize(width: thumb.width, height: thumb.height))
                 }
                 progress = total == 0 ? 1 : Double(completed) / Double(total)
+                updateTiming(completed: completed, total: total)
                 statusLine = "Indexing \(completed) of \(total) new asset(s) (\(concurrency)x parallel)…"
                 submitNext()
             }

@@ -173,6 +173,16 @@ struct ContentView: View {
             Text(engine.statusLine).font(.callout).foregroundStyle(.secondary)
                 .fixedSize(horizontal: false, vertical: true)
 
+            if engine.phase == .indexing || engine.phase == .comparing {
+                HStack(spacing: 14) {
+                    Label(elapsedLabel, systemImage: "clock")
+                    if let etaLabel {
+                        Label(etaLabel, systemImage: "hourglass")
+                    }
+                }
+                .font(.caption).foregroundStyle(.secondary)
+            }
+
             if let thumb = engine.currentThumbnail {
                 HStack(alignment: .top, spacing: 12) {
                     Image(nsImage: thumb)
@@ -181,7 +191,7 @@ struct ContentView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                         .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.secondary.opacity(0.25)))
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Currently comparing").font(.caption).foregroundStyle(.secondary)
+                        Text(currentActivityLabel).font(.caption).foregroundStyle(.secondary)
                         Text(engine.currentName).font(.callout).lineLimit(2)
                     }
                     Spacer()
@@ -202,6 +212,26 @@ struct ContentView: View {
         case .done: return "Done"
         case .error(let m): return "Error: \(m)"
         }
+    }
+
+    /// "Currently comparing" only makes sense once we're actually diffing a
+    /// folder image against the library — while building the index there's
+    /// no folder image involved yet, just a library asset being read/hashed.
+    private var currentActivityLabel: String {
+        switch engine.phase {
+        case .indexing: return "Currently indexing"
+        case .comparing: return "Currently comparing"
+        default: return "Currently processing"
+        }
+    }
+
+    private var elapsedLabel: String {
+        String(format: "Elapsed %.1f min", engine.elapsedSeconds / 60)
+    }
+
+    private var etaLabel: String? {
+        guard let eta = engine.etaMinutes else { return nil }
+        return String(format: "ETA %.1f min", eta)
     }
 
     private var logPanel: some View {
