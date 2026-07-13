@@ -251,8 +251,9 @@ final class SyncEngine: ObservableObject {
         var entries: [IndexedAsset] = []
         entries.reserveCapacity(total)
         var completed = 0
+        var failures = 0
 
-        try await withThrowingTaskGroup(of: (IndexedAsset?, NSImage?).self) { group in
+        try await withThrowingTaskGroup(of: (IndexedAsset?, NSImage?, String?).self) { group in
             var nextIndex = 0
 
             func submitNext() {
@@ -261,31 +262,38 @@ final class SyncEngine: ObservableObject {
                 let wantsThumb = (nextIndex % 25 == 0)
                 nextIndex += 1
                 group.addTask { [weak self] in
-                    guard let self else { return (nil, nil) }
+                    guard let self else { return (nil, nil, asset.localIdentifier) }
                     if Task.isCancelled { throw CancellationError() }
-                    guard let data = await self.requestImageData(for: asset) else { return (nil, nil) }
+                    guard let data = await self.requestImageData(for: asset) else {
+                        return (nil, nil, asset.localIdentifier)
+                    }
                     return await Task.detached(priority: .userInitiated) {
                         guard let cg = ImageHasher.decode(data: data),
                               let exact = ImageHasher.exactHash(cg),
                               let phash = ImageHasher.perceptualHash(cg) else {
-                            return (nil, nil)
+                            return (nil, nil, asset.localIdentifier)
                         }
                         let filename = PHAssetResource.assetResources(for: asset).first?.originalFilename
                         let entry = IndexedAsset(localIdentifier: asset.localIdentifier,
                                                  exactHash: exact,
                                                  perceptualHash: phash,
                                                  filename: filename)
-                        return (entry, wantsThumb ? NSImage(data: data) : nil)
+                        return (entry, wantsThumb ? NSImage(data: data) : nil, nil as String?)
                     }.value
                 }
             }
 
             for _ in 0..<concurrency { submitNext() }
 
-            while let (entry, thumb) = try await group.next() {
+            while let (entry, thumb, failedID) = try await group.next() {
                 if Task.isCancelled { throw CancellationError() }
                 completed += 1
-                if let entry { entries.append(entry) }
+                if let entry {
+                    entries.append(entry)
+                } else if let failedID {
+                    failures += 1
+                    appendLog("⚠️ Could not read asset \(failedID) — likely still syncing with iCloud; will retry next launch.")
+                }
                 if let thumb { currentThumbnail = thumb }
                 progress = total == 0 ? 1 : Double(completed) / Double(total)
                 statusLine = "Indexing library \(completed) of \(total) (\(concurrency)x parallel)…"
@@ -294,8 +302,20 @@ final class SyncEngine: ObservableObject {
         }
 
         let index = LibraryIndex(fingerprint: fingerprint, assets: entries)
-        index.save(libraryKey: libraryKey)
-        appendLog("Index built and saved (\(entries.count) assets).")
+        // Only persist a complete index. If some assets couldn't be read this
+        // time (e.g. still downloading from iCloud right after an import), the
+        // library's fingerprint (asset count + latest date) already matches —
+        // so a partial index saved under that fingerprint would look "fully
+        // synced" forever, permanently hiding those assets from future
+        // comparisons and causing them to be re-imported on every run.
+        // Skipping the save here forces a full, fresh rebuild next launch
+        // instead, which self-heals once the assets become readable.
+        if failures > 0 {
+            appendLog("⚠️ \(failures) asset(s) were skipped this time and were NOT saved to the index cache, so the library will be re-indexed from scratch next launch instead of trusting an incomplete result.")
+        } else {
+            index.save(libraryKey: libraryKey)
+            appendLog("Index built and saved (\(entries.count) assets).")
+        }
         currentThumbnail = nil
         return index
     }
@@ -373,7 +393,14 @@ final class SyncEngine: ObservableObject {
             opts.isNetworkAccessAllowed = true
             opts.isSynchronous = false
             opts.deliveryMode = .highQualityFormat
-            opts.version = .current
+            // Must be .original, not .current: with iCloud Photos "Optimize Mac
+            // Storage" enabled, the local copy can be replaced by a smaller,
+            // re-encoded proxy. .current is happy to hand back that proxy, whose
+            // pixels (and therefore exact-content hash) no longer match the
+            // original file — which made every synced photo look "missing" and
+            // get re-imported on every run. .original forces the real bytes,
+            // downloading from iCloud if needed.
+            opts.version = .original
             PHImageManager.default().requestImageDataAndOrientation(for: asset, options: opts) { data, _, _, _ in
                 cont.resume(returning: data)
             }
