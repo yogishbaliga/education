@@ -250,24 +250,63 @@ final class SyncEngine: ObservableObject {
         let assets = fetchLibraryImageAssets()
         let fingerprint = computeFingerprint(assets: assets)
 
-        if let cached = LibraryIndex.load(libraryKey: libraryKey), cached.fingerprint == fingerprint {
+        let cached = LibraryIndex.load(libraryKey: libraryKey)
+        if let cached, cached.fingerprint == fingerprint {
             appendLog("Loaded cached index (\(cached.assets.count) assets) — library unchanged.")
             statusLine = "Using cached library index."
             return cached
         }
 
-        // Fetching each asset's data from PhotoKit and hashing its pixels are both
-        // independent, one-asset-at-a-time operations, so a bounded pool of
-        // concurrent workers speeds this up substantially on multi-core Macs.
-        // The pool size is capped (not just set to core count) because each
-        // in-flight worker may be holding a full-size decoded image in memory,
-        // and some may be triggering iCloud downloads over the network.
-        let concurrency = max(2, min(ProcessInfo.processInfo.activeProcessorCount, 6))
-        appendLog("Library changed or no cache — building index for \(assets.count) assets using up to \(concurrency) parallel workers…")
+        // The library changed (or there's no cache), but that doesn't mean
+        // every asset needs re-hashing. Look up whatever we already know by
+        // asset identifier and only fetch + hash assets that are new to us.
+        // A cached hash was computed from the asset's *original* bytes,
+        // which never change even if the photo is later edited
+        // non-destructively, so a hit here is always safe to carry forward
+        // as-is — no need to touch it again. Assets that were indexed before
+        // but no longer exist in the library (deleted via Photos) are simply
+        // not carried forward, since we only walk the current asset list.
+        var known: [String: IndexedAsset] = [:]
+        if let cached {
+            known.reserveCapacity(cached.assets.count)
+            for entry in cached.assets { known[entry.localIdentifier] = entry }
+        }
 
-        let total = assets.count
         var entries: [IndexedAsset] = []
-        entries.reserveCapacity(total)
+        entries.reserveCapacity(assets.count)
+        var assetsToHash: [PHAsset] = []
+        for asset in assets {
+            if let existing = known[asset.localIdentifier] {
+                entries.append(existing)
+            } else {
+                assetsToHash.append(asset)
+            }
+        }
+        let reusedCount = entries.count
+
+        if assetsToHash.isEmpty {
+            appendLog(cached != nil
+                ? "Library changed — reused all \(reusedCount) already-indexed asset(s); nothing new to hash."
+                : "Library is empty — nothing to index.")
+            let index = LibraryIndex(fingerprint: fingerprint, assets: entries)
+            index.save(libraryKey: libraryKey)
+            currentThumbnail = nil
+            return index
+        }
+
+        // Fetching each new asset's data from PhotoKit and hashing its pixels
+        // are both independent, one-asset-at-a-time operations, so a bounded
+        // pool of concurrent workers speeds this up substantially on
+        // multi-core Macs. The pool size is capped (not just set to core
+        // count) because each in-flight worker may be holding a full-size
+        // decoded image in memory, and some may be triggering iCloud
+        // downloads over the network.
+        let concurrency = max(2, min(ProcessInfo.processInfo.activeProcessorCount, 6))
+        appendLog(cached != nil
+            ? "Library changed — reusing \(reusedCount) already-indexed asset(s), hashing \(assetsToHash.count) new one(s) using up to \(concurrency) parallel workers…"
+            : "No cache found — building index for \(assetsToHash.count) asset(s) using up to \(concurrency) parallel workers…")
+
+        let total = assetsToHash.count
         var completed = 0
         var failures = 0
 
@@ -276,7 +315,7 @@ final class SyncEngine: ObservableObject {
 
             func submitNext() {
                 guard nextIndex < total else { return }
-                let asset = assets[nextIndex]
+                let asset = assetsToHash[nextIndex]
                 let wantsThumb = (nextIndex % 25 == 0)
                 nextIndex += 1
                 group.addTask { [weak self] in
@@ -314,7 +353,7 @@ final class SyncEngine: ObservableObject {
                 }
                 if let thumb { currentThumbnail = thumb }
                 progress = total == 0 ? 1 : Double(completed) / Double(total)
-                statusLine = "Indexing library \(completed) of \(total) (\(concurrency)x parallel)…"
+                statusLine = "Indexing \(completed) of \(total) new asset(s) (\(concurrency)x parallel)…"
                 submitNext()
             }
         }
@@ -326,13 +365,15 @@ final class SyncEngine: ObservableObject {
         // so a partial index saved under that fingerprint would look "fully
         // synced" forever, permanently hiding those assets from future
         // comparisons and causing them to be re-imported on every run.
-        // Skipping the save here forces a full, fresh rebuild next launch
-        // instead, which self-heals once the assets become readable.
+        // Skipping the save here forces a full re-check of the unhashed
+        // assets next launch instead, which self-heals once they become
+        // readable (already-reused entries aren't at risk either way, since
+        // they aren't touched again until the library changes further).
         if failures > 0 {
-            appendLog("⚠️ \(failures) asset(s) were skipped this time and were NOT saved to the index cache, so the library will be re-indexed from scratch next launch instead of trusting an incomplete result.")
+            appendLog("⚠️ \(failures) asset(s) were skipped this time and were NOT saved to the index cache, so those will be retried from scratch next launch instead of trusting an incomplete result.")
         } else {
             index.save(libraryKey: libraryKey)
-            appendLog("Index built and saved (\(entries.count) assets).")
+            appendLog("Index updated and saved (\(entries.count) total asset(s): \(reusedCount) reused, \(entries.count - reusedCount) newly hashed).")
         }
         currentThumbnail = nil
         return index
