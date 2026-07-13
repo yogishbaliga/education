@@ -160,18 +160,23 @@ final class SyncEngine: ObservableObject {
             statusLine = "Comparing \(i + 1) of \(files.count) — \(url.lastPathComponent)"
 
             // Decode + hash + thumbnail off the main thread so the UI stays responsive.
+            // The thumbnail crosses back as a CGImage (safely Sendable at our macOS 12
+            // deployment target) and is only wrapped as an NSImage once we're back here
+            // on the main actor.
             let result = await Task.detached(priority: .userInitiated) {
-                () -> (exact: String?, phash: UInt64?, thumb: NSImage?, decoded: Bool) in
+                () -> (exact: String?, phash: UInt64?, thumb: CGImage?, decoded: Bool) in
                 guard let cg = ImageHasher.decode(url: url) else {
                     return (nil, nil, nil, false)
                 }
                 return (ImageHasher.exactHash(cg),
                         ImageHasher.perceptualHash(cg),
-                        ImageHasher.thumbnail(url: url),
+                        ImageHasher.thumbnailCGImage(url: url),
                         true)
             }.value
 
-            currentThumbnail = result.thumb
+            if let thumb = result.thumb {
+                currentThumbnail = NSImage(cgImage: thumb, size: NSSize(width: thumb.width, height: thumb.height))
+            }
             guard result.decoded else {
                 appendLog("⚠️ Could not decode \(url.lastPathComponent) — skipped.")
                 continue
@@ -310,7 +315,10 @@ final class SyncEngine: ObservableObject {
         var completed = 0
         var failures = 0
 
-        try await withThrowingTaskGroup(of: (IndexedAsset?, NSImage?, String?).self) { group in
+        // The thumbnail crosses task/actor boundaries as a CGImage (see the note on
+        // ImageHasher.thumbnailCGImage) and is only wrapped as an NSImage once we're
+        // back on the main actor in the consuming loop below.
+        try await withThrowingTaskGroup(of: (IndexedAsset?, CGImage?, String?).self) { group in
             var nextIndex = 0
 
             func submitNext() {
@@ -335,7 +343,7 @@ final class SyncEngine: ObservableObject {
                                                  exactHash: exact,
                                                  perceptualHash: phash,
                                                  filename: filename)
-                        return (entry, wantsThumb ? NSImage(data: data) : nil, nil as String?)
+                        return (entry, wantsThumb ? ImageHasher.thumbnailCGImage(data: data) : nil, nil as String?)
                     }.value
                 }
             }
@@ -351,7 +359,9 @@ final class SyncEngine: ObservableObject {
                     failures += 1
                     appendLog("⚠️ Could not read asset \(failedID) — likely still syncing with iCloud; will retry next launch.")
                 }
-                if let thumb { currentThumbnail = thumb }
+                if let thumb {
+                    currentThumbnail = NSImage(cgImage: thumb, size: NSSize(width: thumb.width, height: thumb.height))
+                }
                 progress = total == 0 ? 1 : Double(completed) / Double(total)
                 statusLine = "Indexing \(completed) of \(total) new asset(s) (\(concurrency)x parallel)…"
                 submitNext()

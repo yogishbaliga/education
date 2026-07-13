@@ -78,15 +78,41 @@ enum ImageHasher {
 
     // MARK: - Thumbnails (for the UI)
 
-    /// A small NSImage suitable for showing the picture currently being compared.
-    static func thumbnail(url: URL, maxPixel: Int = 220) -> NSImage? {
+    /// A small thumbnail as a CGImage — deliberately not NSImage. CGImage is
+    /// safely Sendable on every OS version this app targets, whereas
+    /// NSImage's Sendable conformance is only available on macOS 14+, so
+    /// passing NSImage across a Task.detached/TaskGroup boundary at our
+    /// deployment target (12.0) produces a compiler warning. Callers that
+    /// need an NSImage for display should call this off the main actor, then
+    /// wrap the result with `NSImage(cgImage:size:)` after hopping back.
+    static func thumbnailCGImage(url: URL, maxPixel: Int = 220) -> CGImage? {
         guard let src = CGImageSourceCreateWithURL(url as CFURL, nil) else { return nil }
         let opts: [CFString: Any] = [
             kCGImageSourceCreateThumbnailFromImageAlways: true,
             kCGImageSourceCreateThumbnailWithTransform: true,
             kCGImageSourceThumbnailMaxPixelSize: maxPixel
         ]
-        guard let cg = CGImageSourceCreateThumbnailAtIndex(src, 0, opts as CFDictionary) else { return nil }
+        return CGImageSourceCreateThumbnailAtIndex(src, 0, opts as CFDictionary)
+    }
+
+    /// Same as `thumbnailCGImage(url:maxPixel:)` but from already-in-memory data
+    /// (used for library assets fetched from Photos rather than files on disk).
+    static func thumbnailCGImage(data: Data, maxPixel: Int = 220) -> CGImage? {
+        guard let src = CGImageSourceCreateWithData(data as CFData, nil) else { return nil }
+        let opts: [CFString: Any] = [
+            kCGImageSourceCreateThumbnailFromImageAlways: true,
+            kCGImageSourceCreateThumbnailWithTransform: true,
+            kCGImageSourceThumbnailMaxPixelSize: maxPixel
+        ]
+        return CGImageSourceCreateThumbnailAtIndex(src, 0, opts as CFDictionary)
+    }
+
+    /// A small NSImage suitable for showing the picture currently being
+    /// compared. Only call this on the main actor (or another context you're
+    /// already isolated to) — see `thumbnailCGImage` for the boundary-safe
+    /// building block used to get there from a background task.
+    static func thumbnail(url: URL, maxPixel: Int = 220) -> NSImage? {
+        guard let cg = thumbnailCGImage(url: url, maxPixel: maxPixel) else { return nil }
         return NSImage(cgImage: cg, size: NSSize(width: cg.width, height: cg.height))
     }
 

@@ -340,8 +340,14 @@ private struct DeletionCell: View {
         .task {
             if thumb == nil {
                 let url = item.url
-                let image = await Task.detached { ImageHasher.thumbnail(url: url, maxPixel: 320) }.value
-                await MainActor.run { self.thumb = image }
+                // Cross the Task.detached boundary as a CGImage — safely Sendable at
+                // our macOS 12 deployment target, unlike NSImage (Sendable since 14) —
+                // then wrap as NSImage only after hopping back to the main actor.
+                let cg = await Task.detached { ImageHasher.thumbnailCGImage(url: url, maxPixel: 320) }.value
+                if let cg {
+                    let image = NSImage(cgImage: cg, size: NSSize(width: cg.width, height: cg.height))
+                    await MainActor.run { self.thumb = image }
+                }
             }
         }
     }
