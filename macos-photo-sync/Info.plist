@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleName</key>
+    <string>PhotoLibrarySync</string>
+    <key>CFBundleDisplayName</key>
+    <string>Photo Library Sync</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.example.photolibrarysync</string>
+    <key>CFBundleVersion</key>
+    <string>1.0</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleExecutable</key>
+    <string>PhotoLibrarySync</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>12.0</string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.photography</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Photo Library Sync reads your Photos library to detect which images already exist and imports new ones.</string>
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>Photo Library Sync imports new images into your Photos library.</string>
+</dict>
+</plist>
