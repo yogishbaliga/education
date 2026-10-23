@@ -657,11 +657,30 @@
         margin-top: 4.5rem;
       }
     }
+  
+    /* Shared branding stays alongside the lesson navigation. */
+    .lesson-navigation { display: flex; align-items: center; gap: 16px; }
+    .lesson-brand { display: inline-flex; align-items: center; gap: 10px; color: inherit; text-decoration: none; font: 800 1rem/1.2 system-ui, sans-serif; white-space: nowrap; }
+    .lesson-brand img { display: block; width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0; }
+    .lesson-brand:focus-visible { outline: 3px solid currentColor; outline-offset: 4px; border-radius: 10px; }
+    .lesson-navigation .back-link { white-space: nowrap; }
+    @media (max-width: 480px) {
+      .lesson-navigation { gap: 10px; }
+      .lesson-brand { gap: 6px; font-size: .8rem; }
+      .lesson-brand img { width: 32px; height: 32px; border-radius: 8px; }
+      .lesson-navigation .back-link { font-size: .75rem; }
+    }
   </style>
 </head>
 <body class="theme-c">
 <div class="top-bar">
+  <div class="lesson-navigation">
+    <a class="lesson-brand" href="/" aria-label="Gyanzoo home">
+      <img src="/assets/gyanzoo-icon.png" alt="" width="40" height="40" />
+      <span>Math &amp; Science Lab</span>
+    </a>
   <a class="back-link" href="../index.html">← All lessons</a>
+  </div>
   <div class="picker" role="navigation" aria-label="Visual style">
     <span class="pick-label">Style:</span>
     <button class="pick-btn" data-theme="a" aria-pressed="false"><span class="swatch swatch-a"></span>Explorer</button>
