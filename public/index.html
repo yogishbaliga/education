@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <link rel="icon" href="/favicon.ico" sizes="any" />
-  <link rel="icon" type="image/png" href="/favicon-32.png" sizes="32x32" />
+  <link rel="icon" href="/favicon.ico?v=gyanzoo-2" type="image/x-icon" sizes="16x16 32x32 48x48" />
+  <link rel="icon" type="image/png" href="/favicon-32.png?v=gyanzoo-2" sizes="32x32" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />
 
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>6th &amp; 7th Grade Math &amp; Science</title>
+  <title>Math &amp; Science Lab — Gyanzoo</title>
   <style>
     :root {
       --bg: #f4f1eb;
@@ -42,7 +42,8 @@
       min-height: 100vh;
     }
 
-    .site-brand { display: block; width: 64px; margin-bottom: 24px; position: relative; border-radius: 16px; }
+    .hero-heading { display: flex; align-items: center; gap: 20px; position: relative; }
+    .site-brand { display: block; flex: 0 0 64px; border-radius: 16px; }
     .site-brand img { display: block; width: 64px; height: 64px; border-radius: 16px; }
     .site-brand:focus-visible { outline: 3px solid #f3b43f; outline-offset: 5px; }
 
@@ -51,7 +52,7 @@
       background: linear-gradient(135deg, #1a2e3b 0%, #223d52 55%, #1a3d55 100%);
       color: white;
       padding: 56px 24px 64px;
-      text-align: center;
+      text-align: left;
       position: relative;
       overflow: hidden;
     }
@@ -79,25 +80,8 @@
       font-size: 1.15rem;
       color: rgba(255,255,255,0.72);
       max-width: 50ch;
-      margin-inline: auto;
+      margin-inline: 0;
       position: relative;
-    }
-
-    .grade-badges {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-      margin-top: 22px;
-      position: relative;
-    }
-
-    .grade-badge {
-      padding: 8px 20px;
-      border-radius: 999px;
-      font-weight: 700;
-      font-size: 0.9rem;
-      border: 2px solid rgba(255,255,255,0.35);
-      color: rgba(255,255,255,0.9);
     }
 
     /* ── WRAPPER ──────────────────────────────── */
@@ -259,6 +243,10 @@
 
     @media (max-width: 600px) {
       .hero { padding: 40px 18px 48px; }
+      .hero-heading { gap: 12px; }
+      .hero h1 { font-size: clamp(1.2rem, 5vw, 2rem); white-space: nowrap; }
+      .site-brand { flex-basis: 48px; }
+      .site-brand img { width: 48px; height: 48px; border-radius: 12px; }
       .wrap { padding: 28px 16px 56px; }
       .subject-title { font-size: 1.3rem; }
 
@@ -278,15 +266,13 @@
 <body>
 
 <header class="hero">
-  <a class="site-brand" href="/" aria-label="Gyanzoo home">
-    <img src="/assets/gyanzoo-icon.png" alt="Gyanzoo elephant reading a book" width="64" height="64" />
-  </a>
-  <h1>Math &amp; Science Lab</h1>
-  <p>Interactive lessons for curious minds — explore, click, and learn at your own pace.</p>
-  <div class="grade-badges">
-    <span class="grade-badge">6th Grade</span>
-    <span class="grade-badge">7th Grade</span>
+  <div class="hero-heading">
+    <a class="site-brand" href="/" aria-label="Gyanzoo home">
+      <img src="/assets/gyanzoo-icon.png" alt="Gyanzoo elephant reading a book" width="64" height="64" />
+    </a>
+    <h1>Math &amp; Science Lab</h1>
   </div>
+  <p>Interactive lessons for curious minds — explore, click, and learn at your own pace.</p>
 </header>
 
 <main class="wrap">
